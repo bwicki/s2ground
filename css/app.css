@@ -286,3 +286,9 @@ pre.log{font-family:var(--mono);font-size:12px;background:#0f1722;color:#d7e0ea;
   .ck .act{grid-column:2;justify-self:start}
   .chat{max-width:none}
 }
+/* observers admin: the code shown once after creation, expandable login history */
+.code-big{font-size:34px;font-weight:600;letter-spacing:.12em;padding:14px 18px;border:1px dashed var(--border-strong);border-radius:10px;text-align:center;user-select:all}
+tr.hist td{background:var(--bg);padding:8px 12px}
+.hist-box table.sub{font-size:13px}.hist-box table.sub th,.hist-box table.sub td{padding:4px 8px}
+tr.muted td{color:var(--muted)}
+.sw[disabled]{opacity:.45;cursor:default}

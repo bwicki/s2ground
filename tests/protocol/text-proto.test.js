@@ -2,8 +2,8 @@
 // 0.4 s response wait + retries, ≥ 1 s spacing per sonde, RES parts, TIM, Busy, Error.
 import { test, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { TextProto } from '../../web/src/protocol/text-proto.js';
-import { classifyLine } from '../../web/src/protocol/lines.js';
+import { TextProto } from '../../src/protocol/text-proto.js';
+import { classifyLine } from '../../src/protocol/lines.js';
 
 /** Minimal stand-in for SerialLink: records writes, lets the test inject rx lines. */
 class FakeSerial extends EventTarget {

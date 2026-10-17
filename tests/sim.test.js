@@ -1,8 +1,8 @@
 // node --test: SimGroundLink state transitions and telemetry records (no timers: advance()).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SimGroundLink } from '../web/src/sim/sim-link.js';
-import { csvRow } from '../web/src/files.js';
+import { SimGroundLink } from '../src/sim/sim-link.js';
+import { csvRow } from '../src/files.js';
 
 async function makeLink(opts = {}) {
   const link = new SimGroundLink({ speed: 1000, gpsFixS: 5, launchDelayS: 2, cutAltAgl: 300, seed: 7, ...opts });

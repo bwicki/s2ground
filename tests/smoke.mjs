@@ -8,11 +8,11 @@ import path from 'node:path';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
-const root = path.resolve(new URL('../web', import.meta.url).pathname);
+const root = path.resolve(new URL('..', import.meta.url).pathname);
 const shots = path.resolve(new URL('./shots', import.meta.url).pathname);
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png' };
 
-// tiny static server for web/
+// tiny static server for the repo root (GitHub Pages serves the same layout)
 const server = http.createServer(async (req, res) => {
   let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   if (p === '/') p = '/index.html';
@@ -61,7 +61,18 @@ try {
   await page.waitForFunction(() => /Zurückgelesen/.test(document.querySelector('.written').textContent), null, { timeout: 20000 });
   await page.click('[data-act=balloon]');
   await page.waitForSelector('.banner.ok', { timeout: 10000 });
+  step('prepare: WhatsApp notify card (stage 1) + connected observers with kick');
+  await page.waitForSelector('[data-act=notify]');
+  const wa = await page.getAttribute('[data-act=notify]', 'href');
+  if (!wa.startsWith('https://wa.me/41790000001?text=Sondenaufstieg')) throw new Error(`wa.me url: ${wa}`);
+  await page.waitForSelector('.obs [data-act=kick]', { timeout: 15000 });
   await shot('04-prepare.png');
+  const before = await page.locator('.obs [data-act=kick]').count();
+  await page.click('.obs [data-act=kick]');
+  await page.waitForSelector('.modal');
+  await page.waitForTimeout(500);                       // danger dialog ignores clicks in the first 400 ms
+  await page.click('.modal [data-act=ok]');
+  await page.waitForFunction((n) => document.querySelectorAll('.obs [data-act=kick]').length < n, before, { timeout: 5000 });
   await page.click('details.menu > summary');
   await shot('04b-prepare-menu.png');
   await page.click('details.menu > summary');
@@ -122,10 +133,20 @@ try {
   const nav = await page.getAttribute('[data-act=nav]', 'href');
   if (!nav.startsWith('https://www.google.com/maps/dir/?api=1&destination=')) throw new Error(`nav url: ${nav}`);
 
-  step('admin');
+  step('admin: users (master switch) + observer codes');
   await page.goto(`${base}/?sim=1&speed=20&fast=1#admin`);
-  await page.waitForSelector('table');
-  await page.waitForTimeout(500);
+  await page.waitForSelector('.observers table');
+  await page.fill('.addobs [name=label]', 'Testbeobachter');
+  await page.fill('.addobs [name=mobile]', '+41 79 555 66 77');
+  await page.click('.addobs button[type=submit]');
+  await page.waitForSelector('.code-big');
+  const code = (await page.textContent('.code-big')).trim();
+  if (!/^[2-9A-HJ-NP-Z]{8}$/.test(code)) throw new Error(`observer code: ${code}`);
+  await shot('09b-admin-observer-code.png');
+  await page.click('.modal [data-act=close]');
+  await page.click('.observers [data-act=history]');
+  await page.waitForSelector('.hist-box table');
+  await page.waitForTimeout(300);
   await shot('09-admin.png');
 
   step('EN + "Trotzdem weiter?" dialog');

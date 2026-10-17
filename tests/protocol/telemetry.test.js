@@ -3,9 +3,9 @@
 // with pressure interpolation, TXT/ANN/TIM events and the wire-test decoder.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { TelemetryBuilder, decodeWireTest } from '../../web/src/protocol/telemetry.js';
-import { parseBracketLine } from '../../web/src/protocol/lines.js';
-import { isaPressure } from '../../web/src/util/format.js';
+import { TelemetryBuilder, decodeWireTest } from '../../src/protocol/telemetry.js';
+import { parseBracketLine } from '../../src/protocol/lines.js';
+import { isaPressure } from '../../src/util/format.js';
 
 const msg = (line, t) => ({ ...parseBracketLine(line), t });
 

@@ -7,24 +7,27 @@ The UI must never touch serial ports or protocol details directly.
 ## 1. Directory layout
 
 ```
-web/                      static app (served by the Worker's assets binding, or any static host)
+/                         static app – GitHub Pages serves the repository ROOT of `main` (CNAME = s2ground.wicki.aero)
   index.html              single page, all phases (hash routing: #login #admin #plan #prepare #checks #ascent #retrieve)
   css/app.css             design tokens from the Claude-Design boards (see docs/DESIGN.md)
-  i18n/de.json, en.json   every visible string; key = dotted id; DE is the reference
+  i18n/de.json, en.json   every visible string; key = dotted id; DE is the reference (tests/i18n.test.js checks key parity)
+  src/config.js           apiBase = address of the Worker (workers.dev); the only thing to edit after a deploy
   src/app.js              bootstrap, routing, session (login token), phase state, "Weiter" logic
-  src/ui/*.js             one module per phase + header/menu/chat/map/stüve components
+  src/api.js              Worker client (prefixes every /api path with config.apiBase) + in-memory mock (?sim=1)
+  src/ui/*.js             one module per phase + header/menu/chat/map/stüve components; ui/observers.js = admin section for codes
   src/sim/*.js            simulated ascent (used when no hardware, and for tests)
   src/protocol/           **owned by the protocol task** – see §3; the UI only imports `index.js`
-  src/relay.js            WebSocket client to the Worker (live telemetry fan-out + chat)
+  src/relay.js            WebSocket client to the Worker (live telemetry fan-out + chat); URL = apiBase with https→wss
   src/files.js            writes .raw_flight_history.csv / .sounding / KML via File System Access API (fallback: download)
-worker/                   Cloudflare Worker (ES module) – auth, users/roles, activity log, live sessions + chat
-  src/index.js
-  src/auth.js, users.js, log.js, live.js (Durable Object "LiveSession")
-  schema.sql              D1 schema (users, activity_log, ascents)
+worker/                   Cloudflare Worker `s2ground-api` (ES module, workers.dev) – auth, users, observers, activity log, live sessions + chat
+  src/index.js            router + CORS allow-list (APP_ORIGINS in wrangler.toml)
+  src/auth.js, users.js, observers.js, whatsapp.js, log.js, live.js (Durable Object "LiveSession")
+  schema.sql              D1 schema (users, tokens, settings, activity_log, ascents, observers, observer_logins)
   wrangler.toml
-.github/workflows/deploy.yml   deploy on push to main with secret CLOUDFLARE_API_TOKEN (+ CLOUDFLARE_ACCOUNT_ID)
+.github/workflows/tests.yml    unit tests on every push
+.github/workflows/deploy.yml   Worker deploy only when worker/** changes (+ manual run with `migrate` for schema.sql/seed.sql)
 docs/                     protocol spec, this file, DESIGN.md, user docs (DE/EN)
-tests/                    node --test; protocol unit tests (framing, parsing, CSV writer), sim tests
+tests/                    node --test; protocol unit tests (framing, parsing, CSV writer), sim tests, worker helpers; smoke.mjs (Playwright)
 ```
 
 ## 2. Unified telemetry record (what the UI, files, relay and s2stueve consume)
@@ -57,7 +60,7 @@ tests/                    node --test; protocol unit tests (framing, parsing, CS
  */
 ```
 
-## 3. `GroundLink` facade (web/src/protocol/index.js) – implemented by the protocol task
+## 3. `GroundLink` facade (src/protocol/index.js) – implemented by the protocol task
 
 ```js
 export class GroundLink extends EventTarget {
@@ -115,28 +118,56 @@ text channel first (proven), SSP for net/status/gnss; every uncertain item ([I]/
 named option or feature flag with a TODO referencing the spec's open question number; never block the UI
 (all methods async with timeouts); keep a ring buffer of the last 2000 raw lines.
 
-## 4. Worker API (used by web/src/app.js and web/src/relay.js)
+## 4. Worker API (used by src/app.js, src/relay.js and s2stueve "Follow")
 
-All JSON, `Authorization: Bearer <token>`; tokens from `/api/login`. Roles: `master`, `ground`, `command`, `observer`, `guest`.
+All JSON, `Authorization: Bearer <token>`. Base URL = `config.apiBase` (https://s2ground-api.balthasar.workers.dev).
+CORS: only the origins in `APP_ORIGINS` (wrangler.toml) may call the API from a browser.
 
-| Method | Path | Body / result |
-|---|---|---|
-| POST | /api/login | {user, password} → {token, user, role, lang} |
-| POST | /api/logout | — |
-| GET  | /api/me | → {user, role, settings} |
-| GET/POST/DELETE | /api/users[/:name] | master only |
-| GET/PUT | /api/settings | app settings (relay url, default frequency, rise rate, default cutdown AGL, cloud RH threshold, default folder, auto-logout h, RR4 usb ids, quick replies, airspace categories, openAIP key – returned masked as 'set') – master writes |
-| GET  | /api/log?limit= | activity log (master) |
-| GET  | /api/airspaces?bbox=w,s,e,n | openAIP airspaces (items: _id, name, type, icaoClass, lowerLimit, upperLimit, geometry) via the Worker; key from settings.openaipKey (server-side only); cached 24 h per 0.2° cell; 409 E_NO_OPENAIP_KEY / E_OPENAIP_KEY_REJECTED, 502 E_OPENAIP_UNREACHABLE |
-| POST | /api/log | {action, detail} – every login/phase step/command is logged client-side too |
-| POST | /api/ascents | create live session → {ascentId, followCode} |
-| GET  | /api/ascents?active=1 | list (for s2stueve "Follow sonde ascent") |
-| WS   | /live/:ascentId?token=…&role=… | WebSocket to Durable Object: ground sends {type:'telemetry'|'state'|'event'}, everyone receives them; chat {type:'chat', text}; presence {type:'presence', users:[{name, role, since}]}; guest join with {code} |
+**Access model** – two kinds of principals, no other roles:
+
+| Principal | How they get a token | `auth` on the server | may |
+|---|---|---|---|
+| Ground user | `POST /api/login` {user, password} | `{user, role:'ground', master:true/false}` | everything in the ground app: ascents, hardware actions, chat, kick; `master` additionally users / observers / settings / log |
+| Observer (Beobachter) | `POST /api/observer/login` {code, displayName} | `{user:<displayName>, role:'observer', observerId}` | read active ascents, join the live channel, read everything, write in the chat (instructions like «Bitte jetzt auslösen»). Never telemetry/state/event, never hardware. |
+
+`requireRole(auth)` = any principal · `requireRole(auth,'ground')` = any ground user · `requireRole(auth,'master')` = master flag · `requireRole(auth,'observer')` = observer token.
+Observer codes: 8 characters from `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (no 0/O/1/I), permanent, stored in plain text (viewing codes, not secrets), revocable; revoking deletes the observer's tokens immediately.
+
+| Method | Path | Who | Body / result |
+|---|---|---|---|
+| GET  | /api/health | – | {ok, t} |
+| GET/POST | /api/setup | – | {needed} / {user, password, fullName} → first user = master (only while the users table is empty) |
+| POST | /api/login | – | {user, password} → {token, user, role:'ground', master, lang} (rate-limited per IP) |
+| POST | /api/observer/login | – | {code, displayName} → {token, role:'observer', displayName, observerId, label}; 403 `E_CODE_UNKNOWN` / `E_CODE_REVOKED`, 400 `E_NAME_REQUIRED`; rate-limited; writes observer_logins (IP, UA, name, active ascent) |
+| POST | /api/logout | any | — |
+| GET  | /api/me | any | ground: {user, role, master, settings} · observer: {user, role, observerId} |
+| GET/POST/DELETE | /api/users[/:name] | master | users: {name, fullName, master, active, lastLogin, ascents}; POST {name, fullName, password?, master?, active?} (cannot deactivate yourself / drop your own master flag) |
+| GET  | /api/observers | master | [{id, code, label, displayName, mobile, whatsapp, createdBy, createdAt, revokedAt, lastLoginAt, loginCount}] |
+| POST | /api/observers | master | {label, mobile (E.164 or ''), whatsapp} → {id, code, label, mobile, whatsapp} – the code is created here and also listed later |
+| PUT  | /api/observers/:id | master | {label?, mobile?, whatsapp?} |
+| POST | /api/observers/:id/revoke · /reactivate | master | — |
+| GET  | /api/observers/:id/logins | master | [{at, ip, userAgent, displayName, ascentId}] newest first |
+| GET/PUT | /api/settings | ground / master writes | app settings (relay url, default frequency, rise rate, default cutdown AGL, cloud RH threshold, default folder, auto-logout h, RR4 usb ids, quick replies, airspace categories). Secrets `openaipKey`, `waPhoneNumberId`, `waToken` are returned masked as 'set' / '' and kept when echoed back |
+| GET  | /api/log?limit= | master | activity log |
+| POST | /api/log | any | {action, detail} – every login/phase step/command is logged client-side too |
+| GET  | /api/airspaces?bbox=w,s,e,n | ground | openAIP airspaces via the Worker (key from settings.openaipKey); 409 E_NO_OPENAIP_KEY / E_OPENAIP_KEY_REJECTED, 502 E_OPENAIP_UNREACHABLE |
+| POST | /api/ascents | ground | {name, start:{name,lat,lon,alt}, plannedLaunch (ms), cutAltAgl, frequencyHz, sondeId} → {ascentId, notify:[{observerId, label, mobile, waUrl, sent, error}]} – one entry per active observer with mobile + whatsapp; `waUrl` = https://wa.me/<digits>?text=<standard message> (stage 1); `sent:true` when the Cloud API sent it (stage 2) |
+| GET  | /api/ascents?active=1 | any (observers too) | [{id, name, owner, createdAt, active, meta}] – s2stueve "Follow sonde ascent" picks the newest |
+| POST | /api/ascents/:id/close | ground | — |
+| POST | /api/ascents/:id/kick | ground | {observerId} → DO closes that observer's sockets (code 4001) and blocks the id for this ascent → {ok, closed} |
+| WS   | /live/:ascentId?token=… | any | WebSocket to the Durable Object; the token decides the role (no `role`/`code` query any more). Ground sends {type:'telemetry'|'state'|'event'}; the DO **drops those types from observer sockets**; everyone receives them; chat {type:'chat', text} from anyone; presence {type:'presence', users:[{name, role:'ground'|'observer', observerId, since}]} where `name` is the observer's Klarname; join replay {type:'history', records, chat, state, closed} |
+
+**WhatsApp notification** (`worker/src/whatsapp.js`): the standard message (DE) is built on the server from the ascent meta:
+`Sondenaufstieg geplant (S2 Ground)` · `Start: 17.10.2026 14:30 LT` · `Startort: Rümlang · 4727N00834E` · `Cutdown: 3'000 m AGL` · `Frequenz: 433.900 MHz` · `Sonde: 12345` · `Folgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: XXXXXXXX`.
+Stage 1 (works today): the Prepare page shows one wa.me button per observer; tapping is logged (`notify.whatsapp`).
+Stage 2 (prepared, not released): `sendWhatsApp(env, settings, to, text)` posts to the Meta Cloud API when `waPhoneNumberId` + `waToken` are set; createAscent then sends automatically and returns `notify[].sent=true`.
 
 Durable Object `LiveSession`: keeps the full telemetry history of the ascent in memory + storage so a late
-observer gets the whole profile on join (`{type:'history', records:[…]}`), keeps the last 200 chat messages.
+observer gets the whole profile on join (`{type:'history', records:[…]}`), keeps the last 200 chat messages,
+presence and the kick list (`blocked`, persisted) of the ascent. The ground app never applies incoming
+telemetry/state/event from the relay – it is the source of truth.
 
-## 5. UI contract (web/src/app.js)
+## 5. UI contract (src/app.js)
 
 * Phases: plan → prepare → checks → ascent → retrieve (ids `plan|prepare|checks|ascent|retrieve`), status per phase `ok|warn|bad|todo`.
 * "Weiter" always in the action bar at the top; if the phase is not ok → confirm dialog ("Trotzdem weiter?") and the phase chip turns yellow/red.

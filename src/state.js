@@ -10,7 +10,7 @@ class Bus extends EventTarget {
 export const bus = new Bus();
 
 export const state = {
-  session: null,                 // {user, role, settings, loginAt, lastActivity}
+  session: null,                 // {user, role:'ground', master:boolean, settings, loginAt, lastActivity} – observers never log in here
   sim: false,
   phase: 'plan',
   phaseStatus: Object.fromEntries(PHASES.map((p) => [p, { level: 'todo', summary: '' }])),
@@ -47,8 +47,8 @@ export const state = {
   sondeWritten: null,            // values read back from the sonde after programming
   released: false,               // "START FREIGEBEN" pressed
 
-  ascent: null,                  // {ascentId, followCode, name, startedAt}
-  relay: { connected: false, sent: 0, errors: 0, presence: [], chat: [] },
+  ascent: null,                  // {ascentId, name, startedAt, notify:[{observerId,label,mobile,waUrl,sent}]}
+  relay: { connected: false, sent: 0, errors: 0, presence: [], chat: [] },   // presence: [{name, role:'ground'|'observer', observerId, since}]
   files: { folder: null, supported: false, rows: 0 },
   device: null,                  // {lat, lon, acc} from navigator.geolocation
 };

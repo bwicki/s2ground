@@ -4,7 +4,7 @@
 // timing options are shrunk so the whole file runs in a few seconds.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GroundLink } from '../../web/src/protocol/index.js';
+import { GroundLink } from '../../src/protocol/index.js';
 import { MockSerial } from './mock-serial.js';
 
 const FAST = { timing: { textSpacingMs: 5, responseMs: 150, firstEchoMs: 300, exeAckMs: 150, exeTimeoutMs: 600, exeSpacingMs: 20, sspReplyMs: 300, nameReplyMs: 300, aidReplyMs: 300, joinTimeoutMs: 1500, keepAliveMs: 400, pingReplyMs: 200, probeMs: 200, paramsWaitMs: 500 }, pollSensorsMs: 150 };

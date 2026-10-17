@@ -1,23 +1,17 @@
-# S2 Ground – Cloudflare Worker (static app + API + live sessions)
+# S2 Ground – Cloudflare Worker (API + live sessions only; the web app is on GitHub Pages).
 # Deployed by .github/workflows/deploy.yml (wrangler deploy). Secrets are NOT in this file.
-name = "s2ground"
+# Address after the first deploy: https://s2ground-api.<account subdomain>.workers.dev
+# → enter it in src/config.js (apiBase). Same pattern as ops.wicki.aero / briefing-api.
+name = "s2ground-api"
 main = "src/index.js"
 compatibility_date = "2025-09-01"
 compatibility_flags = ["nodejs_compat"]
-
-# Static web app (web/) served from the Worker's assets binding; hash routing → SPA fallback
-[assets]
-directory = "../web"
-binding = "ASSETS"
-not_found_handling = "single-page-application"
-
-# Custom domain – the route is created automatically on the first deploy (zone wicki.aero in the same account)
-routes = [
-  { pattern = "s2ground.wicki.aero", custom_domain = true }
-]
+workers_dev = true
 
 [vars]
-APP_ORIGINS = "https://s2ground.wicki.aero,https://s2stueve.wicki.aero"
+# Browser origins allowed to call the API (CORS). The app on its own domain, the GitHub Pages
+# fallback address, s2stueve (Follow mode) and local development.
+APP_ORIGINS = "https://s2ground.wicki.aero,https://bwicki.github.io,https://s2stueve.wicki.aero,http://localhost:8080,http://127.0.0.1:8080"
 TOKEN_HOURS = "24"
 
 # D1 database: create it once in the Cloudflare dashboard (Workers & Pages → D1 → "s2ground")
@@ -27,7 +21,7 @@ binding = "DB"
 database_name = "s2ground"
 database_id = "REPLACE-WITH-YOUR-D1-DATABASE-ID"
 
-# Durable Object: one LiveSession per ascent (WebSocket fan-out, history replay, chat)
+# Durable Object: one LiveSession per ascent (WebSocket fan-out, history replay, chat, kick list)
 [[durable_objects.bindings]]
 name = "LIVE"
 class_name = "LiveSession"

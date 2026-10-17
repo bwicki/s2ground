@@ -41,6 +41,17 @@ const ctx = {
   showLog: () => showLog(),
   gnssAid: async () => { try { await state.link.gnssAidToSonde(); state.ephemerisT = Date.now(); toast(t('chk.expert.sent')); } catch (e) { toast(e.message, true); } },
   goto: (p) => gotoPhase(p),
+  /** Ground user removes an observer from the running ascent (socket closed + blocked, see Worker live.js). */
+  kick: async (observerId, name) => {
+    if (!state.ascent || !relay) return;
+    try { if (api.mock) relay.mockKick(observerId); else await api.ascents.kick(state.ascent.ascentId, observerId); ctx.log('observer.kicked', name || String(observerId)); toast(t('prep.ob.kicked', { name: name || '' })); }
+    catch (e) { toast(e.message, true); }
+  },
+  /** Stage-1 WhatsApp: the wa.me button was tapped → remember + log it (the send itself happens in WhatsApp). */
+  markNotified: (observerId, label) => {
+    const n = state.ascent && state.ascent.notify && state.ascent.notify.find((x) => x.observerId === observerId);
+    if (n && !n.sent) { n.sent = true; n.manual = true; ctx.log('notify.whatsapp', label || String(observerId)); bus.emit('relay'); }
+  },
 };
 
 // ---- session ------------------------------------------------------------------------------
@@ -48,7 +59,7 @@ async function restoreSession() {
   if (!api.token) return false;
   try {
     const me = await api.me();
-    state.session = { user: me.user, role: me.role, settings: { ...DEFAULT_SETTINGS, ...me.settings }, loginAt: Date.now(), lastActivity: Date.now() };
+    state.session = { user: me.user, role: me.role, master: !!me.master, settings: { ...DEFAULT_SETTINGS, ...me.settings }, loginAt: Date.now(), lastActivity: Date.now() };
     return true;
   } catch { api.setToken(null); return false; }
 }
@@ -56,7 +67,7 @@ async function login(user, password) {
   const r = await api.login(user, password);
   api.setToken(r.token);
   const me = await api.me();
-  state.session = { user: me.user, role: me.role, settings: { ...DEFAULT_SETTINGS, ...me.settings }, loginAt: Date.now(), lastActivity: Date.now() };
+  state.session = { user: me.user, role: me.role, master: !!me.master, settings: { ...DEFAULT_SETTINGS, ...me.settings }, loginAt: Date.now(), lastActivity: Date.now() };
   if (r.lang) await setLang(r.lang);
   location.hash = '#plan';
 }
@@ -110,7 +121,7 @@ async function connectLink(reselect = false) {
     ctx.log('link.connected', state.sim ? 'SIM' : `RR4 ${link.state.receiver ? link.state.receiver.fw : ''}`);
     // Learn the RR4's USB VID:PID once (admin page shows it; later used to pre-select the port). Master only – others lack the right.
     const usb = link.state.receiver && link.state.receiver.usb;
-    if (!state.sim && usb && usb.usbVendorId && !settings().rr4Usb && state.session && state.session.role === 'master') {
+    if (!state.sim && usb && usb.usbVendorId && !settings().rr4Usb && state.session && state.session.master) {
       const id = `${usb.usbVendorId.toString(16).padStart(4, '0')}:${(usb.usbProductId || 0).toString(16).padStart(4, '0')}`.toUpperCase();
       try { Object.assign(settings(), await api.settings.put({ rr4Usb: id })); bus.emit('settings'); } catch (ex) { console.warn('rr4Usb not saved', ex); }
     }
@@ -210,10 +221,13 @@ function onLinkEvent(ev) {
 async function createAscent(force) {
   if (state.ascent && !force) return;
   const name = `${t('hdr.ascent')} ${fmtDateISO(Date.now())} · ${state.plan.start.name || ''}`;
+  const ls0 = state.linkState;
   try {
-    const r = await api.ascents.create({ name, start: state.plan.start, plannedLaunch: state.plan.result ? state.plan.result.launchMs : null });
-    state.ascent = { ascentId: r.ascentId, followCode: r.followCode, name, startedAt: Date.now() };
-  } catch (e) { state.ascent = { ascentId: `local-${Date.now()}`, followCode: '–', name, startedAt: Date.now() }; toast(`${t('relay.noSession')}: ${e.message}`, true); }
+    // base data of the planned ascent → the Worker builds the WhatsApp message for observers from it
+    const r = await api.ascents.create({ name, start: state.plan.start, plannedLaunch: state.plan.result ? state.plan.result.launchMs : null, cutAltAgl: state.plan.cutdownMode === 'alt' ? state.plan.cutAltAgl : null, frequencyHz: ls0.net ? ls0.net.frequencyHz : settings().frequencyHz, sondeId: ls0.sonde ? ls0.sonde.id : null });
+    state.ascent = { ascentId: r.ascentId, name, startedAt: Date.now(), notify: r.notify || [] };
+    for (const n of state.ascent.notify) if (n.sent) ctx.log('notify.whatsapp', `${n.label} (auto)`);
+  } catch (e) { state.ascent = { ascentId: `local-${Date.now()}`, name, startedAt: Date.now(), notify: [] }; toast(`${t('relay.noSession')}: ${e.message}`, true); }
   if (relay) relay.close();
   relay = new Relay({ mock: api.mock });
   relay.addEventListener('open', () => { state.relay.connected = true; bus.emit('relay'); });
@@ -221,12 +235,14 @@ async function createAscent(force) {
   relay.addEventListener('presence', (e) => { state.relay.presence = e.detail; bus.emit('presence', e.detail); });
   relay.addEventListener('chat', (e) => { state.relay.chat = relay.chat; bus.emit('chat', e.detail); });
   relay.addEventListener('history', () => { state.relay.chat = relay.chat; bus.emit('chat', null); });
-  relay.connect(Relay.buildUrl(settings().relayUrl, state.ascent.ascentId, api.token, state.session.role));
+  // Incoming telemetry/state/event from the relay are deliberately NOT subscribed here: the ground app is the
+  // source of truth, only chat/presence/history come back (the DO refuses those types from observers anyway).
+  relay.connect(Relay.buildUrl(settings().relayUrl, state.ascent.ascentId, api.token));
   Object.defineProperty(state.relay, 'sent', { get: () => (relay ? relay.sent : 0), configurable: true });
   Object.defineProperty(state.relay, 'errors', { get: () => (relay ? relay.errors : 0), configurable: true });
   const ls = state.linkState;
   files.begin({ startMs: Date.now(), sondeId: ls.sonde ? ls.sonde.id : null, groundAlt: state.plan.start.alt, receiverAbout: ls.receiver ? `Sparv RR4 hw=${ls.receiver.hw}, fw=${ls.receiver.fw}, prot=${ls.receiver.prot}` : null, receiverMac: ls.receiver ? ls.receiver.mac : null, net: ls.net, name, version: VERSION });
-  ctx.log('ascent.created', `${name} · ${state.ascent.followCode}`);
+  ctx.log('ascent.created', `${name} · ${state.ascent.ascentId}`);
   bus.emit('relay');
 }
 async function release() {
@@ -313,7 +329,7 @@ function route() {
   const name = hash.slice(1).split('/')[0];
   if (!state.session) { if (name !== 'login') { location.hash = '#login'; return; } }
   else if (name === 'login' || name === '') { location.hash = `#${state.phase}`; return; }
-  if (name === 'admin' && state.session.role !== 'master') { location.hash = `#${state.phase}`; return; }
+  if (name === 'admin' && !state.session.master) { location.hash = `#${state.phase}`; return; }
   if (PHASES.includes(name) && name !== state.phase) {
     const maxVisited = Math.max(...PHASES.map((x, i) => (state.visited[x] ? i : -1)));
     if (PHASES.indexOf(name) > maxVisited) { location.hash = `#${state.phase}`; return; }

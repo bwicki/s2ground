@@ -1,13 +1,16 @@
-# Deploys the Cloudflare Worker (which also serves web/) on every push to main.
-# One-time D1 schema migration: run this workflow manually (Actions → Deploy → Run workflow)
+# Deploys the Cloudflare Worker (worker/ → s2ground-api on workers.dev) when something under
+# worker/ changes on main – the web app itself is published by GitHub Pages straight from the
+# repository root, no workflow needed (README, "GitHub Pages einschalten").
+# One-time D1 schema migration: run this workflow manually (Actions → Deploy worker → Run workflow)
 # with "migrate" ticked. Secrets needed (repo → Settings → Secrets and variables → Actions):
 #   CLOUDFLARE_API_TOKEN   – API token with "Edit Cloudflare Workers" + D1 edit permissions
 #   CLOUDFLARE_ACCOUNT_ID  – the account ID shown in the Cloudflare dashboard
-name: Deploy
+name: Deploy worker
 
 on:
   push:
     branches: [main]
+    paths: ['worker/**']
   workflow_dispatch:
     inputs:
       migrate:
@@ -27,8 +30,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Unit tests (files, planning, formatting, sim)
-        run: node --test tests/*.test.js
+      - name: Unit tests
+        run: node --test tests/*.test.js tests/protocol/*.test.js
 
   deploy:
     needs: test
@@ -47,6 +50,6 @@ jobs:
         run: |
           npx --yes wrangler@4 d1 execute s2ground --remote --file=schema.sql
           npx --yes wrangler@4 d1 execute s2ground --remote --file=seed.sql
-      - name: Deploy Worker + static app
+      - name: Deploy Worker (s2ground-api)
         working-directory: worker
         run: npx --yes wrangler@4 deploy

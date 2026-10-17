@@ -1,0 +1,18 @@
+# Runs the automatic tests on every push and pull request (any folder).
+# The Worker deploy lives in deploy.yml and only runs when something under worker/ changes.
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Unit tests (files, planning, formatting, sim, protocol, worker helpers)
+        run: node --test tests/*.test.js tests/protocol/*.test.js

@@ -2,7 +2,7 @@
 // stripping, latin-1, the two-line `about` reply, text spacing and the SSP line framing.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SerialLink } from '../../web/src/protocol/serial.js';
+import { SerialLink } from '../../src/protocol/serial.js';
 
 function fakePort() {
   const written = [];

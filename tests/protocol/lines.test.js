@@ -1,7 +1,7 @@
 // node --test: line classification (spec §1.2) and bracket parsing / conversions (spec §5.10).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyLine, parseBracketLine, parseTxtData, parseAbout, rssiFromParams, extractBracket } from '../../web/src/protocol/lines.js';
+import { classifyLine, parseBracketLine, parseTxtData, parseAbout, rssiFromParams, extractBracket } from '../../src/protocol/lines.js';
 
 test('classifyLine: ssp spellings, messages, responses, logs, junk', () => {
   assert.equal(classifyLine('0x03060201190109025332').kind, 'ssp');

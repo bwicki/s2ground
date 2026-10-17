@@ -1,7 +1,7 @@
 // node --test: number/coordinate formatting helpers and ISA conversions.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fmtInt, fmtNum, icaoShort, icaoSeconds, parseIcao, isaAltitude, isaPressure, altFromPressure, distanceM, bearingDeg, destPoint, windFromCourse, fmtBearing, googleMapsNavUrl, dewPoint } from '../web/src/util/format.js';
+import { fmtInt, fmtNum, icaoShort, icaoSeconds, parseIcao, isaAltitude, isaPressure, altFromPressure, distanceM, bearingDeg, destPoint, windFromCourse, fmtBearing, googleMapsNavUrl, dewPoint } from '../src/util/format.js';
 
 test('thousands separator (de-CH apostrophe)', () => {
   assert.equal(fmtInt(1910), "1'910"); assert.equal(fmtInt(123), '123'); assert.equal(fmtInt(1234567), "1'234'567");

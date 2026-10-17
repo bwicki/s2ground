@@ -1,10 +1,10 @@
-// node --test: every t('key') used in web/src exists in de.json; en.json has the same keys.
+// node --test: every t('key') used in src exists in de.json; en.json has the same keys.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const root = new URL('../web/', import.meta.url).pathname;
+const root = new URL('../', import.meta.url).pathname;
 const de = JSON.parse(readFileSync(join(root, 'i18n/de.json'), 'utf8'));
 const en = JSON.parse(readFileSync(join(root, 'i18n/en.json'), 'utf8'));
 

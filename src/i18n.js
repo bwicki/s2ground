@@ -1,4 +1,4 @@
-// i18n: all visible strings live in web/i18n/<lang>.json (DE is the reference).
+// i18n: all visible strings live in i18n/<lang>.json (DE is the reference).
 // t('key', {n: 3}) substitutes {n}. A missing key falls back to the DE text, then to the key
 // itself – so a forgotten translation shows up as a readable key instead of breaking the view.
 

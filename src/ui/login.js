@@ -1,5 +1,6 @@
-// Login page (design/Login.dc.html) + the one-time master setup form shown when the Worker's
-// user table is still empty (so Balthasar never needs a terminal to create the first login).
+// Login page (design/Login.dc.html) for GROUND USERS (name + password) + the one-time master
+// setup form shown when the Worker's user table is still empty (so Balthasar never needs a
+// terminal to create the first login). Observers never log in here – they use their code in s2stueve.
 
 import { t, currentLang } from '../i18n.js';
 import { esc, html, qs, onAct } from '../util/dom.js';

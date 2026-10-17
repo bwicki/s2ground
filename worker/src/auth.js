@@ -1,5 +1,6 @@
 // Password hashing (PBKDF2-SHA256 via WebCrypto, no dependencies) and bearer tokens stored
-// in D1 with an expiry. Roles: master > ground/command > observer > guest.
+// in D1 with an expiry. Two kinds of principals: ground users (users table, flag `master`)
+// and observers (observers table, access code, no password). auth = {user, role, master, observerId, token}.
 
 const ITER = 100000;
 const enc = new TextEncoder();
@@ -34,19 +35,23 @@ export function randomToken(bytes = 32) {
   return btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-/** Human-friendly follow code like "7K2-M4Q" (no 0/O/1/I). */
-export function followCode() {
-  const alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-  const a = crypto.getRandomValues(new Uint8Array(6));
-  const s = [...a].map((v) => alphabet[v % alphabet.length]).join('');
-  return `${s.slice(0, 3)}-${s.slice(3)}`;
+/** Alphabet for observer codes: no 0/O/1/I so a code read over the phone is unambiguous. */
+export const CODE_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+/** Observer access code like "7K2M4QX9" (8 chars → 32^8 ≈ 1.1e12 combinations). */
+export function observerCode(len = 8) {
+  const a = crypto.getRandomValues(new Uint8Array(len));
+  return [...a].map((v) => CODE_ALPHABET[v % CODE_ALPHABET.length]).join('');
+}
+/** Normalise what a person typed: upper case, spaces/dashes removed (the alphabet has no 0/O/1/I anyway). */
+export function normalizeCode(s) {
+  return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
 
-export async function createToken(env, user) {
+export async function createToken(env, user, observerId = null) {
   const token = randomToken();
   const now = Date.now();
   const hours = Number(env.TOKEN_HOURS || 24);
-  await env.DB.prepare('INSERT INTO tokens (token, user, created_at, expires_at) VALUES (?1, ?2, ?3, ?4)').bind(token, user, now, now + hours * 3600e3).run();
+  await env.DB.prepare('INSERT INTO tokens (token, user, observer_id, created_at, expires_at) VALUES (?1, ?2, ?3, ?4, ?5)').bind(token, user, observerId, now, now + hours * 3600e3).run();
   // opportunistic cleanup of expired tokens (cheap, keeps the table small)
   await env.DB.prepare('DELETE FROM tokens WHERE expires_at < ?1').bind(now).run();
   return token;
@@ -56,21 +61,40 @@ export async function deleteToken(env, token) {
   if (token) await env.DB.prepare('DELETE FROM tokens WHERE token = ?1').bind(token).run();
 }
 
-/** Resolve a bearer token (header or ?token=) to {user, role, token} or null. */
+/**
+ * Resolve a bearer token (header or ?token=) to the principal, or null.
+ * Ground user: {user, role:'ground', master:boolean, lang, token}
+ * Observer:    {user: displayName, role:'observer', observerId, token}  (null once the code is revoked)
+ */
 export async function authenticate(env, request, url) {
   const h = request.headers.get('Authorization') || '';
   const token = h.startsWith('Bearer ') ? h.slice(7) : (url && url.searchParams.get('token')) || null;
   if (!token) return null;
-  const row = await env.DB.prepare('SELECT t.token, t.expires_at, u.name, u.role, u.active, u.lang FROM tokens t JOIN users u ON u.name = t.user WHERE t.token = ?1').bind(token).first();
-  if (!row || row.expires_at < Date.now() || !row.active) return null;
-  return { user: row.name, role: row.role, lang: row.lang, token };
+  const row = await env.DB.prepare('SELECT token, user, observer_id, expires_at FROM tokens WHERE token = ?1').bind(token).first();
+  if (!row || row.expires_at < Date.now()) return null;
+  if (row.observer_id) {
+    const o = await env.DB.prepare('SELECT id, display_name, label, revoked_at FROM observers WHERE id = ?1').bind(row.observer_id).first();
+    if (!o || o.revoked_at) return null;                 // revoking a code logs the observer out immediately
+    return { user: o.display_name || o.label, role: 'observer', master: false, observerId: o.id, token };
+  }
+  const u = await env.DB.prepare('SELECT name, master, active, lang FROM users WHERE name = ?1').bind(row.user).first();
+  if (!u || !u.active) return null;
+  return { user: u.name, role: 'ground', master: !!u.master, lang: u.lang, token };
 }
 
 export class HttpError extends Error {
   constructor(status, message) { super(message); this.status = status; }
 }
+/**
+ * requireRole(auth)                → any authenticated principal (ground user or observer)
+ * requireRole(auth, 'ground')      → any ground user (master or not)
+ * requireRole(auth, 'master')      → ground user with the master flag
+ * requireRole(auth, 'observer')    → observer token; several names = any of them
+ */
 export function requireRole(auth, ...roles) {
   if (!auth) throw new HttpError(401, 'unauthorized');
-  if (roles.length && !roles.includes(auth.role)) throw new HttpError(403, 'forbidden');
+  if (!roles.length) return auth;
+  const ok = roles.some((r) => (r === 'master' ? auth.master : r === 'ground' ? auth.role === 'ground' : auth.role === r));
+  if (!ok) throw new HttpError(403, 'forbidden');
   return auth;
 }

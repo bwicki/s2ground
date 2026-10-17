@@ -1,7 +1,7 @@
 // node --test: raw_flight_history.csv byte-exact format (spec §7.2), .sounding lines, KML.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CSV_HEADER, csvRow, csvText, soundingStamp, soundingLine, soundingHeader, kmlText, utcStamp } from '../web/src/files.js';
+import { CSV_HEADER, csvRow, csvText, soundingStamp, soundingLine, soundingHeader, kmlText, utcStamp } from '../src/files.js';
 
 const T = Date.UTC(2025, 9, 13, 7, 15, 2);
 const full = { t: T, alt: 1234.7, pa: 87651, spd: 4.52, ang: 213.4, te: 3.21, hu: 54.2, tei: 21.5, lat: 47.123456, lon: 8.654321, rise: 4.8 };

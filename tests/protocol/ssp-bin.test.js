@@ -2,7 +2,7 @@
 // NameMap/Map tolerance and error behaviour.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { encodeFrame, decodeFrame, plain, varuintEncode, varuintDecode, encodeImp, decodeImp, Typed, Sym, S, T, REF, asNameMap, hexToBytes, bytesToHex, readSchema, writeSchema } from '../../web/src/protocol/ssp-bin.js';
+import { encodeFrame, decodeFrame, plain, varuintEncode, varuintDecode, encodeImp, decodeImp, Typed, Sym, S, T, REF, asNameMap, hexToBytes, bytesToHex, readSchema, writeSchema } from '../../src/protocol/ssp-bin.js';
 
 // spec §2.4 (spaces removed)
 const EXAMPLES = {

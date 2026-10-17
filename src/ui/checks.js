@@ -36,7 +36,8 @@ export function computeChecks() {
   const settingsOk = w && (w.cutAltAgl === wantCut);
   items.push(settingsOk ? { id: 'settings', level: 'ok', sub: `${p.opMode === 'ascent' ? t('plan.opAscent') : t('plan.opDrop')} · ${wantCut === null ? t('plan.noCut') : `Cutdown ${fmtInt(wantCut)} m ${t('unit.agl')}`} · ${t('chk.set.confirmed')}`, act: 'settings' }
     : { id: 'settings', level: 'warn', sub: t('chk.set.mismatch'), act: 'settings' });
-  items.push(state.relay.connected ? { id: 'observers', level: 'ok', sub: state.relay.presence.length ? t('chk.obs.ok', { names: state.relay.presence.map((u) => u.fullName || u.name).join(', ') }) : t('chk.obs.nobody') } : { id: 'observers', level: 'warn', sub: t('chk.obs.off') });
+  const obs = state.relay.presence.filter((u) => u.role === 'observer');
+  items.push(state.relay.connected ? { id: 'observers', level: 'ok', sub: obs.length ? t('chk.obs.ok', { n: obs.length, names: obs.map((u) => u.name).join(', ') }) : t('chk.obs.nobody') } : { id: 'observers', level: 'warn', sub: t('chk.obs.off') });
   return items;
 }
 
@@ -104,7 +105,7 @@ export function mountChecks(root, ctx) {
     const wind = last && last.spd !== null && last.spd >= 0.5 ? `${fmtBearing(windFromCourse(last.ang))} · ${fmtInt(msToKt(last.spd))} kt` : t('chk.calm');
     qs(el, '.rows').innerHTML = `<div class="row"><span class="muted">${esc(t('chk.plannedStart'))}</span><span class="val">${state.plan.result ? `${fmtTimeUTC(state.plan.result.launchMs)} UTC` : '–'}</span></div>
       <div class="row"><span class="muted">${esc(t('chk.groundWind'))}</span><span class="val">${wind}</span></div>
-      <div class="row"><span class="muted">${esc(t('chk.observersN'))}</span><span class="val">${state.relay.presence.length}</span></div>
+      <div class="row"><span class="muted">${esc(t('chk.observersN'))}</span><span class="val">${state.relay.presence.filter((u) => u.role === 'observer').length}</span></div>
       <div class="row"><span class="muted">${esc(t('chk.sondeMode'))}</span><span class="val">${sd ? esc(ctx.modeText(sd.md).split(' · ')[0]) : '–'}</span></div>`;
     const btn = qs(el, '[data-act=release]'); btn.disabled = !ready || state.released;
     btn.className = `btn big ${ready ? 'primary' : 'disabled'}`;

@@ -2,9 +2,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { liftForRiseRate, burstAltitude, fallbackProfile, profileAt, predict, planAt, pointInPolygon, airspaceConflicts, suggestCutdownAgl, fromOpenAip, openAipLimitM, openAipLimitText, bboxOf } from '../web/src/planning.js';
+import { liftForRiseRate, burstAltitude, fallbackProfile, profileAt, predict, planAt, pointInPolygon, airspaceConflicts, suggestCutdownAgl, fromOpenAip, openAipLimitM, openAipLimitText, bboxOf } from '../src/planning.js';
 
-const sample = JSON.parse(readFileSync(new URL('../web/src/data/airspaces.json', import.meta.url)));
+const sample = JSON.parse(readFileSync(new URL('../src/data/airspaces.json', import.meta.url)));
 const airspaces = fromOpenAip(sample.items, 432, ['P', 'R', 'D', 'CTR', 'TMA']);
 const start = { lat: 47.4433, lon: 8.5617, alt: 432 };
 

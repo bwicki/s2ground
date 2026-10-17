@@ -3,8 +3,10 @@
 // Auto-reconnects with backoff; telemetry sent while offline is queued (bounded) so an observer
 // joining late still gets a complete profile via the DO's history replay.
 //
-// Mock mode (no Worker, ?sim=1): a scripted "Command Center" observer joins and answers, so the
-// chat and presence UI can be exercised offline.
+// Mock mode (no Worker, ?sim=1): a scripted observer ("Peter (CC)") joins and answers, so the
+// chat, presence and kick UI can be exercised offline.
+
+import { config } from './config.js';
 
 export class Relay extends EventTarget {
   constructor({ mock = false } = {}) {
@@ -15,10 +17,15 @@ export class Relay extends EventTarget {
     this.presence = []; this.chat = [];
   }
 
-  /** Build the WS url: relayUrl setting ('' = same origin) + /live/:ascentId. */
-  static buildUrl(relayUrl, ascentId, token, role) {
-    const base = relayUrl ? relayUrl.replace(/\/$/, '') : `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`;
-    return `${base}/live/${encodeURIComponent(ascentId)}?token=${encodeURIComponent(token || '')}&role=${encodeURIComponent(role || 'ground')}`;
+  /**
+   * Build the WS url: /live/:ascentId on the Worker. Default = config.apiBase with https→wss;
+   * settings.relayUrl is an optional override (e.g. a second Worker). The token decides the role
+   * on the server (ground-user token or observer token) – nothing is passed as a query role.
+   */
+  static buildUrl(relayUrl, ascentId, token) {
+    const src = (relayUrl || config.apiBase || '').replace(/\/$/, '');
+    const base = src.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
+    return `${base}/live/${encodeURIComponent(ascentId)}?token=${encodeURIComponent(token || '')}`;
   }
 
   connect(url) {
@@ -49,6 +56,13 @@ export class Relay extends EventTarget {
     const msg = { type: 'chat', text, user, role, t: Date.now() };
     if (this.mock) { this._pushChat(msg); this._mockReply(text); return; }
     this.send(msg);
+  }
+
+  /** Mock only: the real kick goes through POST /api/ascents/:id/kick and the DO broadcasts presence. */
+  mockKick(observerId) {
+    if (!this.mock) return;
+    this.presence = this.presence.filter((u) => u.observerId !== observerId);
+    this.dispatchEvent(new CustomEvent('presence', { detail: this.presence }));
   }
 
   // ---- internals ---------------------------------------------------------------------------
@@ -95,17 +109,17 @@ export class Relay extends EventTarget {
   _mockConnect() {
     setTimeout(() => {
       this._setConnected(true);
-      this.presence = [{ name: 'cc', fullName: 'Command Center', role: 'command', since: Date.now() }];
+      this.presence = [{ name: 'Peter (CC)', role: 'observer', observerId: 1, since: Date.now() }];
       this.dispatchEvent(new CustomEvent('presence', { detail: this.presence }));
-      this._pushChat({ type: 'chat', user: 'cc', fullName: 'Command Center', role: 'command', text: 'Daten kommen sauber an. Wir lassen bis zum Cutdown steigen.', t: Date.now() });
+      this._pushChat({ type: 'chat', user: 'Peter (CC)', role: 'observer', observerId: 1, text: 'Daten kommen sauber an. Wir lassen bis zum Cutdown steigen.', t: Date.now() });
     }, 2500);
     setTimeout(() => {
-      this.presence.push({ name: 'crew1', fullName: 'Crew Bergung', role: 'ground', since: Date.now() });
+      if (!this.presence.some((u) => u.observerId === 2)) this.presence.push({ name: 'Crew Bergung (Max)', role: 'observer', observerId: 2, since: Date.now() });
       this.dispatchEvent(new CustomEvent('presence', { detail: this.presence }));
     }, 7000);
   }
   _mockReply(text) {
     const reply = /gelandet/i.test(text) ? 'Super, wir fahren los.' : /ausgel/i.test(text) ? 'Danke, Profil reicht uns.' : 'Verstanden.';
-    setTimeout(() => this._pushChat({ type: 'chat', user: 'cc', fullName: 'Command Center', role: 'command', text: reply, t: Date.now() }), 1800);
+    setTimeout(() => this._pushChat({ type: 'chat', user: 'Peter (CC)', role: 'observer', observerId: 1, text: reply, t: Date.now() }), 1800);
   }
 }

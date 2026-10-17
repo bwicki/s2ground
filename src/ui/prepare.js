@@ -1,8 +1,9 @@
 // Phase 2 – "Sonde vorbereiten" (design/Vorbereiten.dc.html): receiver, sonde, balloon and
-// observer cards, the values written to the sonde, expert menu with radio/port/relay/folder.
+// observer cards (connected observers by Klarname + kick, WhatsApp notification buttons),
+// the values written to the sonde, expert menu with radio/port/relay/folder.
 
 import { t } from '../i18n.js';
-import { esc, html, qs, onAct, banner, icons, toast, copyText } from '../util/dom.js';
+import { esc, html, qs, onAct, banner, icons, toast, confirmDialog } from '../util/dom.js';
 import { state, bus, setPhaseStatus, settings } from '../state.js';
 import { fmtInt, fmtNum, fmtTimeUTC, qnhFromStation } from '../util/format.js';
 
@@ -22,7 +23,7 @@ export function updatePrepareStatus() {
 }
 
 export function prepareExpert(ctx) {
-  const p = state.plan, ls = state.linkState, s = settings(), master = state.session && state.session.role === 'master';
+  const p = state.plan, ls = state.linkState, s = settings(), master = state.session && state.session.master;
   const net = ls.net || {};
   const lockedAttr = master ? '' : 'readonly';
   return {
@@ -50,8 +51,8 @@ export function prepareExpert(ctx) {
       <div class="full sep menu-grid3">
         <div class="sec"><div class="k">${esc(t('prep.expert.relay'))}</div>
           <div class="row"><span class="muted">Relay</span><span class="val" style="color:${state.relay.connected ? 'var(--green)' : 'var(--amber)'}">${state.relay.connected ? t('prep.expert.relayOk', { n: state.relay.errors }) : t('prep.expert.relayOff')}</span></div>
-          <div class="row"><span class="muted">${esc(t('prep.expert.followCode'))}</span><span class="val">${state.ascent ? esc(state.ascent.followCode) : '–'}</span></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-act="copyCode">${esc(t('common.copy'))}</button><button class="btn" type="button" data-act="newCode">${esc(t('prep.expert.newCode'))}</button><button class="btn" type="button" data-act="guestLink">${esc(t('prep.expert.guestLink'))}</button></div>
+          <div class="row"><span class="muted">${esc(t('prep.expert.ascentId'))}</span><span class="val mono">${state.ascent ? esc(state.ascent.ascentId) : '–'}</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-act="newSession">${esc(t('prep.expert.newSession'))}</button></div>
         </div>
         <div class="sec"><div class="k">${esc(t('prep.expert.storage'))}</div>
           <label class="f">${esc(t('prep.expert.folder'))}<input class="in mono" type="text" value="${esc(state.files.folder || s.defaultFolder || '')}" readonly></label>
@@ -71,9 +72,7 @@ export function prepareExpert(ctx) {
         op: (b) => { p.opMode = b.dataset.m; panel.querySelectorAll('[data-act=op]').forEach((x) => x.classList.toggle('on', x === b)); },
         reconnect: () => ctx.connect(true),
         log: () => ctx.showLog(),
-        copyCode: async () => { if (state.ascent) toast((await copyText(state.ascent.followCode)) ? t('common.copied') : state.ascent.followCode); },
-        newCode: () => ctx.newAscent(),
-        guestLink: async () => { if (!state.ascent) return; const u = `https://s2stueve.wicki.aero/#follow/${state.ascent.followCode}`; toast((await copyText(u)) ? t('common.copied') : u); },
+        newSession: () => ctx.newAscent(),
         chooseFolder: () => ctx.chooseFolder(),
         downloads: () => ctx.downloadFiles(),
         program: () => ctx.programSonde(true),
@@ -88,7 +87,7 @@ export function modeText(md) {
 }
 
 export function mountPrepare(root, ctx) {
-  const el = html(`<main class="page"><div class="bannerbox"></div><div class="stats4 cards"></div><section class="card written"></section></main>`);
+  const el = html(`<main class="page"><div class="bannerbox"></div><div class="stats4 cards"></div><div class="notifybox"></div><section class="card written"></section></main>`);
   root.replaceChildren(el);
   const p = state.plan;
 
@@ -120,8 +119,9 @@ export function mountPrepare(root, ctx) {
       </section>
       <section class="card"><h2>${esc(t('prep.card.observers'))}</h2>
         ${state.relay.connected ? okline('ok', t('prep.ob.connected'), t('prep.ob.visible')) : okline('warn', t('prep.ob.notConnected'), t('prep.ob.retrying'))}
-        <div style="display:flex;flex-direction:column;gap:6px">${state.relay.presence.length ? state.relay.presence.map((u) => `<div class="obs"><span><span class="dot g" style="margin-right:8px"></span>${esc(u.fullName || u.name)} <span class="muted">(${esc(u.name)})</span></span><span class="muted small">${t('common.since')} ${fmtTimeUTC(u.since)} UTC</span></div>`).join('') : `<span class="muted small">${esc(t('prep.ob.nobody'))}</span>`}</div>
+        <div style="display:flex;flex-direction:column;gap:6px">${observerRows()}</div>
       </section>`;
+    qs(el, '.notifybox').innerHTML = notifyCard();
     const w = state.sondeWritten;
     qs(el, '.written').innerHTML = `<h2>${esc(t('prep.written.title'))}</h2>
       <div class="stats4">
@@ -132,9 +132,31 @@ export function mountPrepare(root, ctx) {
       </div>
       <div class="muted small">${w ? esc(t('prep.written.readBack', { time: fmtTimeUTC(w.t, true) })) : esc(sd ? t('prep.written.pending') : t('prep.written.noSonde'))}</div>`;
   };
+  /** Connected people by Klarname; observers get a ✕ (kick) – ground users are listed without it. */
+  const observerRows = () => {
+    const list = state.relay.presence;
+    if (!list.length) return `<span class="muted small">${esc(t('prep.ob.nobody'))}</span>`;
+    return list.map((u) => `<div class="obs" style="flex-wrap:wrap"><span><span class="dot g" style="margin-right:8px"></span>${esc(u.name)} <span class="muted small">${esc(u.role === 'observer' ? t('role.observer') : t('role.ground'))}</span></span>
+      <span class="nowrap" style="display:inline-flex;gap:8px;align-items:center"><span class="muted small">${t('common.since')} ${fmtTimeUTC(u.since)} UTC</span>${u.role === 'observer' && u.observerId ? `<button class="btn xs" type="button" data-act="kick" data-id="${u.observerId}" data-name="${esc(u.name)}" title="${esc(t('prep.ob.kick'))}" aria-label="${esc(t('prep.ob.kick'))}">✕</button>` : ''}</span></div>`).join('');
+  };
+  /** Stage-1 WhatsApp: one wa.me button per observer with mobile + WhatsApp flag (from POST /api/ascents). */
+  const notifyCard = () => {
+    const list = (state.ascent && state.ascent.notify) || [];
+    if (!list.length) return '';
+    return `<section class="card"><h2>${esc(t('prep.notify.title'))}</h2><p class="muted small" style="margin:0">${esc(t('prep.notify.intro'))}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${list.map((n) => `<div class="obs"><span>${esc(n.label)} <span class="muted small mono">${esc(n.mobile)}</span></span>
+        ${n.sent ? `<span class="small" style="color:var(--green)">✓ ${esc(n.manual ? t('prep.notify.opened') : t('prep.notify.sentAuto'))}</span>` : `<a class="btn xs primary" href="${esc(n.waUrl)}" target="_blank" rel="noopener" data-act="notify" data-id="${n.observerId}" data-label="${esc(n.label)}">${esc(t('prep.notify.send'))}</a>`}
+        ${n.error && !n.sent ? `<span class="muted small">${esc(t('prep.notify.autoFailed'))}</span>` : ''}</div>`).join('')}</div></section>`;
+  };
+  el.addEventListener('click', (e) => {
+    // the wa.me link must keep its default (open WhatsApp); we only remember that it was tapped
+    const a = e.target.closest('[data-act=notify]');
+    if (a) ctx.markNotified(Number(a.dataset.id), a.dataset.label);
+  });
   onAct(el, {
     connect: () => ctx.connect(),
     balloon: () => { state.balloonConfirmed = !state.balloonConfirmed; ctx.log(state.balloonConfirmed ? 'balloon.confirmed' : 'balloon.unconfirmed', p.balloonType); render(); },
+    kick: async (b) => { if (await confirmDialog({ title: t('prep.ob.kickTitle'), text: `<p>${esc(b.dataset.name)}</p><p class="muted small">${esc(t('prep.ob.kickText'))}</p>`, okLabel: t('prep.ob.kick'), cancelLabel: t('common.cancel'), danger: true })) ctx.kick(Number(b.dataset.id), b.dataset.name); },
   });
   const offs = [bus.on('linkstate', render), bus.on('presence', render), bus.on('relay', render), bus.on('written', render), bus.on('plan', render)];
   render();

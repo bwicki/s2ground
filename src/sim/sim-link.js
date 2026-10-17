@@ -2,7 +2,7 @@
 // Scripted, deterministic ascent from Rümlang: GPS-fix wait → ready → (release) → launch →
 // ascent at ~2.5 m/s with wind turning with height → cutdown at the configured altitude →
 // descent → landed. One TelemetryRecord per simulated second; `speed` scales wall-clock time.
-// The protocol task re-exports this class from web/src/protocol/index.js as a GroundLink subclass;
+// The protocol task re-exports this class from src/protocol/index.js as a GroundLink subclass;
 // the UI never depends on the sim beyond the shared facade API.
 
 import { isaPressure, dewPoint, altFromPressure, destPoint, distanceM } from '../util/format.js';

@@ -2,7 +2,7 @@
 // end-to-end in node. It answers text commands (spec §5.1/§5.4/§5.8), joins us to an SSP network
 // (§5.2/§5.3), reports `components`/`net`/S2 status and lets a test inject raw lines.
 
-import { decodeFrame, encodeFrame, Typed, plain, REF } from '../../web/src/protocol/ssp-bin.js';
+import { decodeFrame, encodeFrame, Typed, plain, REF } from '../../src/protocol/ssp-bin.js';
 
 const enc = (s) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
 export const NET = { freq: 433900000, loraSpreadingFactor: 9, loraBandwidth: 0, loraCodingRate: 1, radioTimeslots: 6, radioSlotMs: 500, radioMaxData: 60, samplingInterval: 1000, radioGroundSlotMs: 500 };

@@ -23,6 +23,7 @@ export function mountChat(container, ctx) {
     box.innerHTML = state.relay.chat.map((m) => {
       const mine = m.user === me;
       const sys = m.role === 'system';
+      // observers appear under the Klarname they chose when joining (m.user); ground users under their login name
       return `<div class="msg ${mine ? 'me' : ''} ${sys ? 'sys' : ''}"><span class="who">${esc(mine ? t('chat.me') : (m.fullName || m.user))} · ${fmtTimeUTC(m.t)}</span><span class="t">${esc(m.text)}</span></div>`;
     }).join('') || `<div class="muted small">${esc(t('chat.empty'))}</div>`;
     box.scrollTop = box.scrollHeight;
@@ -31,7 +32,7 @@ export function mountChat(container, ctx) {
     const n = state.relay.presence.length;
     qs(el, '[data-f=online]').textContent = `${n} online`;
     qs(el, '[data-f=dot]').className = `dot ${state.relay.connected ? 'g' : 'x'}`;
-    qs(el, '[data-f=who]').textContent = n ? `${t('chat.via')} · ${state.relay.presence.map((u) => u.fullName || u.name).join(', ')}` : t('chat.via');
+    qs(el, '[data-f=who]').textContent = n ? `${t('chat.via')} · ${state.relay.presence.map((u) => u.name).join(', ')}` : t('chat.via');
   };
   const renderQuick = () => {
     const list = settings().quickRepliesGround || [];
