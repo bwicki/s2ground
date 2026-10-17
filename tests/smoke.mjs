@@ -1,5 +1,5 @@
 // Playwright smoke test through the whole flow in simulation mode (no Worker needed):
-// login → plan → prepare → checks → ascent → detail → retrieve → admin, with screenshots.
+// login → plan → prepare → checks → ascent → detail → retrieve → admin, then the Schnellstart (#quick) pass, with screenshots.
 // Run: node tests/smoke.mjs   (env PLAYWRIGHT_MODULE=/path/to/playwright, PLAYWRIGHT_BROWSERS_PATH)
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -25,10 +25,14 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1280, height: 980 } });
 const errors = [];
-page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
-page.on('console', (m) => { if (m.type() === 'error' && !/net::ERR|Failed to load resource|ERR_TUNNEL|403/.test(m.text())) errors.push(`console: ${m.text()}`); });
+const track = (pg) => {
+  pg.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
+  pg.on('console', (m) => { if (m.type() === 'error' && !/net::ERR|Failed to load resource|ERR_TUNNEL|403/.test(m.text())) errors.push(`console: ${m.text()}`); });
+};
+track(page);
 const shot = (name) => page.screenshot({ path: path.join(shots, name), fullPage: true });
 const step = (s) => console.log(`» ${s}`);
+let qp;                                                  // the Schnellstart page (second pass)
 
 try {
   step('login page');
@@ -37,6 +41,10 @@ try {
   await shot('01-login.png');
   await page.click('form.login button[type=submit]');
   await page.waitForSelector('.actionbar', { timeout: 10000 });
+
+  step('plan: small «Sonde sofort hier starten» button in the action bar');
+  const smallQuick = await page.getAttribute('.actionbar a.q-amber', 'href');
+  if (smallQuick !== '#quick') throw new Error(`quick button in the plan action bar: ${smallQuick}`);
 
   step('plan: airspace warning + suggestion');
   await page.waitForSelector('.banner.warn', { timeout: 15000 });
@@ -165,11 +173,128 @@ try {
   await page.waitForSelector('.confirm-strip');
   await shot('11-trotzdem-weiter.png');
 
+  // ---------------------------------------------------------------------------------------------------------------
+  // Schnellstart: login via the amber button → step 1/2 → stepper → PROGRAMMIEREN & FREIGEBEN → BEREIT → live → cutdown → landed
+  // ---------------------------------------------------------------------------------------------------------------
+  step('quick start: login page has the second, prominent button');
+  qp = await browser.newPage({ viewport: { width: 1280, height: 980 } });
+  track(qp);
+  const qshot = (name) => qp.screenshot({ path: path.join(shots, name), fullPage: true });
+  const qtext = (sel) => qp.textContent(sel, { timeout: 2000 }).catch(() => null);
+  await qp.goto(`${base}/?sim=1&speed=5&fast=1#login`);
+  await qp.waitForSelector('form.login [data-act=quick]');
+  await qshot('12-quick-0-login.png');
+  await qp.click('form.login [data-act=quick]');
+  await qp.waitForURL(/#quick/);
+  await qp.waitForSelector('.q-step');
+
+  step('quick start: minimal header (pill, link to full planning, no phase bar), steps 1 and 2');
+  if (await qp.$('header.top nav.phases')) throw new Error('quick page must not show the phase bar');
+  if (!/ohne Planung/.test(await qp.textContent('header.top .pill.amber'))) throw new Error('quick pill missing');
+  if ((await qp.getAttribute('header.top .qmid a[href="#plan"]', 'href')) !== '#plan') throw new Error('«vollständig planen» link missing');
+  await qp.waitForFunction(() => /RR4/.test(document.querySelector('[data-f=s1]').textContent) && /verbunden/.test(document.querySelector('[data-f=s1]').textContent) && /Nr\./.test(document.querySelector('[data-f=s1]').textContent), null, { timeout: 20000 });
+  await qp.waitForFunction(() => /\d{6}N\d{7}E/.test(document.querySelector('[data-f=start]').textContent), null, { timeout: 20000 });
+  const startTxt = await qtext('[data-f=start]');
+  if (!/m\s*AMSL/.test(startTxt) || !/hier/.test(startTxt)) throw new Error(`start line: ${startTxt}`);
+  if (((await qtext('[data-f=cut]')) || '').trim() !== "3'000") throw new Error(`default cutdown altitude: ${await qtext('[data-f=cut]')}`);
+  await qp.waitForSelector('[data-act=applySuggest]', { timeout: 20000 });        // 3'000 m AGL runs into the LS-R12 sample airspace
+  await qshot('12-quick-1-start.png');
+
+  step('quick start: open airspace conflict is asked again at the start button, going back keeps everything untouched');
+  await qp.waitForFunction(() => !document.querySelector('[data-act=go]').disabled, null, { timeout: 20000 });
+  await qp.click('[data-act=go]');
+  await qp.waitForSelector('.modal');
+  if (!/LS-R12/.test(await qp.textContent('.modal'))) throw new Error('conflict dialog should name the airspace');
+  await qshot('12-quick-1b-conflict-dialog.png');
+  await qp.click('.modal [data-act=cancel]');
+  await qp.waitForSelector('.modal', { state: 'detached' });
+  if (await qp.$('[data-f=status] .q-status')) throw new Error('nothing may start after «zurück»');
+
+  step('quick start: cutdown stepper (+500 / −500) and automatic airspace check');
+  await qp.click('[data-act=applySuggest]');
+  await qp.waitForFunction(() => document.querySelector('[data-f=cut]').textContent.trim() === "1'500" && /kein Konflikt/.test(document.querySelector('[data-f=air]').textContent), null, { timeout: 20000 });
+  await qp.click('[data-act=cutPlus]');
+  if (((await qtext('[data-f=cut]')) || '').trim() !== "2'000") throw new Error('+500 should give 2\'000 m AGL');
+  await qp.waitForSelector('[data-act=applySuggest]', { timeout: 20000 });         // 2'000 m AGL conflicts again → suggestion
+  await qp.click('[data-act=cutMinus]');
+  if (((await qtext('[data-f=cut]')) || '').trim() !== "1'500") throw new Error('−500 should give 1\'500 m AGL');
+  await qp.waitForFunction(() => /kein Konflikt/.test(document.querySelector('[data-f=air]').textContent), null, { timeout: 20000 });
+  await qshot('12-quick-2-ready-to-start.png');
+
+  step('quick start: SONDE PROGRAMMIEREN & FREIGEBEN → WARTEN → BEREIT (release by itself)');
+  await qp.click('[data-act=go]');
+  await qp.waitForFunction(() => /WARTEN/.test((document.querySelector('[data-f=status]') || {}).textContent || ''), null, { timeout: 20000, polling: 100 });
+  await qshot('12-quick-3-warten.png');
+  await qp.waitForFunction(() => /BEREIT/.test((document.querySelector('[data-f=status]') || {}).textContent || ''), null, { timeout: 60000, polling: 50 });
+  await qshot('12-quick-4-bereit.png');
+
+  step('quick start: the launch switches the page to the live state (banner + three tiles)');
+  await qp.waitForSelector('.q-tiles .q-tile', { timeout: 60000 });
+  await qp.waitForFunction(() => document.querySelectorAll('.q-tiles .q-tile').length === 3 && /OK/.test(document.querySelector('[data-f=banner]').textContent) && parseInt(document.querySelector('.q-tile .v').textContent.replace(/[^0-9]/g, ''), 10) > 150, null, { timeout: 90000 });
+  const tiles = await qp.locator('.q-tile').allTextContents();
+  if (!/AGL/.test(tiles[0]) || !/AMSL/.test(tiles[0])) throw new Error(`tile 1: ${tiles[0]}`);
+  if (!/m\/s/.test(tiles[1])) throw new Error(`tile 2: ${tiles[1]}`);
+  if (!/Funk/.test(tiles[2]) || !/Cutdown/i.test(tiles[2])) throw new Error(`tile 3: ${tiles[2]}`);
+  if (!/1'500 m über Grund/.test(await qtext('[data-f=banner]'))) throw new Error('banner should name the programmed cutdown altitude');
+  await qshot('12-quick-5-live.png');
+
+  step('quick start: «Vollständige Ansicht» shows the same ascent, and back');
+  await qp.click('header.top a[href="#ascent"]');
+  await qp.waitForURL(/#ascent/);
+  await qp.waitForSelector('.bannerbox');
+  await qp.waitForFunction(() => /seit/.test(document.querySelector('.bannerbox').textContent), null, { timeout: 30000 });
+  await qp.evaluate(() => { location.hash = '#quick'; });
+  await qp.waitForSelector('.q-tiles .q-tile');
+
+  step('quick start: CUTDOWN JETZT on the quick page (confirm dialog), descent, landed → retrieval block');
+  await qp.click('[data-act=cutdown]');
+  await qp.waitForSelector('.modal');
+  if (!/Cutdown/.test(await qp.textContent('.modal'))) throw new Error('cutdown confirm dialog');
+  await qshot('12-quick-6-cutdown-confirm.png');
+  await qp.waitForTimeout(500);                         // danger dialog ignores clicks in the first 400 ms
+  await qp.click('.modal [data-act=ok]');
+  await qp.waitForFunction(() => /Cutdown ausgelöst/.test(document.querySelector('[data-f=banner]').textContent), null, { timeout: 30000 });
+  await qshot('12-quick-7-descent.png');
+  await qp.waitForSelector('[data-f=banner] a[data-act=nav]', { timeout: 150000 });
+  await qp.waitForTimeout(1200);
+  const banner = await qtext('[data-f=banner]');
+  if (!/gelandet/.test(banner) || !/\d{6}N\d{7}E/.test(banner)) throw new Error(`landed banner: ${banner}`);
+  const qnav = await qp.getAttribute('[data-f=banner] a[data-act=nav]', 'href');
+  if (!qnav.startsWith('https://www.google.com/maps/dir/?api=1&destination=')) throw new Error(`quick nav url: ${qnav}`);
+  if (!(await qp.$('[data-f=banner] .q-qr'))) throw new Error('QR block missing');
+  if (await qp.$('[data-act=cutdown]:not(.hidden)') && await qp.isVisible('[data-act=cutdown]')) throw new Error('CUTDOWN JETZT must be gone after landing');
+  await qshot('12-quick-8-landed.png');
+
+  step('quick start: archive → ready for the next sonde (step 1/2 again)');
+  await qp.click('[data-act=archive]');
+  await qp.waitForSelector('.modal');
+  await qp.waitForTimeout(500);
+  await qp.click('.modal [data-act=ok]');
+  await qp.waitForSelector('.q-step', { timeout: 20000 });
+  await qp.waitForFunction(() => !document.querySelector('.q-tiles') && /RR4/.test(document.querySelector('[data-f=s1]').textContent), null, { timeout: 20000 });
+  await qshot('12-quick-9-after-archive.png');
+
+  step('quick start: English');
+  await qp.evaluate(() => localStorage.setItem('s2ground.lang', 'en'));
+  await qp.reload();                                    // the simulation keeps no session over a reload → login page, now in English
+  await qp.waitForSelector('form.login [data-act=quick]');
+  if (!/Start the sonde right here/.test(await qp.textContent('form.login [data-act=quick]'))) throw new Error('EN login quick button');
+  await qshot('12-quick-10-login-en.png');
+  await qp.click('form.login [data-act=quick]');
+  await qp.waitForSelector('.q-step', { timeout: 20000 });
+  await qp.waitForFunction(() => /Start the sonde right here/.test(document.querySelector('h1, .q-page h1') ? document.querySelector('h1, .q-page h1').textContent : ''), null, { timeout: 10000 });
+  if (!/PROGRAM SONDE & RELEASE/.test(await qp.textContent('[data-act=go]'))) throw new Error('EN start button');
+  await qp.waitForFunction(() => /connected/.test(document.querySelector('[data-f=s1]').textContent) && /here/.test(document.querySelector('[data-f=start]').textContent) && /receiver/.test(document.querySelector('[data-f=start]').textContent) && !/no fix yet/.test(document.querySelector('[data-f=start]').textContent), null, { timeout: 20000 });
+  await qshot('12-quick-11-en.png');
+  await qp.evaluate(() => localStorage.setItem('s2ground.lang', 'de'));
+  await qp.close();
+
   if (errors.length) { console.log('JS errors:\n' + errors.join('\n')); process.exitCode = 1; }
   else console.log('smoke OK – screenshots in', shots);
 } catch (e) {
   console.error('SMOKE FAILED:', e.message);
   await shot('ZZ-failure.png').catch(() => {});
+  if (qp) await qp.screenshot({ path: path.join(shots, 'ZZ-failure-quick.png'), fullPage: true }).catch(() => {});
   if (errors.length) console.log('JS errors:\n' + errors.join('\n'));
   process.exitCode = 1;
 } finally {

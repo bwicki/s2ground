@@ -45,7 +45,9 @@ export const state = {
   balloonConfirmed: false,
   wireTest: null,                // result of ledAndWireTest()
   sondeWritten: null,            // values read back from the sonde after programming
-  released: false,               // "START FREIGEBEN" pressed
+  released: false,               // "START FREIGEBEN" pressed (by hand in the checks, automatically in the quick start)
+  quick: null,                   // Schnellstart (ui/quick.js): {run:'idle'|'working'|'waiting'|'failed', frozen, error, …}; null = not used in this ascent
+  checksSince: null,             // clock time the checks started (the "seit …" hint of the GPS check)
 
   ascent: null,                  // {ascentId, name, startedAt, notify:[{observerId,label,mobile,waUrl,sent}]}
   relay: { connected: false, sent: 0, errors: 0, presence: [], chat: [] },   // presence: [{name, role:'ground'|'observer', observerId, since}]
@@ -77,12 +79,14 @@ export function resetAscent() {
   Object.assign(state, {
     telemetry: [], last: null, packets: { rx: 0, lost: 0, lastT: null, rs: null, snr: null },
     launch: null, peak: null, cutdown: null, landed: null, lostInDescent: false, events: [],
-    balloonConfirmed: false, wireTest: null, sondeWritten: null, released: false, ascent: null,
+    balloonConfirmed: false, wireTest: null, sondeWritten: null, released: false, ascent: null, quick: null, checksSince: null,
     overridden: {}, visited: { plan: true },
   });
   state.plan.result = null; state.plan.ignoreAirspace = false;
   for (const p of PHASES) state.phaseStatus[p] = { level: 'todo', summary: '' };
-  state.relay.chat = []; state.relay.sent = 0;
+  state.relay.chat = [];
+  // app.js turns `sent`/`errors` into getter-only properties while a relay is open → plain assignment would throw (TypeError) and abort the archiving
+  for (const k of ['sent', 'errors']) Object.defineProperty(state.relay, k, { value: 0, writable: true, enumerable: true, configurable: true });
   state.files.rows = 0;
   bus.emit('reset');
 }

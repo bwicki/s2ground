@@ -21,6 +21,24 @@ export function landingPoint() {
   return { lat: pt.lat, lon: pt.lon, alt: p.start.alt, t: last.t, estimated: true, acc: 600, lastAgl: last.altAgl, lastT: last.t };
 }
 
+/**
+ * QR code of `url` into `box` (qrcodejs from cdnjs; placeholder text when the library did not load).
+ * The generated node is cached per url+size, so a banner that re-renders every few seconds can put the same code
+ * into its fresh box instead of showing an empty one.
+ */
+const qrCache = { key: null, node: null };
+export function drawQr(box, url, size = 120) {
+  if (!box) return;
+  if (typeof QRCode === 'undefined') { box.textContent = 'QR'; return; }
+  const key = `${size}:${url}`;
+  if (qrCache.key !== key || !qrCache.node) {
+    const holder = document.createElement('div');
+    new QRCode(holder, { text: url, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
+    qrCache.key = key; qrCache.node = holder;
+  }
+  box.replaceChildren(qrCache.node);
+}
+
 export function updateRetrieveStatus() {
   const lp = landingPoint();
   if (!lp) setPhaseStatus('retrieve', 'bad', t('ret.status.noPos'));
@@ -73,7 +91,7 @@ export function mountRetrieve(root, ctx) {
   if (sat && typeof L !== 'undefined') L.control.scale({ imperial: false }).addTo(sat.map);
   if (over && p.result) { over.setStart(p.start.lat, p.start.lon, 'Start'); over.setLanding(p.result.landing.lat, p.result.landing.lon, `${t('plan.landingAt')} (${t('legend.plan')})`); }
   if (sat && p.result) sat.setLanding(p.result.landing.lat, p.result.landing.lon, `${t('plan.landingAt')} (${t('legend.plan')})`);
-  let qrFor = null, fitted = false;
+  let fitted = false;
 
   const render = () => {
     updateRetrieveStatus();
@@ -91,10 +109,7 @@ export function mountRetrieve(root, ctx) {
       const last = state.last;
       box.innerHTML = banner({ level: 'ok', title: t('ret.banner.okTitle', { dist: dist !== null ? fmtNum(dist / 1000, 1) : '–' }), sub: t('ret.banner.okSub', { age: age !== null ? fmtDuration(age) : '–', h: last ? fmtNum((last.su - 3.4) * 6, 1) : '–' }), side: navBtn, extra: qr });
     }
-    const qrBox = qs(el, '#qrbox');
-    if (qrBox && typeof QRCode !== 'undefined') {
-      if (qrFor !== url) { qrFor = url; qrBox.innerHTML = ''; new QRCode(qrBox, { text: url, width: 120, height: 120, correctLevel: QRCode.CorrectLevel.M }); }
-    } else if (qrBox) qrBox.textContent = 'QR';
+    drawQr(qs(el, '#qrbox'), url);
     f('dist').textContent = dist !== null ? fmtNum(dist / 1000, 1) : '–';
     f('brg').textContent = dev ? fmtBearing(bearingDeg(dev.lat, dev.lon, lp.lat, lp.lon)) : '–';
     f('drive').textContent = dist !== null ? `≈ ${Math.max(1, Math.round((dist * 1.4) / 1000 / 40 * 60 + 2))}` : '–';
@@ -115,8 +130,8 @@ export function mountRetrieve(root, ctx) {
     copy: async () => { const lp = landingPoint(); if (!lp) return; const s = `${icaoSeconds(lp.lat, lp.lon)} · ${lp.lat.toFixed(6)}, ${lp.lon.toFixed(6)}`; toast((await copyText(s)) ? t('common.copied') : s); },
     chat: () => { const lp = landingPoint(); if (lp) ctx.sendChat(`${t('ret.chatPos')} ${icaoSeconds(lp.lat, lp.lon)} (${lp.lat.toFixed(5)}, ${lp.lon.toFixed(5)}) ${googleMapsNavUrl(lp.lat, lp.lon)}`); },
     beep: async () => { try { await state.link.setMode(5); await state.link.beep(); ctx.log('beep', ''); toast(t('ret.beepSent')); } catch (e) { toast(e.message, true); } },
-    nav: () => ctx.log('navigate', 'Google Maps'),
   });
+  el.addEventListener('click', (e) => { if (e.target.closest('[data-act=nav]')) ctx.log('navigate', 'Google Maps'); });   // onAct() would cancel the link's own navigation
   const offs = [bus.on('telemetry', render), bus.on('device', render), bus.on('landed', render)];
   const timer = setInterval(render, 5000);
   render();

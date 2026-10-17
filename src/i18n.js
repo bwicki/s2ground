@@ -35,5 +35,14 @@ export function t(key, params) {
   return s;
 }
 
+const escHtml = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+/**
+ * t() for text that goes into innerHTML: every parameter is HTML-escaped, except a trusted fragment passed as
+ * {html: '<strong>…</strong>'}. (The dictionary texts themselves are ours and may contain markup-free text only.)
+ */
+export function tx(key, params = {}) {
+  return t(key, Object.fromEntries(Object.entries(params).map(([k, v]) => [k, v !== null && typeof v === 'object' && 'html' in v ? v.html : escHtml(v)])));
+}
+
 /** Keys of the DE dictionary (used by tests to check EN completeness). */
 export function allKeys() { return Object.keys(dicts.de || {}); }

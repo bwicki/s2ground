@@ -26,7 +26,7 @@ export function computeChecks() {
   const su = last ? last.su : (ls.sonde ? ls.sonde.batV : null);
   items.push(su === null || su === undefined ? { id: 'battery', level: 'warn', sub: t('chk.bat.unknown') }
     : su >= 3.95 ? { id: 'battery', level: 'ok', sub: t('chk.bat.ok', { h: fmtNum((su - 3.4) * 6, 1) }) }
-      : su >= 3.75 ? { id: 'battery', level: 'warn', sub: t('chk.bat.low', { v: fmtNum(su, 2) }) } : { id: 'battery', level: 'bad', sub: t('chk.bat.bad', { v: fmtNum(su, 2) }) });
+      : su >= 3.75 ? { id: 'battery', level: 'warn', low: true, sub: t('chk.bat.low', { v: fmtNum(su, 2) }) } : { id: 'battery', level: 'bad', sub: t('chk.bat.bad', { v: fmtNum(su, 2) }) });
   const sensorsOk = last && last.te !== null && last.te > -40 && last.te < 50 && last.hu !== null && last.hu >= 0 && last.hu <= 100 && last.pa !== null && last.pa > 80000 && last.pa < 105000;
   items.push(sensorsOk ? { id: 'sensors', level: 'ok', sub: t('chk.sens.ok') } : { id: 'sensors', level: 'warn', sub: t('chk.sens.wait') });
   items.push(state.wireTest && state.wireTest.primaryOk ? { id: 'wire', level: 'ok', sub: t('chk.wire.ok', { led: state.wireTest.ledOk ? 'OK' : '–' }) }
@@ -39,6 +39,19 @@ export function computeChecks() {
   const obs = state.relay.presence.filter((u) => u.role === 'observer');
   items.push(state.relay.connected ? { id: 'observers', level: 'ok', sub: obs.length ? t('chk.obs.ok', { n: obs.length, names: obs.map((u) => u.name).join(', ') }) : t('chk.obs.nobody') } : { id: 'observers', level: 'warn', sub: t('chk.obs.off') });
   return items;
+}
+
+/**
+ * Cutdown-wire / LED test (`wires`, ≈ 1.5–8 s, the sonde stays in the hand). Stores state.wireTest, logs and toasts.
+ * Shared by the checks page (button) and the quick start (runs automatically). Resolves with the result, or null on an error.
+ */
+export async function runWireTest(ctx) {
+  try {
+    state.wireTest = await state.link.ledAndWireTest();
+    ctx.log('wireTest', JSON.stringify({ ...state.wireTest, raw: undefined }));
+    toast(state.wireTest.primaryOk ? t('chk.wire.okToast') : t('chk.wire.failed'), !state.wireTest.primaryOk);
+    return state.wireTest;
+  } catch (e) { toast(`${t('chk.wire.error')}: ${e.message}`, true); return null; }
 }
 
 export function updateChecksStatus() {
@@ -114,8 +127,7 @@ export function mountChecks(root, ctx) {
   onAct(el, {
     wire: async () => {
       if (wireBusy) return; wireBusy = true; render();
-      try { state.wireTest = await state.link.ledAndWireTest(); ctx.log('wireTest', JSON.stringify({ ...state.wireTest, raw: undefined })); toast(state.wireTest.primaryOk ? t('chk.wire.okToast') : t('chk.wire.failed'), !state.wireTest.primaryOk); }
-      catch (e) { toast(`${t('chk.wire.error')}: ${e.message}`, true); }
+      await runWireTest(ctx);
       wireBusy = false; render();
     },
     release: () => ctx.release(),

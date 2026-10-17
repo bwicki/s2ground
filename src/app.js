@@ -17,6 +17,7 @@ import { mountAscent, updateAscentStatus } from './ui/ascent.js';
 import { mountDetail } from './ui/detail.js';
 import { mountRetrieve, updateRetrieveStatus } from './ui/retrieve.js';
 import { mountAdmin } from './ui/admin.js';
+import { mountQuick } from './ui/quick.js';
 
 const VERSION = '0.1';
 const params = new URLSearchParams(location.search);
@@ -31,10 +32,15 @@ const ctx = {
   serialSupported: !!navigator.serial,
   log: (action, detail) => api.log.add(action, detail),
   modeText,
-  connect: (reselect = false) => connectLink(reselect),
+  /** opts.deferAscent: connect only – the quick start creates the ascent session once start and cutdown are final. */
+  connect: (reselect = false, opts) => connectLink(reselect, opts),
   programSonde: (force = false) => programSonde(force),
-  release: () => release(),
+  /** opts.stay: arm without leaving the current page (quick start). */
+  release: (opts) => release(opts),
   newAscent: () => createAscent(true),
+  ensureAscent: () => createAscent(false),
+  archive: (to) => archive(to),
+  refreshHeader: () => renderHeaderBar(),
   chooseFolder: async () => { try { const n = await files.chooseFolder(); state.files.folder = n; toast(t('files.folderSet', { name: n })); bus.emit('relay'); } catch { /* cancelled */ } },
   downloadFiles: () => { if (!files.base) { toast(t('files.noAscent'), true); return; } files.downloadAll({ landingEstimate: null }); },
   sendChat: (text) => { if (!relay) return; relay.sendChat(text, state.session.user, state.session.role); ctx.log('chat', text.slice(0, 120)); },
@@ -63,13 +69,13 @@ async function restoreSession() {
     return true;
   } catch { api.setToken(null); return false; }
 }
-async function login(user, password) {
+async function login(user, password, opts = {}) {
   const r = await api.login(user, password);
   api.setToken(r.token);
   const me = await api.me();
   state.session = { user: me.user, role: me.role, master: !!me.master, settings: { ...DEFAULT_SETTINGS, ...me.settings }, loginAt: Date.now(), lastActivity: Date.now() };
   if (r.lang) await setLang(r.lang);
-  location.hash = '#plan';
+  location.hash = opts.quick ? '#quick' : '#plan';
 }
 async function logout() {
   await api.logout(); api.setToken(null); state.session = null;
@@ -112,7 +118,7 @@ async function createLink() {
   state.link = link;
   return link;
 }
-async function connectLink(reselect = false) {
+async function connectLink(reselect = false, { deferAscent = false } = {}) {
   const link = await createLink();
   try {
     state.linkState = { ...state.linkState, port: 'opening' }; bus.emit('linkstate', state.linkState);
@@ -125,7 +131,7 @@ async function connectLink(reselect = false) {
       const id = `${usb.usbVendorId.toString(16).padStart(4, '0')}:${(usb.usbProductId || 0).toString(16).padStart(4, '0')}`.toUpperCase();
       try { Object.assign(settings(), await api.settings.put({ rr4Usb: id })); bus.emit('settings'); } catch (ex) { console.warn('rr4Usb not saved', ex); }
     }
-    await createAscent(false);
+    if (!deferAscent) await createAscent(false);
     pollLink();
   } catch (e) {
     state.linkState = { ...state.linkState, port: 'closed' }; bus.emit('linkstate', state.linkState);
@@ -148,10 +154,10 @@ function pollLink() {
   }, 2000);
 }
 let programming = false;
-/** Write the plan to the sonde (cutdown altitude) and read it back; start the telemetry session. */
+/** Write the plan to the sonde (cutdown altitude) and read it back; start the telemetry session. Resolves true when written and read back. */
 async function programSonde(force) {
-  if (programming || !state.link || !state.linkState.sonde) return;
-  if (state.sondeWritten && !force) return;
+  if (programming || !state.link || !state.linkState.sonde) return false;
+  if (state.sondeWritten && !force) return false;
   programming = true;
   try {
     const p = state.plan;
@@ -164,8 +170,11 @@ async function programSonde(force) {
     state.sondeWritten = { cutAltAgl: p.cutdownMode === 'alt' ? (cut ?? p.cutAltAgl) : null, groundPa, t: Date.now(), sondeType: info && info.type };
     ctx.log('sonde.programmed', `${info ? info.type : ''} · ${p.opMode} · Cutdown ${state.sondeWritten.cutAltAgl ?? '–'} m AGL`);
     bus.emit('written', state.sondeWritten);
+    programming = false;
+    return true;
   } catch (e) { toast(`${t('prep.programFailed')}: ${e.message}`, true); }
   programming = false;
+  return false;
 }
 
 // ---- telemetry processing (spec §6.2 simplified) ------------------------------------------
@@ -218,9 +227,16 @@ function onLinkEvent(ev) {
 }
 
 // ---- ascent session (Worker + relay + files) -------------------------------------------------
-async function createAscent(force) {
-  if (state.ascent && !force) return;
-  const name = `${t('hdr.ascent')} ${fmtDateISO(Date.now())} · ${state.plan.start.name || ''}`;
+let creatingAscent = null;
+function createAscent(force) {
+  if (state.ascent && !force) return Promise.resolve();
+  if (creatingAscent && !force) return creatingAscent;           // one Worker session per ascent, however many views ask for it
+  const run = createAscentNow().finally(() => { if (creatingAscent === run) creatingAscent = null; });
+  creatingAscent = run;
+  return run;
+}
+async function createAscentNow() {
+  const name = `${t('hdr.ascent')} ${fmtDateISO(Date.now())}${state.plan.start.name ? ` · ${state.plan.start.name}` : ''}`;
   const ls0 = state.linkState;
   try {
     // base data of the planned ascent → the Worker builds the WhatsApp message for observers from it
@@ -245,14 +261,21 @@ async function createAscent(force) {
   ctx.log('ascent.created', `${name} · ${state.ascent.ascentId}`);
   bus.emit('relay');
 }
-async function release() {
+async function release({ stay = false } = {}) {
+  if (state.released) return;
   state.released = true;
   ctx.log('start.released', t('chk.status.ok'));
   if (state.link && typeof state.link.release === 'function') state.link.release();   // sim: lets go of the balloon
   toast(t('chk.releasedToast'));
-  gotoPhase('ascent', true);
+  if (!stay) { gotoPhase('ascent', true); return; }
+  // Quick start: stay on the page, but the phase flow behind it counts as walked, so «Vollständige Ansicht» (#ascent) opens without loss.
+  for (const p of ['plan', 'prepare', 'checks', 'ascent']) state.visited[p] = true;
+  state.phase = 'ascent';
+  updatePlanStatus(); updatePrepareStatus(); updateChecksStatus();
+  ctx.log('phase', phaseLabel('ascent'));
+  bus.emit('phase', { phase: 'ascent' });
 }
-async function archive() {
+async function archive(to = 'plan') {
   const ok = await confirmDialog({ title: t('ret.archiveTitle'), text: `<p>${esc(t('ret.archiveText'))}</p>`, okLabel: t('ret.archiveOk'), cancelLabel: t('common.cancel') });
   if (!ok) return;
   const wrote = await files.finish();
@@ -261,7 +284,7 @@ async function archive() {
   if (state.link) { state.link.stopSession(); try { await state.link.disconnect(); } catch { /* ignore */ } state.link = null; clearInterval(pollTimer); }
   if (relay) { relay.close(); relay = null; }
   resetAscent(); state.linkState = { port: 'closed', receiver: null, sonde: null, net: null, lastRxT: null, rxLines: 0, txLines: 0 };
-  state.phase = 'plan'; location.hash = '#plan'; render();
+  state.phase = 'plan'; location.hash = `#${to}`; render();
   toast(t('ret.archived'));
 }
 
@@ -299,6 +322,10 @@ function renderHeaderBar() {
     slots.header.replaceChildren(renderHeader({ mode: 'detail', subtitle: `${state.ascent ? state.ascent.name : ''} · live`, tabs: ['map', 'vertical', 'stueve'].map((id) => ({ id, label: t(`detail.tab.${id}`), on: id === tab })), pill: view.pill ? view.pill() : '', onTab: (tb) => { location.hash = `#detail/${tb}`; }, onClose: () => { location.hash = '#ascent'; } }));
     slots.action.replaceChildren(); return;
   }
+  if (viewName === 'quick') {
+    slots.header.replaceChildren(renderHeader({ mode: 'quick', subtitle: view && view.subtitle ? view.subtitle() : undefined, quick: view && view.header ? view.header() : '', onLogout: logout }));
+    slots.action.replaceChildren(); return;
+  }
   const mode = viewName === 'admin' ? 'admin' : 'phases';
   slots.header.replaceChildren(renderHeader({ mode, subtitle: viewName === 'admin' ? t('admin.subtitle') : undefined, expert: expertFor(), onGoto: (p) => gotoPhase(p), onLang: (l) => setLang(l), onLogout: logout, onLog: showLog }));
   if (mode !== 'phases') { slots.action.replaceChildren(); return; }
@@ -308,6 +335,7 @@ function renderHeaderBar() {
     back: prev ? { label: phaseLabel(prev) } : null,
     status: `${t('action.step', { n: PHASES.indexOf(p) + 1, total: PHASES.length })} · ${esc(st.summary || '')}`,
     next: { label: nextLabel, level: state.overridden[p] ? 'ok' : st.level, disabled: false },
+    quick: p === 'plan' && !state.launch,
     onBack: () => gotoPhase(prev), onNext: weiter,
   }));
 }
@@ -347,6 +375,7 @@ function render() {
     case 'login': view = mountLogin(slots.view, { onLogin: login, onLang: (l) => setLang(l) }); break;
     case 'admin': view = mountAdmin(slots.view, ctx); break;
     case 'detail': view = mountDetail(slots.view, ctx, location.hash.split('/')[1] || 'map'); break;
+    case 'quick': view = mountQuick(slots.view, ctx); break;
     case 'plan': view = mountPlan(slots.view, ctx); break;
     case 'prepare': view = mountPrepare(slots.view, ctx); break;
     case 'checks': view = mountChecks(slots.view, ctx); break;
@@ -355,7 +384,9 @@ function render() {
     default: location.hash = '#plan'; return;
   }
   renderSimBar(); renderHeaderBar();
-  document.title = state.session ? `S2 Ground · ${name === 'detail' ? t('detail.title') : name === 'admin' ? t('admin.title') : phaseLabel(state.phase)}` : 'S2 Ground';
+  // The quick start defers the ascent session until start and cutdown are final; every other page needs it right away.
+  if (name !== 'quick' && name !== 'login' && state.link && state.linkState.port === 'open' && !state.ascent) createAscent(false);
+  document.title = state.session ? `S2 Ground · ${name === 'detail' ? t('detail.title') : name === 'admin' ? t('admin.title') : name === 'quick' ? t('quick.title') : phaseLabel(state.phase)}` : 'S2 Ground';
 }
 
 // ---- boot ----------------------------------------------------------------------------------------------

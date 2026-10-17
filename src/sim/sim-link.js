@@ -69,7 +69,7 @@ export class SimGroundLink extends EventTarget {
     const agl = this.pos.alt - this.opt.start.alt;
     return {
       port: this.port || 'closed',
-      receiver: this.port === 'open' ? { hw: '4', fw: '1.4.2', prot: 6, mac: '1F3A', componentId: 1, gnssFix: true, batV: 4.05, tempC: 21.5, utcSyncSource: 'gnss', sats: 11, pa: this._groundPa() } : null,
+      receiver: this.port === 'open' ? { hw: '4', fw: '1.4.2', prot: 6, mac: '1F3A', componentId: 1, gnssFix: true, batV: 4.05, tempC: 21.5, utcSyncSource: 'gnss', sats: 11, pa: this._groundPa(), lat: this.opt.start.lat, lon: this.opt.start.lon, alt: this.opt.start.alt } : null,   // the RR4 stands at the start (its own GNSS position)
       sonde: this.phase === 'off' ? null : {
         id: this.opt.sondeId, name: 'S2', componentId: 2, type: 'S2H3-R-B20', md: this._md(), batV: this.su, pr: this._pa(),
         condition: this.sats < 5 ? 1 << 18 : 0, conditionText: this.sats < 5 ? ['no GPS fix'] : [], powerDbm: this.phase === 'gpsWait' || this.phase === 'ready' ? 0 : 13,

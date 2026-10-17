@@ -183,6 +183,30 @@ Folgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: 7K2M4Q
   bleibt die Karte bei Stufe 1 («bitte manuell»). Die Vorlage muss im Meta-Business-Manager eingereicht und
   in `worker/src/whatsapp.js` als Template-Nachricht hinterlegt werden; das ist der noch offene Schritt.
 
+### 6d. Schnellstart: «Sonde sofort hier starten»
+
+Für den Fall, dass nichts geplant ist und es schnell gehen muss: Auf der Anmeldeseite (zweiter, orange umrandeter Knopf)
+oder oben in der Planungsseite → **Sonde sofort hier starten**. Eine Seite, drei Schritte, keine Phasenleiste:
+
+1. **Verbinden** – RR4 am USB-Kabel und Sonde werden automatisch erkannt (✓ / ✗ mit Anweisung, was zu tun ist).
+2. **Einstellen** – Startort = **hier** (GPS des Empfängers, sonst GPS des Geräts, sonst Standard-Startort; als ICAO-Koordinaten und m AMSL).
+   Cutdown-Höhe in 500-m-Schritten (**− 500 / + 500**, 500 … 12'000 m AGL, Vorgabe aus den Einstellungen). Wind und
+   Lufträume prüft die App automatisch (bei Konflikt: Knopf **Cutdown senken**); DABS/NOTAM bleiben Deine Sache.
+3. **Starten** – ein Knopf **SONDE PROGRAMMIEREN & FREIGEBEN**: schreibt Cutdown-Höhe und Funk-Einstellungen auf die Sonde,
+   liest zurück, macht den Draht-/LED-Test und wartet, bis GPS, Batterie, Sensoren und Funk grün sind. Dann steht
+   **BEREIT – JETZT LOSLASSEN** da; die Freigabe an die Sonde geschieht automatisch.
+
+Nach dem Loslassen erkennt die App den Aufstieg selbst und zeigt eine Live-Seite: grünes Banner, drei Kacheln
+(Höhe über Grund, Steigrate, Bis Cutdown) und den roten Knopf **CUTDOWN JETZT** (derselbe geschützte Ablauf wie in der
+Vollansicht: Rückfrage, Quittung per Funk, Protokoll). Nach der Landung wird daraus der Bergungsblock (Entfernung, Richtung,
+Position, Google Maps, QR-Code) und **Aufstieg abschliessen & archivieren**. «Vollständige Ansicht →» öffnet denselben
+Aufstieg in der normalen Ansicht.
+
+Der Schnellstart ist keine Abkürzung am Protokoll vorbei: Er schreibt dieselben drei Dateien (Abschnitt 9), sendet live an
+den Worker (s2stueve) und schreibt dieselben Protokolleinträge wie der volle Ablauf (zusätzlich `quickstart` mit Startort,
+Cutdown-Höhe und Luftraum-Ergebnis). Beobachter werden **nicht automatisch** benachrichtigt – dafür gibt es unten auf der
+Seite den Link «Command Center per WhatsApp benachrichtigen».
+
 ---
 
 ## 7. Simulation (ohne Sonde üben)
@@ -229,7 +253,7 @@ Die App schreibt pro Aufstieg drei Dateien, benannt `JJJJ-MM-TT_HHMM_<Sondennumm
 
 ```
 node --test tests/*.test.js tests/protocol/*.test.js   # Dateiformate, Planung, Koordinaten, Simulation, Protokoll, Worker-Helfer
-node tests/smoke.mjs                                   # Playwright: ganzer Ablauf in der Simulation, Screenshots in tests/shots/
+node tests/smoke.mjs                                   # Playwright: ganzer Ablauf inkl. Schnellstart in der Simulation, Screenshots in tests/shots/
 ```
 Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `npx serve -l 8080 .`) und
 `http://localhost:8080/?sim=1` öffnen – `localhost:8080` steht in der CORS-Liste des Workers.

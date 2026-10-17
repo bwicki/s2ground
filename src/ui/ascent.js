@@ -2,7 +2,7 @@
 // vertical view + Stüve viewers with "Detailsicht", CUTDOWN JETZT, chat with quick replies.
 
 import { t } from '../i18n.js';
-import { esc, html, qs, onAct, banner, confirmDialog, toast } from '../util/dom.js';
+import { esc, html, qs, onAct, banner } from '../util/dom.js';
 import { state, bus, setPhaseStatus, settings, now } from '../state.js';
 import { fmtInt, fmtNum, fmtTimeUTC, fmtDuration, mToFt, msToKt, windFromCourse, fmtBearing, distanceM, icaoSeconds } from '../util/format.js';
 import { planAt, profileAt } from '../planning.js';
@@ -10,6 +10,7 @@ import { createMap } from './map.js';
 import { renderVertical } from './vertical.js';
 import { renderStueve } from './stueve.js';
 import { mountChat } from './chat.js';
+import { manualCutdown } from './cutdown.js';
 
 const dot = (ok, warn) => `<span class="dot ${ok ? 'g' : warn ? 'y' : 'r'}"></span>`;
 const tile = (k, v, u, cmp, extra = '', cls = '') => `<div class="tile ${cls}"><span class="k">${esc(k)}</span><div class="vals"><div class="vu"><span class="v">${v}</span><span class="u">${u}</span></div></div>${extra}<div class="cmp">${cmp}</div></div>`;
@@ -147,24 +148,7 @@ export function mountAscent(root, ctx) {
     if (map && rec.lat !== null) map.setSonde(rec.lat, rec.lon, `${t('asc.sondeNow')} · ${fmtInt(rec.altAgl)} m AGL`);
     renderViewers();
   };
-  let cutBusy = false;                 // one confirm dialog / one relBal at a time (double click, repeated key)
-  onAct(el, {
-    cutdown: async () => {
-      if (cutBusy) return;
-      // After landing the hot wire must not be fired again (burns the wire for nothing, drains the battery).
-      if (state.landed) { toast(t('asc.cutdownLanded'), true); return; }
-      cutBusy = true;
-      try {
-        // Before launch the command is a 150 ms test burn (spec §5.8) – say so explicitly in the confirm dialog.
-        const text = state.launch ? t('asc.cutdownConfirm', { alt: state.last ? fmtInt(state.last.altAgl) : '–' }) : t('asc.cutdownConfirmGround');
-        const ok = await confirmDialog({ title: t('asc.cutdownNow'), text: `<p>${esc(text)}</p>`, okLabel: t('asc.cutdownDo'), cancelLabel: t('common.cancel'), danger: true });
-        if (!ok) return;
-        if (!state.link) { toast(`${t('asc.cutdownError')}: E_PORT_CLOSED`, true); return; }
-        try { const res = await state.link.cutdown(); ctx.log('cutdown.manual', `${state.last ? fmtInt(state.last.altAgl) : '?'} m AGL · ${res}`); toast(t('asc.cutdownSent')); if (!state.launch) toast(t('asc.cutdownGround')); }
-        catch (e) { ctx.log('cutdown.manual', `${state.last ? fmtInt(state.last.altAgl) : '?'} m AGL · FAILED ${e.message}`); toast(`${t('asc.cutdownError')}: ${e.message}`, true); }
-      } finally { cutBusy = false; }
-    },
-  });
+  onAct(el, { cutdown: () => manualCutdown(ctx) });
   const offs = [bus.on('telemetry', onTelemetry), bus.on('presence', renderBanner), bus.on('relay', renderBanner), bus.on('settings', () => renderViewers(true)), bus.on('landed', () => { renderBanner(); renderTiles(); })];
   const timer = setInterval(() => { renderBanner(); renderTiles(); }, 2000);
   renderTiles(); renderBanner(); renderViewers(true);

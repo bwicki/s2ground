@@ -8,13 +8,14 @@ The UI must never touch serial ports or protocol details directly.
 
 ```
 /                         static app – GitHub Pages serves the repository ROOT of `main` (CNAME = s2ground.wicki.aero)
-  index.html              single page, all phases (hash routing: #login #admin #plan #prepare #checks #ascent #retrieve)
+  index.html              single page, all phases (hash routing: #login #admin #plan #prepare #checks #ascent #retrieve #quick)
   css/app.css             design tokens from the Claude-Design boards (see docs/DESIGN.md)
   i18n/de.json, en.json   every visible string; key = dotted id; DE is the reference (tests/i18n.test.js checks key parity)
   src/config.js           apiBase = address of the Worker (workers.dev); the only thing to edit after a deploy
   src/app.js              bootstrap, routing, session (login token), phase state, "Weiter" logic
   src/api.js              Worker client (prefixes every /api path with config.apiBase) + in-memory mock (?sim=1)
   src/ui/*.js             one module per phase + header/menu/chat/map/stüve components; ui/observers.js = admin section for codes
+  src/quick.js            Schnellstart logic without DOM (cutdown stepper, "hier", readiness verdict); ui/quick.js + ui/quick-live.js = the page (#quick); ui/cutdown.js = the ONE guarded CUTDOWN JETZT handler
   src/sim/*.js            simulated ascent (used when no hardware, and for tests)
   src/protocol/           **owned by the protocol task** – see §3; the UI only imports `index.js`
   src/relay.js            WebSocket client to the Worker (live telemetry fan-out + chat); URL = apiBase with https→wss
@@ -131,7 +132,7 @@ CORS: only the origins in `APP_ORIGINS` (wrangler.toml) may call the API from a 
 | Observer (Beobachter) | `POST /api/observer/login` {code, displayName} | `{user:<displayName>, role:'observer', observerId}` | read active ascents, join the live channel, read everything, write in the chat (instructions like «Bitte jetzt auslösen»). Never telemetry/state/event, never hardware. |
 
 `requireRole(auth)` = any principal · `requireRole(auth,'ground')` = any ground user · `requireRole(auth,'master')` = master flag · `requireRole(auth,'observer')` = observer token.
-Observer codes: 8 characters from `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (no 0/O/1/I), permanent, stored in plain text (viewing codes, not secrets), revocable; revoking deletes the observer's tokens immediately.
+Observer codes: 6 characters from `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (no 0/O/1/I), permanent, stored in plain text (viewing codes, not secrets), revocable; revoking deletes the observer's tokens immediately.
 
 | Method | Path | Who | Body / result |
 |---|---|---|---|
@@ -158,7 +159,7 @@ Observer codes: 8 characters from `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (no 0/O/1/I
 | WS   | /live/:ascentId?token=… | any | WebSocket to the Durable Object; the token decides the role (no `role`/`code` query any more). Ground sends {type:'telemetry'|'state'|'event'}; the DO **drops those types from observer sockets**; everyone receives them; chat {type:'chat', text} from anyone; presence {type:'presence', users:[{name, role:'ground'|'observer', observerId, since}]} where `name` is the observer's Klarname; join replay {type:'history', records, chat, state, closed} |
 
 **WhatsApp notification** (`worker/src/whatsapp.js`): the standard message (DE) is built on the server from the ascent meta:
-`Sondenaufstieg geplant (S2 Ground)` · `Start: 17.10.2026 14:30 LT` · `Startort: Rümlang · 4727N00834E` · `Cutdown: 3'000 m AGL` · `Frequenz: 433.900 MHz` · `Sonde: 12345` · `Folgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: XXXXXXXX`.
+`Sondenaufstieg geplant (S2 Ground)` · `Start: 17.10.2026 14:30 LT` · `Startort: Rümlang · 4727N00834E` · `Cutdown: 3'000 m AGL` · `Frequenz: 433.900 MHz` · `Sonde: 12345` · `Folgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: XXXXXX`.
 Stage 1 (works today): the Prepare page shows one wa.me button per observer; tapping is logged (`notify.whatsapp`).
 Stage 2 (prepared, not released): `sendWhatsApp(env, settings, to, text)` posts to the Meta Cloud API when `waPhoneNumberId` + `waToken` are set; createAscent then sends automatically and returns `notify[].sent=true`.
 
@@ -176,3 +177,4 @@ telemetry/state/event from the relay – it is the source of truth.
 * Number formatting: thousands separator `'` (de-CH), units never wrap, coordinates ICAO (DDMMN DDDMME and with seconds), altitudes AMSL/AGL.
 * Login like ops.wicki.aero: user + password → Worker; token in sessionStorage; auto-logout after the configured hours.
 * Mock/Sim mode: `?sim=1` or when Web Serial is unsupported → `SimGroundLink`; banner "Simulation".
+* **Schnellstart** (`#quick`, "Sonde sofort hier starten"): a second entry besides the phase flow, no planning. Login page and plan page action bar offer it; the page has a minimal header (no phase bar) and a link "Stattdessen vollständig planen →" (`#plan`). Pre-start: three steps (Verbinden / Einstellen / Starten); start = "hier" (receiver GPS → device GPS → default start, ICAO + m AMSL), cutdown altitude in 500 m steps (500…12'000 m AGL, default `settings.cutAltAgl`), airspace check automatic via `runPlan` (start = here, launch = now), then ONE button "SONDE PROGRAMMIEREN & FREIGEBEN" = `programSonde` → `link.ledAndWireTest()` → wait until `startVerdict()` (src/quick.js) is green → release (same logging as the checks page). Launch detection of app.js then switches the page to the live state (banner, three tiles, CUTDOWN JETZT, retrieval block after landing). The ascent state, files, relay, observers and activity log are exactly those of the phase flow (`ctx.log('quickstart', …)` once at the start); "Vollständige Ansicht →" opens `#ascent` for the same ascent. Observers are notified only via the link at the bottom (`notify.whatsapp`), never automatically.

@@ -2,7 +2,7 @@
 // viewer, CUTDOWN JETZT, layer checkboxes, deviation from plan, legend.
 
 import { t } from '../i18n.js';
-import { esc, html, qs, onAct, confirmDialog, toast, icons } from '../util/dom.js';
+import { esc, html, qs, onAct, icons } from '../util/dom.js';
 import { state, bus, settings, now } from '../state.js';
 import { fmtInt, fmtNum, fmtTimeUTC, distanceM, bearingDeg } from '../util/format.js';
 import { planAt } from '../planning.js';
@@ -10,6 +10,7 @@ import { createMap } from './map.js';
 import { renderVertical } from './vertical.js';
 import { renderStueve } from './stueve.js';
 import { flightTime, ascentRecords } from './ascent.js';
+import { manualCutdown } from './cutdown.js';
 
 export function mountDetail(root, ctx, tab = 'map') {
   const p = state.plan;
@@ -82,11 +83,7 @@ export function mountDetail(root, ctx, tab = 'map') {
   };
   el.addEventListener('change', (e) => { if (e.target.name in layers) { layers[e.target.name] = e.target.checked; if (map) map.setFollow(layers.follow); if (map) map.setAirspaces(p.result ? p.result.airspaces : [], layers.airspace && p.showAirspace); renderView(); } });
   onAct(el, {
-    cutdown: async () => {
-      const ok = await confirmDialog({ title: t('asc.cutdownNow'), text: `<p>${esc(t('asc.cutdownConfirm', { alt: state.last ? fmtInt(state.last.altAgl) : '–' }))}</p>`, okLabel: t('asc.cutdownDo'), cancelLabel: t('common.cancel'), danger: true });
-      if (!ok) return;
-      try { await state.link.cutdown(); ctx.log('cutdown.manual', `${state.last ? fmtInt(state.last.altAgl) : '?'} m AGL (Detailsicht)`); toast(t('asc.cutdownSent')); } catch (e) { toast(e.message, true); }
-    },
+    cutdown: () => manualCutdown(ctx, { where: 'Detailsicht' }),
   });
   let lastHeavy = 0;
   const off = bus.on('telemetry', () => { renderDeviation(); const now = Date.now(); if (tab === 'map' || now - lastHeavy > 3000) { lastHeavy = now; renderView(); } });

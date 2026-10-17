@@ -24,33 +24,39 @@ export function mountLogin(root, ctx) {
         <label class="f">${esc(t('login.password'))}<input class="in" name="password" type="password" autocomplete="current-password" value="${SIM ? 'demo' : ''}" required></label>
         <div class="err hidden" role="alert"></div>
         <button class="btn primary" type="submit" style="min-height:56px;font-size:17px">${esc(t('login.submit'))}</button>
+        <button class="btn q-amber login-quick" type="button" data-act="quick" style="min-height:64px;font-size:17px;flex-direction:column;gap:2px;line-height:1.2"><span>${esc(t('quick.btn.title'))}</span><span style="font-size:13px;font-weight:500">${esc(t('quick.btn.sub'))}</span></button>
         <p class="muted" style="margin:0;font-size:13px;line-height:1.5">${esc(t('login.note'))}</p>
         ${SIM ? `<p class="muted" style="margin:0;font-size:13px">${esc(t('login.simHint'))}</p>` : ''}
       </form>
     </main>
     <footer class="foot"><span>s2ground.wicki.aero · Version 0.1</span><span>${esc(t('login.browsers'))}</span></footer>
   </div>`);
-  onAct(el, { lang: (b) => ctx.onLang(b.dataset.lang) });
   const form = qs(el, 'form'), err = qs(el, '.err');
   let setupMode = false;
   api.setupNeeded().then((needed) => {
     if (!needed) return;
     setupMode = true;
     el.querySelectorAll('.setup, .setup-only').forEach((x) => x.classList.remove('hidden'));
+    qs(el, '.login-quick').classList.add('hidden');            // the first login creates the master user, no shortcut yet
     qs(el, 'button[type=submit]').textContent = t('login.setupSubmit');
   });
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+  /** Normal login → #plan; quick = «Sonde sofort hier starten» → same credentials, then straight to #quick. */
+  const doLogin = async (quick) => {
     err.classList.add('hidden');
     const user = form.user.value.trim(), password = form.password.value;
-    const btn = qs(el, 'button[type=submit]'); btn.disabled = true;
+    const btns = el.querySelectorAll('form.login button'); btns.forEach((b) => { b.disabled = true; });
     try {
       if (setupMode) await api.setup(user, password, form.fullName.value.trim());
-      await ctx.onLogin(user, password);
+      await ctx.onLogin(user, password, { quick });
     } catch (ex) {
       err.textContent = ex.status === 401 ? t('login.badCredentials') : ex.status === 429 ? t('login.rateLimited') : `${t('login.failed')} (${ex.message})`;
       err.classList.remove('hidden');
-    } finally { btn.disabled = false; }
+    } finally { btns.forEach((b) => { b.disabled = false; }); }
+  };
+  form.addEventListener('submit', (e) => { e.preventDefault(); doLogin(false); });
+  onAct(el, {
+    lang: (b) => ctx.onLang(b.dataset.lang),
+    quick: () => { if (form.reportValidity()) doLogin(true); },
   });
   root.replaceChildren(el);
   return { destroy() { el.remove(); } };

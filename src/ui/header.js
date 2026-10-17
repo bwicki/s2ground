@@ -23,7 +23,8 @@ function phaseChips(current) {
 }
 
 /**
- * o.mode: 'phases' | 'detail' | 'admin' | 'plain'; o.subtitle; o.expert {title, body} (menu content);
+ * o.mode: 'phases' | 'detail' | 'admin' | 'quick' | 'plain'; o.subtitle; o.expert {title, body} (menu content);
+ * quick = Schnellstart: no phase bar, o.quick = the view's own pills/links (html string), only user pill + logout;
  * o.tabs [{id,label,on}] for the detail view; o.pill extra pill html; callbacks: onGoto, onLang, onLogout, onTab, onClose
  */
 export function renderHeader(o) {
@@ -35,11 +36,14 @@ export function renderHeader(o) {
   let middle = '';
   if (o.mode === 'phases') middle = `<nav class="phases" aria-label="${esc(t('hdr.phases'))}">${phaseChips(state.phase)}</nav>`;
   else if (o.mode === 'detail') middle = `<nav class="phases" aria-label="${esc(t('hdr.views'))}">${o.tabs.map((tb) => `<button type="button" class="tab ${tb.on ? 'on' : ''}" data-act="tab" data-tab="${tb.id}">${esc(tb.label)}</button>`).join('')}</nav>`;
+  else if (o.mode === 'quick') middle = `<div class="qmid">${o.quick || ''}</div>`;
   else if (o.subtitleOnly) middle = `<span class="muted">${esc(o.subtitleOnly)}</span>`;
 
   let tools = '';
   if (o.mode === 'detail') {
     tools = `${o.pill || ''}<button class="btn sm" type="button" data-act="close">${icons.close} ${esc(t('detail.close'))}</button>`;
+  } else if (o.mode === 'quick') {
+    tools = `<span class="pill">${esc(user)}</span><button class="btn sm" type="button" data-act="logout">${esc(t('hdr.logout'))}</button>`;
   } else {
     const menu = o.expert ? `<details class="menu"><summary aria-label="${esc(t('hdr.menu'))}" title="${esc(t('hdr.menu'))}">${icons.menu}</summary><div class="panel"><h3></h3><div class="body"></div><div class="foot">${state.session && state.session.master ? `<a href="#admin">${esc(t('hdr.adminLink'))}</a>` : ''}${o.mode === 'admin' ? '' : `<a href="#log" data-act="log">${esc(t('hdr.protocol'))}</a>`}</div></div></details>` : '';
     const adminBtn = o.mode === 'admin' ? `<a class="btn sm" href="#plan">${esc(t('admin.toAscents'))}</a>` : '';
@@ -77,14 +81,15 @@ export function renderHeader(o) {
 }
 
 /**
- * Action bar: back button (previous phase), status text, "Weiter" (level colours the button).
- * o: {back:{label}|null, status, next:{label, level, disabled}, onBack, onNext}
+ * Action bar: back button (previous phase), status text, [Schnellstart link], "Weiter" (level colours the button).
+ * o: {back:{label}|null, status, next:{label, level, disabled}, quick:boolean, onBack, onNext}
  */
 export function renderActionBar(o) {
   const lvlCls = o.next && o.next.level === 'warn' ? 'warnish' : o.next && o.next.level === 'bad' ? 'badish' : 'primary';
   const el = html(`<div class="actionbar">
     ${o.back ? `<button class="btn" type="button" data-act="back">← ${esc(o.back.label)}</button>` : '<span></span>'}
     <span class="status">${o.status || ''}</span>
+    ${o.quick ? `<a class="btn sm q-amber" href="#quick">${esc(t('quick.btn.short'))}</a>` : ''}
     ${o.next ? `<button class="btn ${lvlCls}" type="button" data-act="next" ${o.next.disabled ? 'disabled' : ''}>${esc(o.next.label)}</button>` : ''}
   </div>`);
   onAct(el, { back: () => o.onBack && o.onBack(), next: () => o.onNext && o.onNext() });
