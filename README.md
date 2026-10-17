@@ -120,7 +120,7 @@ Es gibt nur **zwei Arten von Personen**:
 | | Anmeldung | darf |
 |---|---|---|
 | **Bodenstation (Ground-Benutzer)** | Anmeldename + Passwort in S2 Ground | alles bedienen: Aufstieg, Sonde, Cutdown, Chat, Beobachter entfernen. Mit Schalter **Masteruser** zusätzlich: Benutzer, Beobachter-Codes, App-Einstellungen, Protokoll |
-| **Beobachter** | kein Passwort – persönlicher **8-stelliger Zugangscode** (z. B. `7K2M4QX9`) in s2stueve → «Follow sonde ascent», dazu wählt er einen **Klarnamen**, der im Chat erscheint | alles sehen, im Chat schreiben und Anweisungen geben («Bitte jetzt auslösen»). Keine Hardware-Aktionen. |
+| **Beobachter** | kein Passwort – persönlicher **6-stelliger Zugangscode** (z. B. `7K2M4Q`) in s2stueve → «Follow sonde ascent», dazu wählt er einen **Klarnamen**, der im Chat erscheint | alles sehen, im Chat schreiben und Anweisungen geben («Bitte jetzt auslösen»). Keine Hardware-Aktionen. |
 
 Beides verwaltest Du im Menü ☰ → **Masteruser · Benutzer & App-Einstellungen**:
 * **Benutzer**: Anmeldename, Name, Passwort, Schalter *Masteruser* und *Aktiv*, letzte Anmeldung.
@@ -167,7 +167,7 @@ Startort: Rümlang · 4727N00834E
 Cutdown: 3'000 m AGL
 Frequenz: 433.900 MHz
 Sonde: 12345
-Folgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: 7K2M4QX9
+Folgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: 7K2M4Q
 ```
 
 * **Stufe 1 (funktioniert sofort, keine Konten nötig):** Phase 2 zeigt die Karte **«Beobachter benachrichtigen
@@ -188,8 +188,8 @@ Folgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: 7K2M4Q
 ## 7. Simulation (ohne Sonde üben)
 
 * `https://s2ground.wicki.aero/?sim=1` → simulierte Sonde **und** eingebaute Mini-Datenbank
-  (Anmeldung `bwicki` / `demo` als Masteruser, `crew1` / `demo` als Bodenstation; Beobachter-Codes `7K2M4QX9`
-  «Command Center» und `B8R4TZ6W` «Crew Bergung»); es wird nichts auf dem Server gespeichert.
+  (Anmeldung `bwicki` / `demo` als Masteruser, `crew1` / `demo` als Bodenstation; Beobachter-Codes `7K2M4Q`
+  «Command Center» und `B8R4TZ` «Crew Bergung»); es wird nichts auf dem Server gespeichert.
 * `https://s2ground.wicki.aero/?sim=1&api=1` → simulierte Sonde, aber echte Anmeldung/Live-Daten über den
   Worker – so sieht s2stueve den simulierten Aufstieg.
 * Optionen anhängen: `&speed=20` (20× schneller; auch über die Knöpfe im schwarzen Balken), `&fast=1`

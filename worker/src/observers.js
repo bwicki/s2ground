@@ -1,5 +1,5 @@
 // Observers (Beobachter): people without a password who follow an ascent in s2stueve with a
-// permanent 8-character access code. The master creates/revokes codes in the admin page; every
+// permanent 6-character access code. The master creates/revokes codes in the admin page; every
 // join is written to observer_logins so the master can see who used which code when.
 // Observers can read everything and write in the chat; hardware actions stay with ground users
 // (enforced by requireRole('ground') in index.js and by the Durable Object for the live channel).
@@ -9,7 +9,7 @@ import { logAction } from './log.js';
 import { buildNotifyMessage, waUrl, waConfigured, sendWhatsApp } from './whatsapp.js';
 
 const MOBILE_RE = /^\+[1-9]\d{7,14}$/;          // E.164
-const CODE_RE = /^[2-9A-HJ-NP-Z]{8}$/;
+const CODE_RE = /^[2-9A-HJ-NP-Z]{6}$/;
 
 function cleanMobile(s) {
   const m = String(s || '').replace(/[\s()-]/g, '').replace(/^00/, '+');

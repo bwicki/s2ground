@@ -5,11 +5,11 @@ import assert from 'node:assert/strict';
 import { observerCode, normalizeCode, requireRole, CODE_ALPHABET, HttpError } from '../worker/src/auth.js';
 import { buildNotifyMessage, waUrl, waDigits, icaoShort, fmtLocal, waConfigured, sendWhatsApp } from '../worker/src/whatsapp.js';
 
-test('observer code: 8 chars, alphabet without 0/O/1/I', () => {
+test('observer code: 6 chars, alphabet without 0/O/1/I', () => {
   assert.equal(CODE_ALPHABET.length, 32);
   for (const c of '0O1I') assert.ok(!CODE_ALPHABET.includes(c));
-  for (let i = 0; i < 50; i++) assert.match(observerCode(), /^[2-9A-HJ-NP-Z]{8}$/);
-  assert.equal(normalizeCode(' 7k2m-4qx9 '), '7K2M4QX9');
+  for (let i = 0; i < 50; i++) assert.match(observerCode(), /^[2-9A-HJ-NP-Z]{6}$/);
+  assert.equal(normalizeCode(' 7k2m-4q '), '7K2M4Q');
 });
 
 test('requireRole: ground = any ground user, master = flag, observer = code token', () => {
@@ -29,7 +29,7 @@ test('requireRole: ground = any ground user, master = flag, observer = code toke
 
 test('standard WhatsApp message (DE) from the ascent meta', () => {
   const meta = { plannedLaunch: Date.UTC(2026, 9, 17, 12, 30), start: { name: 'Rümlang', lat: 47.4433, lon: 8.5617 }, cutAltAgl: 3000, frequencyHz: 433900000, sondeId: 12345 };
-  const msg = buildNotifyMessage(meta, '7K2M4QX9');
+  const msg = buildNotifyMessage(meta, '7K2M4Q');
   assert.equal(msg, [
     'Sondenaufstieg geplant (S2 Ground)',
     'Start: 17.10.2026 14:30 LT',                            // Europe/Zurich = UTC+2 in October
@@ -37,11 +37,11 @@ test('standard WhatsApp message (DE) from the ascent meta', () => {
     "Cutdown: 3'000 m AGL",
     'Frequenz: 433.900 MHz',
     'Sonde: 12345',
-    'Folgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: 7K2M4QX9',
+    'Folgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: 7K2M4Q',
   ].join('\n'));
   // unknown values are left out, the follow line is always there
-  const short = buildNotifyMessage({ start: { name: 'Rümlang' } }, 'B8R4TZ6W');
-  assert.equal(short, 'Sondenaufstieg geplant (S2 Ground)\nStartort: Rümlang\nFolgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: B8R4TZ6W');
+  const short = buildNotifyMessage({ start: { name: 'Rümlang' } }, 'B8R4TZ');
+  assert.equal(short, 'Sondenaufstieg geplant (S2 Ground)\nStartort: Rümlang\nFolgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: B8R4TZ');
   assert.equal(buildNotifyMessage({ cutAltAgl: null }, 'X').includes('Cutdown'), false);
 });
 

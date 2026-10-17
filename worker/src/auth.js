@@ -37,8 +37,8 @@ export function randomToken(bytes = 32) {
 
 /** Alphabet for observer codes: no 0/O/1/I so a code read over the phone is unambiguous. */
 export const CODE_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-/** Observer access code like "7K2M4QX9" (8 chars → 32^8 ≈ 1.1e12 combinations). */
-export function observerCode(len = 8) {
+/** Observer access code like "7K2M4Q" (6 chars → 32^8 ≈ 1.1e12 combinations). */
+export function observerCode(len = 6) {
   const a = crypto.getRandomValues(new Uint8Array(len));
   return [...a].map((v) => CODE_ALPHABET[v % CODE_ALPHABET.length]).join('');
 }

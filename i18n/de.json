@@ -548,7 +548,7 @@
   "prep.notify.sentAuto": "automatisch gesendet",
   "prep.notify.autoFailed": "automatischer Versand fehlgeschlagen – bitte manuell",
   "obs.title": "Beobachter · Zugangscodes",
-  "obs.intro": "Beobachter brauchen kein Passwort: Sie melden sich in s2stueve («Follow sonde ascent») mit ihrem 8-stelligen Code an, wählen einen Klarnamen und können im Chat schreiben. Hardware-Aktionen (Cutdown) bleiben der Bodenstation vorbehalten.",
+  "obs.intro": "Beobachter brauchen kein Passwort: Sie melden sich in s2stueve («Follow sonde ascent») mit ihrem 6-stelligen Code an, wählen einen Klarnamen und können im Chat schreiben. Hardware-Aktionen (Cutdown) bleiben der Bodenstation vorbehalten.",
   "obs.label": "Bezeichnung",
   "obs.labelPh": "z. B. Command Center",
   "obs.mobile": "Mobile",

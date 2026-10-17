@@ -141,7 +141,7 @@ try {
   await page.click('.addobs button[type=submit]');
   await page.waitForSelector('.code-big');
   const code = (await page.textContent('.code-big')).trim();
-  if (!/^[2-9A-HJ-NP-Z]{8}$/.test(code)) throw new Error(`observer code: ${code}`);
+  if (!/^[2-9A-HJ-NP-Z]{6}$/.test(code)) throw new Error(`observer code: ${code}`);
   await shot('09b-admin-observer-code.png');
   await page.click('.modal [data-act=close]');
   await page.click('.observers [data-act=history]');

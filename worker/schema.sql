@@ -3,7 +3,7 @@
 --
 -- Access model (Oct 2026): two kinds of people only.
 --   * Ground users  – login name + password; one or more carry the flag `master` (Superuser).
---   * Observers     – no password; each has a permanent 8-character code (table observers),
+--   * Observers     – no password; each has a permanent 6-character code (table observers),
 --                     revocable by the master; every join is recorded in observer_logins.
 -- Nothing was deployed before this schema, so there is no migration path from the old
 -- role-based users table – start with a fresh database (README, "Datenbank").
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS ascents (
 -- action is possible with them), so they are stored in plain text and shown again in the admin page.
 CREATE TABLE IF NOT EXISTS observers (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
-  code          TEXT NOT NULL UNIQUE,      -- 8 chars, alphabet without 0/O/1/I, e.g. 7K2M4QX9
+  code          TEXT NOT NULL UNIQUE,      -- 6 chars, alphabet without 0/O/1/I, e.g. 7K2M4Q
   label         TEXT NOT NULL,             -- the master's label ("Command Center", "Crew Bergung")
   display_name  TEXT,                      -- Klarname chosen by the observer at the last join
   mobile        TEXT NOT NULL DEFAULT '',  -- E.164 (+41791234567) or ''

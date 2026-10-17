@@ -41,8 +41,8 @@ const mock = {
     { name: 'crew1', fullName: '[Name Groundcrew]', master: false, password: 'demo', active: 1, lastLogin: Date.now() - 8 * DAY, ascents: 3 },
   ],
   observers: [
-    { id: 1, code: '7K2M4QX9', label: 'Command Center', displayName: 'Peter (CC)', mobile: '+41790000001', whatsapp: true, createdBy: 'bwicki', createdAt: Date.now() - 30 * DAY, revokedAt: null, lastLoginAt: Date.now() - 2 * DAY, loginCount: 6 },
-    { id: 2, code: 'B8R4TZ6W', label: 'Crew Bergung', displayName: '', mobile: '', whatsapp: false, createdBy: 'bwicki', createdAt: Date.now() - 10 * DAY, revokedAt: null, lastLoginAt: null, loginCount: 0 },
+    { id: 1, code: '7K2M4Q', label: 'Command Center', displayName: 'Peter (CC)', mobile: '+41790000001', whatsapp: true, createdBy: 'bwicki', createdAt: Date.now() - 30 * DAY, revokedAt: null, lastLoginAt: Date.now() - 2 * DAY, loginCount: 6 },
+    { id: 2, code: 'B8R4TZ', label: 'Crew Bergung', displayName: '', mobile: '', whatsapp: false, createdBy: 'bwicki', createdAt: Date.now() - 10 * DAY, revokedAt: null, lastLoginAt: null, loginCount: 0 },
   ],
   logins: { 1: [{ at: Date.now() - 2 * DAY, ip: '85.1.2.3', userAgent: 'Chrome/130 Android', displayName: 'Peter (CC)', ascentId: 'demo-1' }, { at: Date.now() - 9 * DAY, ip: '85.1.2.3', userAgent: 'Chrome/129 Windows', displayName: 'Peter', ascentId: null }] },
   settings: { ...DEFAULT_SETTINGS },
@@ -92,7 +92,7 @@ async function mockHandle(method, path, body, token) {
       if (o && sub === 'revoke') { o.revokedAt = Date.now(); return { ok: true }; }
       if (o && sub === 'reactivate') { o.revokedAt = null; return { ok: true }; }
       if (!String(body.label || '').trim()) throw new ApiError(400, 'E_LABEL_REQUIRED');
-      const code = Array.from(crypto.getRandomValues(new Uint8Array(8)), (v) => '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'[v % 32]).join('');
+      const code = Array.from(crypto.getRandomValues(new Uint8Array(6)), (v) => '23456789ABCDEFGHJKLMNPQRSTUVWXYZ'[v % 32]).join('');
       const mobile = String(body.mobile || '').replace(/[\s()-]/g, '').replace(/^00/, '+');
       const n = { id: mock.observers.length + 1, code, label: body.label.trim(), displayName: '', mobile, whatsapp: !!(body.whatsapp && mobile), createdBy: who.name, createdAt: Date.now(), revokedAt: null, lastLoginAt: null, loginCount: 0 };
       mock.observers.push(n);

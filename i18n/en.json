@@ -548,7 +548,7 @@
   "prep.notify.sentAuto": "sent automatically",
   "prep.notify.autoFailed": "automatic send failed – please send manually",
   "obs.title": "Observers · access codes",
-  "obs.intro": "Observers need no password: they sign in to s2stueve (“Follow sonde ascent”) with their 8-character code, choose a display name and may write in the chat. Hardware actions (cutdown) stay with the ground station.",
+  "obs.intro": "Observers need no password: they sign in to s2stueve (“Follow sonde ascent”) with their 6-character code, choose a display name and may write in the chat. Hardware actions (cutdown) stay with the ground station.",
   "obs.label": "Label",
   "obs.labelPh": "e.g. Command Center",
   "obs.mobile": "Mobile",
