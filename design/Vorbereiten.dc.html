@@ -58,7 +58,7 @@ details.menu>.panel>.foot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 20px
 </style>
 </helmet>
 
-<div style="display:flex;flex-direction:column;min-height:1150px">
+<div style="display:flex;flex-direction:column;min-height:1250px">
   <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff">
     <div style="display:flex;flex-direction:column;min-width:120px"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Aufstieg 2026-10-13 · Rümlang</span></div>
     <nav aria-label="Phasen" style="display:flex;gap:2px;flex-wrap:wrap">
@@ -104,10 +104,10 @@ details.menu>.panel>.foot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 20px
         </div>
         <div style="grid-column:span 3;display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:20px;padding-top:12px;border-top:1px solid #eef1f5">
           <div style="display:flex;flex-direction:column;gap:10px">
-            <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Verknüpfung s2stueve (nur im Ausnahmefall nötig)</div>
-            <div class="row"><span class="muted">Relay</span><span class="val" style="color:#1f8a4c">verbunden · 0 Fehler</span></div>
-            <div class="row"><span class="muted">Follow-Code (Gastzugang)</span><span class="val">7K2-M4Q</span></div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button">Kopieren</button><button class="btn" type="button">Neu erzeugen</button><button class="btn" type="button">Gastlink</button></div>
+            <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Verknüpfung s2stueve</div>
+            <div class="row"><span class="muted">Relay (Worker)</span><span class="val" style="color:#1f8a4c">verbunden · 0 Fehler</span></div>
+            <div class="row"><span class="muted">Beobachter verbunden</span><span class="val">2</span></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" href="Admin.dc.html">Beobachter-Codes verwalten</a></div>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px">
             <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Datenablage (zusätzlich zur App)</div>
@@ -115,7 +115,7 @@ details.menu>.panel>.foot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 20px
             <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button">Ordner wählen</button><button class="btn" type="button">Vorgabe übernehmen</button></div>
             <span class="muted" style="font-size:12px">Je Aufstieg werden CSV, .sounding und KML dort abgelegt (Dropbox synchronisiert). Zugriff einmalig im Browser erlauben (Chrome/Edge); auf dem Android-Pad landen die Dateien im Download-Ordner.</span>
           </div>
-          <div class="muted" style="font-size:13px;align-self:end">Beobachter mit eigenem Login sehen den Aufstieg in s2stueve automatisch. Der Follow-Code dient nur für Gäste ohne Login.</div>
+          <div class="muted" style="font-size:13px;align-self:end">Beobachter kommen mit ihrem persönlichen Code (Masteruser → Beobachter) in s2stueve hinein; Codes gelten bis zum Widerruf.</div>
         </div>
         <div style="grid-column:span 3;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:6px;border-top:1px solid #eef1f5">
           <button class="btn primary" type="button">Geänderte Einstellungen an Sonde übertragen</button>
@@ -166,12 +166,17 @@ details.menu>.panel>.foot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 20px
       </section>
       <section class="card">
         <h2>Externe Beobachter (S2Stueve-App)</h2>
-        <div class="okline"><span class="big" style="background:#1f8a4c">✓</span><div><div style="font-weight:600">Verbindung zu s2stueve steht (automatisch)</div><div class="muted" style="font-size:13px">Dieser Aufstieg ist dort unter «Follow sonde ascent» sichtbar</div></div></div>
+        <div class="okline"><span class="big" style="background:#1f8a4c">✓</span><div><div style="font-weight:600">Aufstieg ist in s2stueve sichtbar</div><div class="muted" style="font-size:13px">Beobachter treten mit ihrem Code bei und erscheinen hier mit Klarnamen</div></div></div>
         <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#f4f5f7"><span><span class="dot g" style="display:inline-block;margin-right:8px"></span>Command Center <span class="muted">(cc)</span></span><span class="muted" style="font-size:13px">seit 14:19 UTC</span></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#f4f5f7"><span><span class="dot g" style="display:inline-block;margin-right:8px"></span>Crew Bergung <span class="muted">(crew1)</span></span><span class="muted" style="font-size:13px">seit 14:24 UTC</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#f4f5f7"><span><span class="dot g" style="display:inline-block;margin-right:8px"></span>Hans Muster <span class="muted">(Command Center)</span></span><span style="display:flex;align-items:center;gap:8px"><span class="muted" style="font-size:13px">seit 14:19 UTC</span><button class="btn" type="button" aria-label="Beobachter entfernen" title="Entfernen" style="min-height:28px;min-width:28px;padding:0;font-size:13px">✕</button></span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#f4f5f7"><span><span class="dot g" style="display:inline-block;margin-right:8px"></span>Peter <span class="muted">(Crew Bergung)</span></span><span style="display:flex;align-items:center;gap:8px"><span class="muted" style="font-size:13px">seit 14:24 UTC</span><button class="btn" type="button" aria-label="Beobachter entfernen" title="Entfernen" style="min-height:28px;min-width:28px;padding:0;font-size:13px">✕</button></span></div>
         </div>
-        <p class="muted" style="margin:0;font-size:13px">Ohne Beobachter steht hier: «Noch niemand schaut zu». Kein Code nötig – die Verknüpfung läuft im Hintergrund.</p>
+        <div style="display:flex;flex-direction:column;gap:8px;padding-top:10px;border-top:1px solid #eef1f5">
+          <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Beobachter benachrichtigen (WhatsApp)</div>
+          <button class="btn" type="button" style="justify-content:space-between;border-color:#9fd8b4;color:#14532d;background:#e6f6ec;font-size:14px;min-height:42px"><span>Command Center · +41 79 …</span><span>✓ gesendet</span></button>
+          <button class="btn" type="button" style="justify-content:space-between;font-size:14px;min-height:42px"><span>Crew Bergung · +41 78 …</span><span style="color:#1f8a4c;font-weight:600">WhatsApp öffnen →</span></button>
+          <span class="muted" style="font-size:12px">Öffnet WhatsApp mit der fertigen Nachricht (Datum, Startort, Cutdown, Frequenz, Code) – nur noch «Senden» tippen.</span>
+        </div>
       </section>
     </div>
 
@@ -190,7 +195,7 @@ details.menu>.panel>.foot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 20px
   </main>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1150}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1250}}'>
 class Component extends DCLogic {
   renderVals() { return {}; }
 }

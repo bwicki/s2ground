@@ -47,7 +47,8 @@ export function mountAdmin(root, ctx) {
   };
   const renderSettings = () => {
     const f = (label, name, value, extra = '') => `<label class="f">${esc(label)}<input class="in mono" name="${name}" value="${esc(value)}" ${extra}></label>`;
-    qs(el, '.settings').innerHTML = f(t('admin.s.relay'), 'relayUrl', s.relayUrl || '', `placeholder="${esc(api.base.replace(/^https:/, 'wss:'))}"`)
+    // relayUrl (override of apiBase) is deliberately not editable here – it only exists for tests; the Worker address lives in src/config.js
+    qs(el, '.settings').innerHTML = ''
       + f(t('admin.s.frequency'), 'frequencyMHz', fmtNum((s.frequencyHz || 433900000) / 1e6, 3) + ' MHz')
       + f(t('admin.s.rise'), 'riseRate', `${s.riseRate} m/s`) + f(t('admin.s.descent'), 'descentRate', `${s.descentRate} m/s`)
       + f(t('admin.s.rr4usb'), 'rr4Usb', s.rr4Usb || t('admin.s.notDetected'), 'readonly')
@@ -87,7 +88,7 @@ export function mountAdmin(root, ctx) {
   qs(el, '.settings').addEventListener('submit', async (e) => {
     e.preventDefault(); const fd = new FormData(e.target);
     const wf = String(fd.get('windFallback')).split('/');
-    const patch = { relayUrl: fd.get('relayUrl').trim(), frequencyHz: Math.round(num(fd.get('frequencyMHz')) * 1e6), riseRate: num(fd.get('riseRate')), descentRate: num(fd.get('descentRate')), sondeTypes: fd.get('sondeTypes'), cloudRh: num(fd.get('cloudRh')), defaultFolder: fd.get('defaultFolder'), autoLogoutH: num(fd.get('autoLogoutH')), windFallbackDir: num(wf[0]), windFallbackSpd: num(wf[1] || s.windFallbackSpd), cutAltAgl: Math.round(num(fd.get('cutAltAgl')) / 100) * 100, airspaceCats: String(fd.get('airspaceCats') || '').toUpperCase().replace(/\s/g, '') };
+    const patch = { frequencyHz: Math.round(num(fd.get('frequencyMHz')) * 1e6), riseRate: num(fd.get('riseRate')), descentRate: num(fd.get('descentRate')), sondeTypes: fd.get('sondeTypes'), cloudRh: num(fd.get('cloudRh')), defaultFolder: fd.get('defaultFolder'), autoLogoutH: num(fd.get('autoLogoutH')), windFallbackDir: num(wf[0]), windFallbackSpd: num(wf[1] || s.windFallbackSpd), cutAltAgl: Math.round(num(fd.get('cutAltAgl')) / 100) * 100, airspaceCats: String(fd.get('airspaceCats') || '').toUpperCase().replace(/\s/g, '') };
     for (const k of ['openaipKey', 'waPhoneNumberId', 'waToken']) { const v = String(fd.get(k) || '').trim(); if (v) patch[k] = v; }   // empty field = keep the stored secret
     try { Object.assign(s, await api.settings.put(patch)); toast(t('admin.saved')); renderSettings(); bus.emit('settings'); } catch (ex) { toast(ex.message, true); }
   });

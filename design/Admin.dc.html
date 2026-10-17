@@ -30,10 +30,11 @@ td{padding:10px;border-bottom:1px solid #eef1f5;vertical-align:middle}
 .sw.off{background:#c7d0dc}.sw.off::after{left:3px}
 .logo{width:150px;height:44px;border:1px dashed #9aa7b6;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5b6b7f;text-align:center;background:#fff;flex:none}
 .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid #d9dee6;background:#fff;font-size:14px;min-height:38px;box-sizing:border-box}
+table.obs{font-size:14px}table.obs th,table.obs td{padding:8px 6px}
 </style>
 </helmet>
 
-<div style="display:flex;flex-direction:column;min-height:900px">
+<div style="display:flex;flex-direction:column;min-height:2300px">
   <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff;flex-wrap:wrap">
     <div style="display:flex;flex-direction:column"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Verwaltung · nur Masteruser</span></div>
     <div style="grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
@@ -47,19 +48,18 @@ td{padding:10px;border-bottom:1px solid #eef1f5;vertical-align:middle}
   </header>
 
   <main style="flex:1;padding:26px 28px;display:flex;flex-direction:column;gap:22px">
-    <h1 style="margin:0;font-size:26px;font-weight:600">Benutzer &amp; Protokoll</h1>
+    <h1 style="margin:0;font-size:26px;font-weight:600">Benutzer, Beobachter &amp; Protokoll</h1>
 
     <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
-      <section class="card" style="flex:999 1 560px">
-        <h2>Benutzer</h2>
+      <div style="flex:999 1 560px;display:flex;flex-direction:column;gap:20px;min-width:0">
+      <section class="card">
+        <h2>Ground-Benutzer (bedienen S2 Ground, lösen Cutdown aus)</h2>
         <div style="overflow-x:auto">
         <table>
-          <thead><tr><th>Anmeldename</th><th>Name</th><th>Rolle</th><th>Letzte Anmeldung</th><th>Aufstiege</th><th>Aktiv</th></tr></thead>
+          <thead><tr><th>Anmeldename</th><th>Name</th><th>Masteruser</th><th>Letzte Anmeldung</th><th>Aufstiege</th><th>Aktiv</th></tr></thead>
           <tbody>
-            <tr><td class="mono">bwicki</td><td>Balthasar Wicki</td><td><span class="tag m">Masteruser</span></td><td class="mono">13.10.2026 17:02</td><td class="mono">14</td><td><span class="sw" role="img" aria-label="aktiv"></span></td></tr>
-            <tr><td class="mono">crew1</td><td>[Name Groundcrew]</td><td><span class="tag">Nutzer</span></td><td class="mono">05.10.2026 06:41</td><td class="mono">3</td><td><span class="sw" role="img" aria-label="aktiv"></span></td></tr>
-            <tr><td class="mono">cc</td><td>[Name Command Center]</td><td><span class="tag">Nutzer</span></td><td class="mono">05.10.2026 06:55</td><td class="mono">–</td><td><span class="sw" role="img" aria-label="aktiv"></span></td></tr>
-            <tr><td class="mono">gast</td><td>[Gast]</td><td><span class="tag">Nutzer</span></td><td class="mono">–</td><td class="mono">–</td><td><span class="sw off" role="img" aria-label="inaktiv"></span></td></tr>
+            <tr><td class="mono">bwicki</td><td>Balthasar Wicki</td><td><span class="sw" role="img" aria-label="Masteruser"></span></td><td class="mono">13.10.2026 17:02</td><td class="mono">14</td><td><span class="sw" role="img" aria-label="aktiv"></span></td></tr>
+            <tr><td class="mono">crew1</td><td>[Name Groundcrew]</td><td><span class="sw off" role="img" aria-label="kein Masteruser"></span></td><td class="mono">05.10.2026 06:41</td><td class="mono">3</td><td><span class="sw" role="img" aria-label="aktiv"></span></td></tr>
           </tbody>
         </table>
         </div>
@@ -70,10 +70,44 @@ td{padding:10px;border-bottom:1px solid #eef1f5;vertical-align:middle}
           <button class="btn primary" type="button">Benutzer hinzufügen</button>
         </div>
       </section>
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <h2>Beobachter · Zugangscodes (s2stueve «Follow sonde ascent»)</h2>
+        <span class="muted" style="font-size:13px">Ein Code je Beobachter · 8 Zeichen · gilt bis zum Widerruf · Klarname setzt der Beobachter selbst beim Beitreten</span>
+      </div>
+      <div style="overflow-x:auto">
+      <table class="obs">
+        <thead><tr><th>Bezeichnung</th><th>Klarname</th><th>Code</th><th>Mobile</th><th>WhatsApp</th><th>Letzte Anm. (Anz.)</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Command Center</td><td>Hans Muster</td><td><span class="mono" style="font-weight:600;letter-spacing:.08em;white-space:nowrap">7K2M4QX9 <button class="btn" type="button" style="min-height:26px;padding:0 7px;font-size:12px" aria-label="Kopieren">⧉</button></span></td><td class="mono" style="white-space:nowrap;font-size:13px">+41 79 123 45 67</td><td><span class="sw" role="img" aria-label="WhatsApp an"></span></td><td class="mono" style="white-space:nowrap">13.10. 14:19 (6)</td><td style="white-space:nowrap"><button class="btn" type="button" style="min-height:28px;padding:0 8px;font-size:12px">Verlauf</button> <button class="btn" type="button" style="min-height:28px;min-width:28px;padding:0;font-size:12px;border-color:#c0392b;color:#c0392b" title="Widerrufen" aria-label="Widerrufen">✕</button></td></tr>
+          <tr><td>Crew Bergung</td><td>Peter</td><td><span class="mono" style="font-weight:600;letter-spacing:.08em;white-space:nowrap">B8R4TZ6W <button class="btn" type="button" style="min-height:26px;padding:0 7px;font-size:12px" aria-label="Kopieren">⧉</button></span></td><td class="mono" style="white-space:nowrap;font-size:13px">+41 78 987 65 43</td><td><span class="sw off" role="img" aria-label="WhatsApp aus"></span></td><td class="mono" style="white-space:nowrap">13.10. 14:24 (2)</td><td style="white-space:nowrap"><button class="btn" type="button" style="min-height:28px;padding:0 8px;font-size:12px">Verlauf</button> <button class="btn" type="button" style="min-height:28px;min-width:28px;padding:0;font-size:12px;border-color:#c0392b;color:#c0392b" title="Widerrufen" aria-label="Widerrufen">✕</button></td></tr>
+          <tr style="color:#7c8a9a"><td>Gast Messe 09/26</td><td>–</td><td><span class="mono" style="letter-spacing:.08em;text-decoration:line-through;white-space:nowrap">M3PQ7V2H</span><br><span class="tag">widerrufen 20.09.</span></td><td class="mono">–</td><td><span class="sw off" role="img" aria-label="aus"></span></td><td class="mono" style="white-space:nowrap">14.09. 10:02 (1)</td><td style="white-space:nowrap"><button class="btn" type="button" style="min-height:28px;padding:0 8px;font-size:12px">Verlauf</button> <button class="btn" type="button" style="min-height:28px;padding:0 8px;font-size:12px" title="Reaktivieren">↻</button></td></tr>
+          <tr><td colspan="7" style="background:#f4f5f7;font-size:13px"><span class="muted" style="text-transform:uppercase;letter-spacing:.04em;font-size:11px;font-weight:600">Verlauf · Command Center</span> &nbsp; 13.10.2026 14:19 · «Hans Muster» · Aufstieg Rümlang · Chrome/Android &nbsp;·&nbsp; 05.10.2026 06:55 · «Hans Muster» · Aufstieg Bülach · Safari/iPad &nbsp;·&nbsp; 28.09.2026 09:12 · «H. Muster» · kein Aufstieg aktiv</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 2fr 1fr auto;gap:12px;align-items:end;padding-top:6px;border-top:1px solid #eef1f5">
+        <label class="f">Bezeichnung (für Dich)<input class="in" type="text" placeholder="z. B. Command Center Bern"></label>
+        <label class="f">Mobile (optional, für WhatsApp)<input class="in mono" type="text" placeholder="+41 79 …"></label>
+        <label class="f" style="flex-direction:row;align-items:center;gap:10px;min-height:46px;font-size:14px;color:#14202e"><input type="checkbox" checked style="width:20px;height:20px;accent-color:#1f5fbf"> WhatsApp bei neuem Aufstieg</label>
+        <button class="btn primary" type="button">Code erzeugen</button>
+      </div>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:12px 14px;border:1px dashed #c7d0dc;border-radius:10px;background:#f4f8ff">
+        <span class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Nach «Code erzeugen»</span>
+        <span>Neuer Code für <strong>Command Center Bern</strong>: <span class="mono" style="font-size:20px;font-weight:600;letter-spacing:.1em">Q7HN3K8D</span></span>
+        <button class="btn" type="button" style="min-height:38px">Kopieren</button>
+        <button class="btn" type="button" style="min-height:38px;border-color:#1f8a4c;color:#14532d">Code per WhatsApp senden</button>
+        <span class="muted" style="font-size:13px">Der Beobachter öffnet s2stueve → «Follow sonde ascent», tippt den Code und seinen Klarnamen ein.</span>
+      </div>
+      <div class="muted" style="font-size:13px">WhatsApp-Benachrichtigung bei einem neuen Aufstieg: Stufe 1 öffnet pro Beobachter eine vorbereitete WhatsApp-Nachricht (Stammdaten des geplanten Aufstiegs + Code) zum Absenden mit einem Tipp; Stufe 2 (automatischer Versand über die WhatsApp-Business-Schnittstelle) ist vorbereitet und wird freigeschaltet, sobald das Meta-Konto steht.</div>
+    </section>
 
-      <section class="card" style="flex:1 1 320px">
+      </div>
+
+      <section class="card" style="flex:0 0 300px">
         <h2>App-Einstellungen</h2>
-        <label class="f">Relay für s2stueve (Live-Daten &amp; Chat)<input class="in mono" type="text" value="[Firebase-Projekt-ID]"></label>
+        <label class="f">Cutdown-Höhe Vorgabe<input class="in mono" type="text" value="3'000 m AGL"></label>
+        <label class="f">openAIP API-Schlüssel (Lufträume) – bleibt auf dem Server<input class="in mono" type="password" value="••••••••••••" placeholder="Schlüssel ist hinterlegt"></label>
         <label class="f">Standard-Frequenz<input class="in mono" type="text" value="433.900 MHz"></label>
         <label class="f">Standard-Steigrate (Planung)<input class="in mono" type="text" value="2.5 m/s"></label>
         <label class="f">RR4 Hardware-ID (USB VID/PID) – wird beim ersten Verbinden automatisch erkannt<input class="in mono" type="text" value="noch nicht erkannt" readonly></label>
@@ -119,7 +153,7 @@ td{padding:10px;border-bottom:1px solid #eef1f5;vertical-align:middle}
           <tr><td class="mono">13.10.2026 14:42:10</td><td class="mono">bwicki</td><td>Cutdown manuell</td><td>Aufstieg 2026-10-13 Rümlang · 2'480 m AGL · auf Bitte Command Center</td></tr>
           <tr><td class="mono">13.10.2026 14:30:05</td><td class="mono">bwicki</td><td>Start freigegeben</td><td>Aufstieg 2026-10-13 Rümlang · alle Checks grün</td></tr>
           <tr><td class="mono">13.10.2026 14:21:48</td><td class="mono">bwicki</td><td>Sonde programmiert</td><td>S2H3-R-B20 · Aufstieg · Cutdown 1'900 m AGL · 433.900 MHz</td></tr>
-          <tr><td class="mono">13.10.2026 14:19:02</td><td class="mono">cc</td><td>Follow beigetreten</td><td>Aufstieg 2026-10-13 Rümlang · s2stueve</td></tr>
+          <tr><td class="mono">13.10.2026 14:19:02</td><td class="mono">Beobachter 7K2M4QX9</td><td>Follow beigetreten</td><td>Aufstieg 2026-10-13 Rümlang · s2stueve · Klarname «Hans Muster»</td></tr>
           <tr><td class="mono">13.10.2026 14:12:30</td><td class="mono">bwicki</td><td>Planung gerechnet</td><td>Startort 4727N00834E · Luftraumwarnung LS-R12 → Cutdown gesenkt</td></tr>
           <tr><td class="mono">13.10.2026 14:02:11</td><td class="mono">bwicki</td><td>Anmeldung</td><td>Chrome · Windows</td></tr>
         </tbody>
@@ -129,7 +163,7 @@ td{padding:10px;border-bottom:1px solid #eef1f5;vertical-align:middle}
   </main>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2300}}'>
 class Component extends DCLogic {
   renderVals() { return {}; }
 }

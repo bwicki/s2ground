@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>S2 Ground – Schnellstart, Aufstieg läuft</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f5f7;color:#14202e;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.4}
+a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.muted{color:#5b6b7f}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 22px;border-radius:10px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-weight:600;font-size:17px;cursor:pointer}
+.btn.primary{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.btn.danger{background:#c0392b;border-color:#c0392b;color:#fff}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid #d9dee6;background:#fff;font-size:14px;min-height:38px;box-sizing:border-box}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.g{background:#1f8a4c}.y{background:#d98c00}.r{background:#c0392b}.b{background:#1f5fbf}
+.tile{background:#fff;border:1px solid #d9dee6;border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.tile .k{font-size:15px;color:#5b6b7f;text-transform:uppercase;letter-spacing:.04em}
+.tile .v{white-space:nowrap;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:48px;font-weight:600;line-height:1.05}
+.tile .u{white-space:nowrap;font-size:17px;color:#5b6b7f}
+.tile .cmp{display:flex;align-items:center;gap:8px;font-size:15px;margin-top:6px;padding-top:8px;border-top:1px solid #e4e8ee}
+.status{border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:18px;border:1px solid}
+.status.ok{background:#e6f6ec;border-color:#9fd8b4;color:#14532d}
+.status.warn{background:#fff4e0;border-color:#f3c97a;color:#7a3e00}
+.status .big{font-size:24px;font-weight:700}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;min-height:1100px">
+  <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff">
+    <div style="display:flex;flex-direction:column;min-width:120px"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Schnellstart · 2026-10-13 · Sonde 00123</span></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="pill" style="border-color:#1f8a4c"><span class="dot g"></span>Aufstieg läuft seit <span class="mono">12:04</span> min</span><span class="pill"><span class="dot g"></span>Funk gut · letztes Paket vor 1 s</span><span class="pill"><span class="dot b"></span>2 Beobachter schauen zu</span><a href="Aufstieg.dc.html" style="font-size:14px">Vollständige Ansicht (Karte, Vertikalsicht, Stüve, Chat) →</a></div>
+    <div style="grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <img src="/_blob/0e4c30272f96a31d708cd9be18800e0a" alt="Wicki Partners Ballonteam" style="height:46px;width:auto">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <span class="pill">bwicki</span>
+        <a class="btn" href="Login.dc.html" style="min-height:40px;font-size:14px;padding:0 12px">Abmelden</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex:1;padding:22px 28px;display:flex;flex-direction:column;gap:16px;max-width:1000px;width:100%;box-sizing:border-box;margin:0 auto">
+    <div class="status ok"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16.5 9.5"/></svg><div><div class="big">OK – Sonde steigt, alles läuft automatisch</div><div style="font-size:16px">Cutdown bei 3'000 m über Grund in ≈ 10 min. Du musst nichts tun. Daten gehen live an s2stueve und in die Dropbox.</div></div></div>
+
+    <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:16px">
+      <div class="tile" style="border-color:#1f5fbf"><span class="k">Höhe über Grund</span><div style="display:flex;align-items:baseline;gap:10px"><span class="v" style="color:#1f5fbf">1'480</span><span class="u">m AGL</span></div><span class="u">1'910 m AMSL</span><div class="cmp"><span class="dot g"></span>Steigt normal</div></div>
+      <div class="tile"><span class="k">Steigrate</span><div style="display:flex;align-items:baseline;gap:10px"><span class="v">+2.6</span><span class="u">m/s</span></div><span class="u">&nbsp;</span><div class="cmp"><span class="dot g"></span>Normal (2–3 m/s)</div></div>
+      <div class="tile"><span class="k">Bis Cutdown</span><div style="display:flex;align-items:baseline;gap:10px"><span class="v">≈ 10</span><span class="u">min</span></div><span class="u">bei 3'000 m AGL · automatisch</span><div class="cmp"><span class="dot g"></span>Funk gut · −87 dBm</div></div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <a class="btn danger" href="#" style="min-height:76px;font-size:24px;letter-spacing:.04em">CUTDOWN JETZT</a>
+      <span class="muted" style="font-size:14px;text-align:center">Nur wenn nötig – fragt einmal nach, die Sonde quittiert per Funk, wird protokolliert.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+      <span class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:0 4px">Dieselbe Seite nach der Landung</span>
+      <div class="status ok" style="gap:22px;flex-wrap:wrap">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true" style="flex:none"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <div style="flex:1;min-width:280px"><div class="big">Sonde gelandet – 7.8 km von hier, Richtung 068°</div><div style="font-size:16px">Funk am Boden schwach: Empfänger mitnehmen und eingeschaltet lassen. Position: <span class="mono">472816N0083708E</span></div></div>
+        <a class="btn primary" href="Retrieve.dc.html" style="min-height:60px;font-size:18px">In Google Maps navigieren</a>
+        <div style="display:flex;align-items:center;gap:12px;padding-left:16px;border-left:1px solid #9fd8b4"><div style="width:96px;height:96px;border:1px solid #9fd8b4;border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;color:#14532d;text-align:center">QR-Code</div><div style="display:flex;flex-direction:column;gap:2px;max-width:150px;font-size:13px"><strong>Ans Handy übergeben</strong><span>Scannen – Navigation startet direkt</span></div></div>
+      </div>
+      <div class="muted" style="font-size:14px">Darunter: «Aufstieg abschliessen &amp; archivieren ✓». Mehr braucht die Schnellstart-Seite nicht – die vollständige Ansicht bleibt jederzeit einen Klick entfernt.</div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

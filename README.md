@@ -35,18 +35,11 @@ der Worker lässt nur die in `worker/wrangler.toml` (`APP_ORIGINS`) eingetragene
 
 ---
 
-## 2. GitHub-Repository anlegen (nur Browser)
+## 2. GitHub-Repository (erledigt)
 
-1. Auf https://github.com anmelden → oben rechts **+** → **New repository**.
-2. Name `s2ground`, **Private**, *ohne* README/Lizenz anklicken → **Create repository**.
-3. Auf der leeren Repo-Seite den Link **uploading an existing file** anklicken.
-4. Den **Inhalt** des Ordners `s2ground` (alles, inkl. `.github` und `CNAME`) per Drag & Drop ins
-   Browserfenster ziehen – ganze Ordner sind erlaubt. Falls der versteckte Ordner `.github` nicht
-   mitkommt: im Explorer «Ausgeblendete Elemente» einschalten und nochmals ziehen.
-5. Unten **Commit changes** (Zweig `main`).
-
-> Hinweis: GitHub Pages funktioniert bei privaten Repos nur mit GitHub Pro/Team – sonst das Repo auf
-> **Public** stellen (es liegen keine Passwörter oder Schlüssel darin).
+Das Repository `bwicki/s2ground` ist angelegt (öffentlich – es liegen keine Passwörter oder Schlüssel darin;
+alle Geheimnisse leben als Secrets auf GitHub bzw. in der Cloudflare-Datenbank) und der Code ist eingespielt.
+Änderungen kommen künftig per Push auf `main`; die App wird daraus automatisch veröffentlicht.
 
 ---
 

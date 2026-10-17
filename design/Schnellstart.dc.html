@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>S2 Ground – Schnellstart (Sonde sofort hier starten)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f5f7;color:#14202e;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.4}
+a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.muted{color:#5b6b7f}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 22px;border-radius:10px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-weight:600;font-size:17px;cursor:pointer}
+.btn.primary{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.btn.disabled{background:#e4e8ee;border-color:#e4e8ee;color:#7c8a9a;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid #d9dee6;background:#fff;font-size:14px;min-height:38px;box-sizing:border-box}
+.step{background:#fff;border:1px solid #d9dee6;border-radius:16px;padding:22px 26px;display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px 22px;align-items:start}
+.step .n{width:56px;height:56px;border-radius:50%;background:#14202e;color:#f6b03d;font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace}
+.step h2{margin:0;font-size:24px;font-weight:600;align-self:center}
+.step .body{grid-column:2;display:flex;flex-direction:column;gap:12px}
+.line{display:flex;align-items:center;gap:14px;min-height:44px;font-size:18px}
+.line .ic{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex:none}
+.g{background:#1f8a4c}.y{background:#d98c00}.r{background:#c0392b}
+.val{white-space:nowrap;font-family:"IBM Plex Mono",ui-monospace,monospace;font-weight:600}
+.u{white-space:nowrap;font-size:15px;color:#5b6b7f}
+.stepper{display:inline-flex;align-items:stretch;border:1px solid #c7d0dc;border-radius:12px;overflow:hidden;background:#fff}
+.stepper button{min-width:76px;min-height:64px;border:0;background:#fff;color:#14202e;font:inherit;font-size:22px;font-weight:600;cursor:pointer}
+.stepper .v{display:flex;align-items:baseline;gap:8px;padding:0 22px;border-left:1px solid #c7d0dc;border-right:1px solid #c7d0dc;font-family:"IBM Plex Mono",monospace;font-size:34px;font-weight:600}
+.status{border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:18px;border:1px solid}
+.status.wait{background:#fff4e0;border-color:#f3c97a;color:#7a3e00}
+.status.go{background:#e6f6ec;border-color:#9fd8b4;color:#14532d}
+.status .big{font-size:26px;font-weight:700}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;min-height:1500px">
+  <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff">
+    <div style="display:flex;flex-direction:column;min-width:120px"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Schnellstart · 2026-10-13</span></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="pill" style="border-color:#d98c00;background:#fff4e0;color:#7a3e00">Sonde sofort hier starten · ohne Planung</span><a href="Planen.dc.html" style="font-size:14px">Stattdessen vollständig planen →</a></div>
+    <div style="grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <img src="/_blob/0e4c30272f96a31d708cd9be18800e0a" alt="Wicki Partners Ballonteam" style="height:46px;width:auto">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <span class="pill">bwicki</span>
+        <a class="btn" href="Login.dc.html" style="min-height:40px;font-size:14px;padding:0 12px">Abmelden</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex:1;padding:22px 28px;display:flex;flex-direction:column;gap:16px;max-width:1000px;width:100%;box-sizing:border-box;margin:0 auto">
+    <div>
+      <h1 style="margin:0;font-size:32px;font-weight:600;letter-spacing:-.01em">Sonde sofort hier starten</h1>
+      <div class="muted" style="font-size:17px;margin-top:4px">Drei Schritte. Die App stellt alles andere selbst ein, zeichnet auf und überträgt live an s2stueve.</div>
+    </div>
+
+    <section class="step">
+      <div class="n">1</div><h2>Verbinden</h2>
+      <div class="body">
+        <div class="line"><span class="ic g">✓</span><span>Empfänger RR4 am USB-Kabel – <strong>verbunden</strong></span></div>
+        <div class="line"><span class="ic g">✓</span><span>Sonde erkannt – <strong>Nr. <span class="mono">00123</span></strong>, Batterie 4.1 V</span></div>
+        <div class="muted" style="font-size:14px">Wenn hier etwas rot ist, steht daneben genau, was zu tun ist (z. B. «USB-Kabel am RR4 einstecken und <em>Verbinden</em> drücken», «Schwarzes Kabel an RR4 und Sonde stecken, 5 s warten»).</div>
+      </div>
+    </section>
+
+    <section class="step">
+      <div class="n">2</div><h2>Einstellen</h2>
+      <div class="body">
+        <div class="line"><span class="ic g">✓</span><span>Startort = <strong>hier</strong> (GPS des Empfängers) · <span class="val">472636N0083342E</span> · <span class="val">432</span> <span class="u">m AMSL</span></span></div>
+        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+          <span style="font-size:18px;min-width:220px">Cutdown-Höhe über Grund</span>
+          <div class="stepper" aria-label="Cutdown-Höhe"><button type="button">−&nbsp;500</button><div class="v"><span>3'000</span><span class="u" style="font-size:16px">m AGL</span></div><button type="button">+&nbsp;500</button></div>
+          <span class="muted" style="font-size:14px">Vorgabe aus den Einstellungen · die Sonde trennt dort automatisch</span>
+        </div>
+        <div class="line"><span class="ic g">✓</span><span>Luftraum automatisch geprüft (Wind von Open-Meteo, Lufträume von openAIP): <strong>kein Konflikt bis 3'000 m</strong></span></div>
+        <div class="muted" style="font-size:14px">Bei einem Konflikt steht hier gelb: «Luftraum LS-R12 ab 2'100 m – Cutdown auf 1'500 m senken?» mit einem Knopf dafür. DABS/NOTAM bleiben Deine Sache.</div>
+      </div>
+    </section>
+
+    <section class="step">
+      <div class="n">3</div><h2>Starten</h2>
+      <div class="body">
+        <a class="btn primary" href="#" style="min-height:76px;font-size:22px;letter-spacing:.02em">SONDE PROGRAMMIEREN &amp; FREIGEBEN</a>
+        <div class="muted" style="font-size:14px">Schreibt Cutdown-Höhe und Funk-Einstellungen auf die Sonde, liest sie zurück, prüft GPS, Batterie, Sensoren und den Cutdown-Draht – alles automatisch. Dauert 1–2 Minuten.</div>
+        <div class="status wait"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><div><div class="big">WARTEN – Sonde sucht GPS</div><div style="font-size:16px">Sonde ins Freie halten, Antenne nach unten. Das dauert 0.5 bis 2 Minuten. Nicht loslassen.</div></div></div>
+        <div class="status go"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16.5 9.5"/></svg><div><div class="big">BEREIT – JETZT LOSLASSEN</div><div style="font-size:16px">Sonde blinkt 1× pro Sekunde. Die App merkt den Start selbst und wechselt in die Live-Ansicht.</div></div></div>
+        <div class="muted" style="font-size:13px">Die beiden Statusfelder erscheinen nacheinander (erst gelb, dann grün); hier sind beide zur Ansicht gezeigt.</div>
+      </div>
+    </section>
+
+    <div class="muted" style="font-size:14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px"><span>Alles wird protokolliert und als Dateien abgelegt (Dropbox) · Beobachter mit Code sehen den Aufstieg in s2stueve.</span><a href="Vorbereiten.dc.html">Beobachter per WhatsApp benachrichtigen →</a></div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1500}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
