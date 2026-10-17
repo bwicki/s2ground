@@ -50,7 +50,7 @@ export function mountAdmin(root, ctx) {
       + f(t('admin.s.cloudRh'), 'cloudRh', `${s.cloudRh} %`) + f(t('admin.s.folder'), 'defaultFolder', s.defaultFolder || '')
       + f(t('admin.s.autoLogout'), 'autoLogoutH', `${s.autoLogoutH} h`)
       + f(t('admin.s.windFallback'), 'windFallback', `${s.windFallbackDir}° / ${s.windFallbackSpd} m/s`)
-      + f(t('admin.s.cutAlt'), 'cutAltAgl', `${s.cutAltAgl || 3000} m`)
+      + f(t('admin.s.cutAlt'), 'cutAltAgl', `${fmtInt(s.cutAltAgl || 3000)} m`)
       + `<label class="f">${esc(t('admin.s.openaipKey'))}<input class="in mono" name="openaipKey" type="password" autocomplete="off" value="" placeholder="${esc(s.openaipKey === 'set' ? t('admin.s.keySet') : t('admin.s.keyMissing'))}"><span class="muted small">${esc(t('admin.s.openaipHint'))}</span></label>`
       + f(t('admin.s.airspaceCats'), 'airspaceCats', s.airspaceCats || 'P,R,D,CTR,TMA', 'placeholder="P,R,D,CTR,TMA,CTA,TMZ,ATZ,GLD"')
       + `<button class="btn" type="submit">${esc(t('common.save'))}</button>`;
