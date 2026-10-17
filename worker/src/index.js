@@ -69,7 +69,10 @@ async function api(request, env, url, ctx) {
   if (path === '/api/me' && m === 'GET') {
     requireRole(auth);
     const base = { user: auth.user, role: auth.role, master: !!auth.master, observerId: auth.observerId || null, lang: auth.lang || null };
-    return json(auth.role === 'ground' ? { ...base, settings: publicSettings(await getSettings(env)) } : base);
+    if (auth.role === 'ground') return json({ ...base, settings: publicSettings(await getSettings(env)) });
+    // Observers (s2stueve Follow mode) only get the quick replies the master configured for them – nothing else.
+    const s = await getSettings(env);
+    return json({ ...base, settings: { quickRepliesObserver: s.quickRepliesObserver || [] } });
   }
 
   if (path === '/api/users' && m === 'GET') return json(await listUsers(env, auth));
