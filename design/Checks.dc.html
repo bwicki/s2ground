@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>S2 Ground – Start-Checks</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f5f7;color:#14202e;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.4}
+a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.muted{color:#5b6b7f}
+.card{background:#fff;border:1px solid #d9dee6;border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{margin:0;font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7f}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid #eef1f5}
+.row:last-child{border-bottom:0}
+.val{white-space:nowrap;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:16px;font-weight:500}
+.ph{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;color:#5b6b7f;font-weight:500;min-height:44px;box-sizing:border-box;font-size:15px}
+.ph .n{display:inline-flex;width:26px;height:26px;border-radius:50%;align-items:center;justify-content:center;border:1.5px solid #b8c2d0;font-size:13px;font-family:"IBM Plex Mono",monospace;flex:none}
+.ph.active{background:#14202e;color:#fff}
+.ph.active .n{background:#f6b03d;border-color:#f6b03d;color:#14202e;font-weight:600}
+.ph.done .n{background:#1f8a4c;border-color:#1f8a4c;color:#fff}
+.ph.warn .n{background:#d98c00;border-color:#d98c00;color:#fff}
+.ph.bad .n{background:#c0392b;border-color:#c0392b;color:#fff}
+.ph.active.warn .n{background:#d98c00;border-color:#d98c00;color:#fff}
+.ph.active.bad .n{background:#c0392b;border-color:#c0392b;color:#fff}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid #d9dee6;background:#fff;font-size:14px;min-height:38px;box-sizing:border-box}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 20px;border-radius:10px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
+.btn.primary{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.btn.disabled{background:#e4e8ee;border-color:#e4e8ee;color:#7c8a9a;cursor:not-allowed}
+.btn.big{min-height:60px;font-size:18px;padding:0 28px}
+.seg{display:flex;border:1px solid #c7d0dc;border-radius:10px;overflow:hidden;background:#fff}
+.seg button{flex:1;min-height:44px;border:0;background:#fff;color:#5b6b7f;font:inherit;font-weight:500;cursor:pointer}
+.seg button.on{background:#14202e;color:#fff}
+.banner{display:flex;gap:16px;align-items:flex-start;padding:16px 20px;border-radius:12px;border:1px solid}
+.banner.warn{background:#fff4e0;border-color:#f3c97a;color:#7a3e00}
+.banner h3{margin:0;font-size:18px;font-weight:600}
+.banner ol{margin:6px 0 0 0;padding-left:20px;font-size:15px;line-height:1.5}
+.ck{display:grid;grid-template-columns:36px minmax(0, 1fr) 170px;align-items:center;gap:14px;min-height:60px;padding:6px 8px;border-bottom:1px solid #eef1f5}
+.ck:last-child{border-bottom:0}
+.ck .big{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;justify-self:center}
+.ck .lbl{font-weight:600;font-size:16px}
+.ck .sub{font-size:14px;color:#5b6b7f}
+.ck .todo{font-size:14px;color:#7a3e00;font-weight:500}
+details.menu{position:relative;display:flex;z-index:60}
+details.menu>summary{list-style:none;cursor:pointer;width:44px;height:40px;border:1px solid #c7d0dc;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;color:#14202e;box-sizing:border-box}
+details.menu>summary::-webkit-details-marker{display:none}
+details.menu[open]>summary{background:#14202e;border-color:#14202e;color:#fff}
+details.menu>.panel{position:absolute;right:0;top:calc(100% + 10px);width:min(940px,calc(100vw - 56px));max-height:calc(100vh - 130px);overflow:auto;background:#fff;border:1px solid #c7d0dc;border-radius:12px;box-shadow:0 18px 50px rgba(20,32,46,.22);text-align:left;font-weight:400}
+details.menu>.panel>h3{margin:0;padding:14px 20px;border-bottom:1px solid #eef1f5;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7f;display:flex;align-items:center;gap:10px}
+details.menu .body{padding:16px 20px 20px 20px}
+details.menu>.panel>.foot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid #eef1f5;font-size:14px;font-weight:500}
+.logo{width:150px;height:44px;border:1px dashed #9aa7b6;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5b6b7f;text-align:center;background:#fff;flex:none}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;min-height:980px">
+  <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff">
+    <div style="display:flex;flex-direction:column;min-width:120px"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Aufstieg 2026-10-13 · Rümlang</span></div>
+    <nav aria-label="Phasen" style="display:flex;gap:2px;flex-wrap:wrap">
+      <a class="ph done warn" href="Planen.dc.html"><span class="n">!</span>Aufstieg planen</a>
+      <a class="ph done" href="Vorbereiten.dc.html"><span class="n">✓</span>Sonde vorbereiten</a>
+      <a class="ph active warn" href="Checks.dc.html"><span class="n">3</span>Start-Checks</a>
+      <a class="ph " href="Aufstieg.dc.html"><span class="n">4</span>Aufstieg</a>
+      <a class="ph " href="Retrieve.dc.html"><span class="n">5</span>Sonde bergen</a>
+    </nav>
+    <div style="grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <img src="/_blob/0e4c30272f96a31d708cd9be18800e0a" alt="Wicki Partners Ballonteam" style="height:46px;width:auto">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <span class="pill">bwicki</span>
+        <div class="seg" style="width:90px" aria-label="Sprache"><button class="on" type="button">DE</button><button type="button">EN</button></div>
+        <a class="btn" href="Login.dc.html" style="min-height:40px;font-size:14px;padding:0 12px">Abmelden</a>
+        <details class="menu">
+          <summary aria-label="Menü (Experte)" title="Menü"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+          <div class="panel">
+            <h3>Experte: Messwerte hinter den Prüfpunkten</h3>
+<div class="body" style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:4px 24px">
+        <div class="row"><span class="muted">RSSI / SNR</span><span class="val">−62 dBm / 9 dB</span></div>
+        <div class="row"><span class="muted">Paketrate 30 s</span><span class="val">100 % · 10 / 10</span></div>
+        <div class="row"><span class="muted">Zeitschlitz-Sync</span><span class="val">wartet auf GPS</span></div>
+        <div class="row"><span class="muted">Sonde GPS</span><span class="val">4 Sat · kein Fix</span></div>
+        <div class="row"><span class="muted">RR4 GPS</span><span class="val">11 Sat · 3D</span></div>
+        <div class="row"><span class="muted">Ephemeriden an Sonde</span><span class="val">übertragen 14:20</span></div>
+        <div class="row"><span class="muted">Batterie Sonde</span><span class="val">4.10 V</span></div>
+        <div class="row"><span class="muted">T / RH / p Sonde</span><span class="val">12.3 °C · 71 % · 962.1</span></div>
+        <div class="row"><span class="muted">p RR4</span><span class="val">962.4 hPa</span></div>
+        <div class="row"><span class="muted">LED-Test</span><span class="val"><a href="#led">ausführen</a></span></div>
+        <div class="row"><span class="muted">Sendeleistung</span><span class="val">0 dBm (vor Start)</span></div>
+        <div class="row"><span class="muted">Rohdaten</span><span class="val"><a href="#log">Protokoll öffnen</a></span></div>
+      </div>
+            <div class="foot"><a href="Admin.dc.html">Masteruser · Benutzer &amp; App-Einstellungen</a></div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <div style="display:flex;align-items:center;gap:12px;padding:10px 28px;background:#fff;border-bottom:1px solid #d9dee6;flex-wrap:wrap">
+    <a class="btn" href="Vorbereiten.dc.html">← Sonde vorbereiten</a>
+    <span class="muted" style="flex:1;font-size:14px">Schritt 3 von 5 · noch nicht startklar – 2 von 8 Punkten offen</span>
+    <a class="btn" style="border-color:#f3c97a;color:#7a3e00;background:#fff4e0" href="Aufstieg.dc.html">Weiter: Aufstieg →</a>
+  </div>
+  <div style="margin:12px 28px 0 28px;padding:14px 18px;border:1px solid #f3c97a;background:#fff4e0;border-radius:12px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+    <span class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;width:100%">Erscheint beim Klick auf «Weiter», solange Punkte offen sind</span>
+    <strong style="color:#7a3e00;font-size:16px">Trotzdem weiter?</strong>
+    <span style="flex:1;min-width:280px;font-size:14px;color:#14202e">2 Prüfpunkte sind offen (GPS der Sonde, Cutdown-Draht). <br>Wenn Du weitergehst, bleibt Schritt 3 im Verlauf gelb und der Start bleibt gesperrt, <br>bis die Sonde bereit ist.</span>
+    <button class="btn" type="button">Zurück zu den Checks</button>
+    <a class="btn" style="border-color:#f3c97a;color:#7a3e00" href="Aufstieg.dc.html">Trotzdem weiter →</a>
+  </div>
+
+  <main style="flex:1;padding:22px 28px;display:flex;flex-direction:column;gap:18px">
+
+    <div class="banner warn" role="status">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6M12 16h.01"></path></svg>
+      <div style="flex:1">
+        <h3>Noch nicht startklar – 2 von 8 Punkten offen</h3>
+        <div style="font-size:15px;margin-top:4px">Was Du jetzt tun musst:</div>
+        <ol>
+          <li><strong>Sonde ins Freie halten</strong>, Antenne nach unten, freie Sicht zum Himmel – der GPS-Empfang braucht 0.5 bis 2 Minuten. Der Punkt wird von allein grün.</li>
+          <li><strong>«Cutdown-Draht testen» drücken</strong> und die Sonde dabei in der Hand halten (der Faden wird nicht durchtrennt).</li>
+        </ol>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:stretch">
+      <section class="card" style="flex:999 1 560px;gap:2px">
+        <h2 style="margin-bottom:6px">Prüfpunkte – laufen automatisch</h2>
+        <div class="ck"><span class="big" style="background:#1f8a4c">✓</span><div><div class="lbl">Funkverbindung zur Sonde</div><div class="sub">stabil, alle Pakete kommen an</div></div><span></span></div>
+        <div class="ck"><span class="big" style="background:#d98c00">…</span><div><div class="lbl">GPS der Sonde</div><div class="todo">wartet auf Satelliten (4 von 5 nötig) – Sonde ins Freie halten</div></div><span class="muted" style="font-size:13px;justify-self:end">seit 0:48 min</span></div>
+        <div class="ck"><span class="big" style="background:#1f8a4c">✓</span><div><div class="lbl">GPS des Empfängers</div><div class="sub">Position bekannt, Startort übernommen</div></div><span></span></div>
+        <div class="ck"><span class="big" style="background:#1f8a4c">✓</span><div><div class="lbl">Batterie der Sonde</div><div class="sub">voll, reicht ca. 3.5 h</div></div><span></span></div>
+        <div class="ck"><span class="big" style="background:#1f8a4c">✓</span><div><div class="lbl">Sensoren</div><div class="sub">Temperatur, Feuchte und Druck plausibel</div></div><span></span></div>
+        <div class="ck"><span class="big" style="background:#d98c00">!</span><div><div class="lbl">Cutdown-Draht</div><div class="todo">noch nicht getestet</div></div><button class="btn" type="button">Cutdown-Draht testen</button></div>
+        <div class="ck"><span class="big" style="background:#1f8a4c">✓</span><div><div class="lbl">Einstellungen auf der Sonde</div><div class="sub">Aufstieg · Cutdown 1'600 m über Grund · bestätigt</div></div><a href="Vorbereiten.dc.html" style="font-size:14px;justify-self:end">ändern</a></div>
+        <div class="ck"><span class="big" style="background:#1f8a4c">✓</span><div><div class="lbl">Externe Beobachter (S2Stueve-App)</div><div class="sub">verbunden · Command Center, Crew Bergung schauen zu</div></div><span></span></div>
+      </section>
+
+      <aside class="card" style="flex:1 1 320px;justify-content:space-between">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <h2>Start</h2>
+          <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:12px;background:#fff4e0;border:1px solid #f3c97a">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7a3e00" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+            <div><div style="font-size:19px;font-weight:600;color:#7a3e00">Warten</div><div class="muted" style="font-size:13px">Sonde blinkt 2× alle 5 s = noch nicht bereit</div></div>
+          </div>
+          <div class="muted" style="font-size:14px;line-height:1.5">Sobald alles grün ist, blinkt die Sonde 1× pro Sekunde und der Knopf unten wird aktiv. Die Sonde erkennt den Start selbst – nach der Freigabe einfach loslassen.</div>
+          <div class="row"><span class="muted">Geplanter Start</span><span class="val">14:30 UTC</span></div>
+          <div class="row"><span class="muted">Wind am Boden</span><span class="val">230° · 4 kt</span></div>
+          <div class="row"><span class="muted">Externe Beobachter</span><span class="val">2</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span class="btn disabled big" style="min-height:76px;font-size:22px" aria-disabled="true">START FREIGEBEN</span>
+          <div class="muted" style="font-size:13px;text-align:center">wird aktiv, wenn alle 8 Punkte grün sind</div>
+        </div>
+      </aside>
+    </div>
+
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

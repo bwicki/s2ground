@@ -1,0 +1,5 @@
+node_modules/
+tests/shots/
+.wrangler/
+*.log
+.DS_Store

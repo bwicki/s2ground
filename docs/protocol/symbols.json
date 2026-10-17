@@ -1,0 +1,2646 @@
+{
+ "rr4": [
+  {
+   "id": 13,
+   "name": "components",
+   "type": "TypedList(Uint8) / List of Oid",
+   "unit": "",
+   "access": "r",
+   "desc": "Components - List of all components in system (known by this component?)",
+   "c_name": "COMPONENTS",
+   "ontology_file": "required.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 5,
+   "name": "name",
+   "type": "String",
+   "unit": "",
+   "access": "rw",
+   "desc": "Object name - ASCII name assigned to an object",
+   "c_name": "NAME",
+   "ontology_file": "required.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: get)",
+   "windsond_ops": "get"
+  },
+  {
+   "id": 774,
+   "name": "utcSyncSource",
+   "type": "Uint8 (<=2 bad, 3 uncertain, >=4 good)",
+   "unit": "",
+   "access": "r",
+   "desc": "UTC synchronization source - The accuracy of synchronization with global time expressed as the type of synchronization",
+   "c_name": "UTC_SYNC_SOURCE",
+   "ontology_file": "time.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 599,
+   "name": "gnssHasAid",
+   "type": "Bool",
+   "unit": "",
+   "access": "r",
+   "desc": "Has GNSS-aiding information",
+   "c_name": "GNSS_HAS_AIDING",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 1201,
+   "name": "net",
+   "type": "Struct REF105 (Network V6) or REF102 (V5) - read schema via getVarType",
+   "unit": "",
+   "access": "rw",
+   "desc": "Network settings",
+   "c_name": "NET",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub,get,set)",
+   "windsond_ops": "sub,get,set"
+  },
+  {
+   "id": 1235,
+   "name": "encKey",
+   "type": "Struct REF104 {payload: Blob, unixEpochStamp: Uint64Fix1000}",
+   "unit": "",
+   "access": "rw",
+   "desc": "Encryption Key - Key for encrypted communication",
+   "c_name": "ENCRYPTION_KEY",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub,get,set)",
+   "windsond_ops": "sub,get,set"
+  },
+  {
+   "id": 598,
+   "name": "gnssGetAid",
+   "type": "function: no argument -> Blob (chunk of UBX-MGA data; empty blob = end)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Get GNSS-aiding information",
+   "c_name": "GNSS_GET_AIDING",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: call)",
+   "windsond_ops": "call"
+  },
+  {
+   "id": 596,
+   "name": "gnssSignals",
+   "type": "TypedMap(Uint8,Uint8) REF94 or TypedList(GnssSat) REF114",
+   "unit": "dB",
+   "access": "r",
+   "desc": "GNSS SNR - Signal-to-noise ratio for each tracked satellite",
+   "c_name": "GNSS_SIGNALS",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 628,
+   "name": "gnssEnabledConstellations",
+   "type": "Uint8 bitmask: bit0 GPS, bit1 SBAS, bit2 Galileo, bit3 BeiDou, bit4 IMES, bit5 QZSS, bit6 GLONASS (inferred)",
+   "unit": "",
+   "access": "rw",
+   "desc": "GNSS enabled constellations - Which GNSS constellations to enable",
+   "c_name": "GNSS_ENABLED_CONSTELLATIONS",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: get,set)",
+   "windsond_ops": "get,set"
+  },
+  {
+   "id": 24,
+   "name": "ping",
+   "type": "function: Oid -> Oid",
+   "unit": "",
+   "access": "cmd",
+   "desc": "SSP network ping - Ping function to verify the SSP network hasn't changed",
+   "c_name": "PING",
+   "ontology_file": "required.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: call)",
+   "windsond_ops": "call"
+  }
+ ],
+ "s2": [
+  {
+   "id": 1100,
+   "name": "md",
+   "type": "Uint8 (0..7 flight phases, 8/9 charging, >=8 not flying)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Mode - Phase for the system",
+   "c_name": "MODE",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 1101,
+   "name": "gs",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Groundstation ready - If the ground station is ready for system launch",
+   "c_name": "GROUNDSTATION",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1102,
+   "name": "burn",
+   "type": "function (inferred)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Burn - Activate hot-wire",
+   "c_name": "BURN",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1103,
+   "name": "relPr",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "Pascal",
+   "access": "rw",
+   "desc": "Release pressure - The pressure level where the balloon will be automatically detached",
+   "c_name": "RELEASE_PRESSURE",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1104,
+   "name": "burnTest",
+   "type": "function (inferred)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Burn test - Check if the hot-wire activation works without cutting the thread",
+   "c_name": "BURN_TEST",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1105,
+   "name": "relAlt",
+   "type": "Uint16 meter AGL (65535 = none, inferred)",
+   "unit": "meter_AGL",
+   "access": "rw",
+   "desc": "Release altitude - The altitude AGL where the balloon will be automatically detached",
+   "c_name": "RELEASE_ALTITUDE",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1106,
+   "name": "landedBehavior",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Behavior after landing - If the device should be silent after landing",
+   "c_name": "LANDED_BEHAVIOR",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1107,
+   "name": "ledTest",
+   "type": "function (inferred)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "LED test - Check if the power LED works",
+   "c_name": "LED_TEST",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1108,
+   "name": "burnShuntR",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "ohm",
+   "access": "rw",
+   "desc": "Hot-wire shunt resistor value - The resistance of the shunt used to measure current for the hot wire",
+   "c_name": "BURN_SHUNT_RESISTANCE",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1109,
+   "name": "role",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Device role - Controls the behavior of the device",
+   "c_name": "RADIOSONDE_ROLE",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1110,
+   "name": "silentUntilReady",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Silent until ready - The sonde avoids beeping until it is ready for launch",
+   "c_name": "RADIOSONDE_SILENT_UNTIL_READY",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1111,
+   "name": "listenAfterReady",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Listen after ready - The sonde continues to listen to incoming radio commands in ready and rising modes",
+   "c_name": "RADIOSONDE_LISTEN_AFTER_READY",
+   "ontology_file": "radiosonde.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1239,
+   "name": "powerBeforeLaunch_dBm",
+   "type": "Int8/Int16 dBm",
+   "unit": "dBm",
+   "access": "rw",
+   "desc": "Radio transmission power before launch - Power for radio transmission before launch",
+   "c_name": "POWER_BEFORE_LAUNCH_DBM",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub,set)",
+   "windsond_ops": "sub,set"
+  },
+  {
+   "id": 5,
+   "name": "name",
+   "type": "String",
+   "unit": "",
+   "access": "rw",
+   "desc": "Object name - ASCII name assigned to an object",
+   "c_name": "NAME",
+   "ontology_file": "required.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: get)",
+   "windsond_ops": "get"
+  },
+  {
+   "id": 587,
+   "name": "gnssEnabled",
+   "type": "Bool",
+   "unit": "bool",
+   "access": "rw",
+   "desc": "GNSS enabled - If the GNSS module is powered on and the device accepts data from it",
+   "c_name": "GNSS_ENABLED",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 1200,
+   "name": "mac",
+   "type": "Uint32 (sonde number)",
+   "unit": "",
+   "access": "r",
+   "desc": "MAC - Unique address for networking",
+   "c_name": "MAC",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 314,
+   "name": "bat",
+   "type": "Float volt",
+   "unit": "volt",
+   "access": "r",
+   "desc": "Supply voltage",
+   "c_name": "BATTERY_VOLTAGE",
+   "ontology_file": "device.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 1201,
+   "name": "net",
+   "type": "Struct REF105 (Network V6) or REF102 (V5) - read schema via getVarType",
+   "unit": "",
+   "access": "rw",
+   "desc": "Network settings",
+   "c_name": "NET",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub,set)",
+   "windsond_ops": "sub,set"
+  },
+  {
+   "id": 336,
+   "name": "condition",
+   "type": "Uint32 bitmask (bits 0-10 errors, bits 16-23 warnings)",
+   "unit": "",
+   "access": "r",
+   "desc": "Condition - The current run-time situation of the device signalling any errors or warnings",
+   "c_name": "CONDITION",
+   "ontology_file": "device.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 890,
+   "name": "pr",
+   "type": "Uint32 or Float pascal",
+   "unit": "pascal",
+   "access": "r",
+   "desc": "Pressure - Absolute pressure",
+   "c_name": "PRESSURE",
+   "ontology_file": "barometer.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 1226,
+   "name": "txCriterion",
+   "type": "Uint8 enum: 0 always send, 3 require GPS, 4 require GPS (old 1PPS)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Criterion for transmitting - What level of time synchronization the device requires before sending repeated radio transmissions",
+   "c_name": "TX_CRITERION",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub,set)",
+   "windsond_ops": "sub,set"
+  },
+  {
+   "id": 1203,
+   "name": "power_dBm",
+   "type": "Int8/Int16 dBm (-17..22)",
+   "unit": "dBm",
+   "access": "rw",
+   "desc": "Radio transmission power - Power for radio transmission",
+   "c_name": "POWER_DBM",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub,set)",
+   "windsond_ops": "sub,set"
+  },
+  {
+   "id": 891,
+   "name": "prCalOf",
+   "type": "Int (pascal)",
+   "unit": "pascal",
+   "access": "rw",
+   "desc": "Pressure calibration offset - Constant offset added to raw pressure measurement",
+   "c_name": "PRESSURE_CALIBRATION_OFFSET",
+   "ontology_file": "barometer.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: get,set)",
+   "windsond_ops": "get,set"
+  },
+  {
+   "id": 1235,
+   "name": "encKey",
+   "type": "Struct REF104 {payload: Blob, unixEpochStamp: Uint64Fix1000}",
+   "unit": "",
+   "access": "rw",
+   "desc": "Encryption Key - Key for encrypted communication",
+   "c_name": "ENCRYPTION_KEY",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: get,set)",
+   "windsond_ops": "get,set"
+  },
+  {
+   "id": 1241,
+   "name": "encUnlocked",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Encryption feature flag",
+   "c_name": "ENCRYPTION_UNLOCKED",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: get)",
+   "windsond_ops": "get"
+  },
+  {
+   "id": 628,
+   "name": "gnssEnabledConstellations",
+   "type": "Uint8 bitmask: bit0 GPS, bit1 SBAS, bit2 Galileo, bit3 BeiDou, bit4 IMES, bit5 QZSS, bit6 GLONASS (inferred)",
+   "unit": "",
+   "access": "rw",
+   "desc": "GNSS enabled constellations - Which GNSS constellations to enable",
+   "c_name": "GNSS_ENABLED_CONSTELLATIONS",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: get,set)",
+   "windsond_ops": "get,set"
+  },
+  {
+   "id": 596,
+   "name": "gnssSignals",
+   "type": "TypedMap(Uint8,Uint8) REF94 or TypedList(GnssSat) REF114",
+   "unit": "dB",
+   "access": "r",
+   "desc": "GNSS SNR - Signal-to-noise ratio for each tracked satellite",
+   "c_name": "GNSS_SIGNALS",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: sub)",
+   "windsond_ops": "sub"
+  },
+  {
+   "id": 594,
+   "name": "gnssCmd",
+   "type": "function: Blob (0xFF + UBX frame, sent in <=50-byte chunks) -> any",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Send command to the GNSS module",
+   "c_name": "GNSS_COMMAND",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: call)",
+   "windsond_ops": "call"
+  },
+  {
+   "id": 24,
+   "name": "ping",
+   "type": "function: Oid -> Oid",
+   "unit": "",
+   "access": "cmd",
+   "desc": "SSP network ping - Ping function to verify the SSP network hasn't changed",
+   "c_name": "PING",
+   "ontology_file": "required.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0: call)",
+   "windsond_ops": "call"
+  }
+ ],
+ "common": [
+  {
+   "id": 1,
+   "name": "ASCII",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": " - Special meaning: Symbol given as ASCII",
+   "c_name": "ASCII",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 3,
+   "name": "NULL",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "No value or unknown value - Only used when a symbol is expected as value but a value isn't available",
+   "c_name": "NULL",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 4,
+   "name": "id",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Object ID - Sparvio object or component id",
+   "c_name": "ID",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 5,
+   "name": "name",
+   "type": "String",
+   "unit": "",
+   "access": "rw",
+   "desc": "Object name - ASCII name assigned to an object",
+   "c_name": "NAME",
+   "ontology_file": "required.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "rr4": "get",
+    "s2": "get"
+   }
+  },
+  {
+   "id": 6,
+   "name": "serNo",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Device serial number - Unique serial number of a device",
+   "c_name": "SERIAL_NUMBER",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 7,
+   "name": "class",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Object class - A reference to the registry entry for the class of the component **",
+   "c_name": "CLASS",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 8,
+   "name": "app",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Application - What application is running on the device",
+   "c_name": "APPLICATION_ID",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 9,
+   "name": "vars",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Variables - Variables available for the object",
+   "c_name": "VARIABLES",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 10,
+   "name": "funcs",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Functions - Available functions",
+   "c_name": "FUNCTIONS",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 11,
+   "name": "events",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Event types - What event types the component can emit",
+   "c_name": "EVENTS",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 12,
+   "name": "funcSigs",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Function signatures - Available functions along with their argument type and return type",
+   "c_name": "FUNCTION_SIGNATURES",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 13,
+   "name": "components",
+   "type": "TypedList(Uint8) / List of Oid",
+   "unit": "",
+   "access": "r",
+   "desc": "Components - List of all components in system (known by this component?)",
+   "c_name": "COMPONENTS",
+   "ontology_file": "required.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "rr4": "sub"
+   }
+  },
+  {
+   "id": 14,
+   "name": "parent",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Parent component - The neighbor component on the path to the root",
+   "c_name": "PARENT",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 15,
+   "name": "neig",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Neighbor components - List of id's for the direct neighbors (including parent)",
+   "c_name": "NEIGHBOR_COMPONENTS",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 16,
+   "name": "autoSubs",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Automatic subscriptions - Variables and events will be sent to these subscribers without receiving explicit subscription requests",
+   "c_name": "AUTO_SUBSCRIPTIONS",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 17,
+   "name": "utc",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "sec",
+   "access": "r",
+   "desc": "UTC time - Seconds after UTC midnight",
+   "c_name": "UTC_TIME",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 25,
+   "name": "lTime",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Local time - Low-resolution time counting for the individual MCU",
+   "c_name": "LOCAL_TIME",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 28,
+   "name": "trigLTime",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Trigger timestamp - The timestamp in localTime of the most recent SSP trigger rising edge",
+   "c_name": "TRIG_LOCAL_TIME",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 18,
+   "name": "debugEvt",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "event",
+   "desc": "Debug event - Text emitted from sspDebug_printf()",
+   "c_name": "DEBUG_EVENT",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 19,
+   "name": "traceEvt",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "event",
+   "desc": "Trace - Information for tracing the logical path of the application",
+   "c_name": "TRACE_EVENT",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 20,
+   "name": "errorEvt",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "event",
+   "desc": "Error event - Text emitted from sspError_printf()",
+   "c_name": "ERROR_EVENT",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 21,
+   "name": "serTxt",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "event",
+   "desc": "Serial input - Serial input from external source (such as a connected GPS or other sensor)",
+   "c_name": "SERIAL_INPUT",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 23,
+   "name": "hwEvt",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "event",
+   "desc": "Low-level hardware event",
+   "c_name": "HARDWARE_EVENT",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 24,
+   "name": "ping",
+   "type": "function: Oid -> Oid",
+   "unit": "",
+   "access": "cmd",
+   "desc": "SSP network ping - Ping function to verify the SSP network hasn't changed",
+   "c_name": "PING",
+   "ontology_file": "required.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "rr4": "call",
+    "s2": "call"
+   }
+  },
+  {
+   "id": 26,
+   "name": "subDef",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Subscribe to all default variables - Subscribe to all default variables and configuration",
+   "c_name": "SUBSCRIBE_DEFAULTS",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 27,
+   "name": "msg",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Message - A SSP message",
+   "c_name": "MESSAGE",
+   "ontology_file": "required.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 300,
+   "name": "fwVer",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Firmware version",
+   "c_name": "FIRMWARE_VERSION",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 345,
+   "name": "fwVerStr",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Firmware version",
+   "c_name": "FIRMWARE_VERSION_STR",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 326,
+   "name": "verMajor",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Major version - Major compatibility/functionality level",
+   "c_name": "VERSION_MAJOR",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 327,
+   "name": "verMinor",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Minor version - Level of added functionality",
+   "c_name": "VERSION_MINOR",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 328,
+   "name": "verBuild",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Build count - Third level in versioning -- bugfixes etc",
+   "c_name": "VERSION_BUILD",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 301,
+   "name": "reset",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Reset MCU - A request to reset/restart the MCU",
+   "c_name": "RESET",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 302,
+   "name": "shutdown",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Shutdown - A request to shut down the MCU",
+   "c_name": "SHUTDOWN",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 303,
+   "name": "factoryReset",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Factory reset - Revert all persistent settings to factory values",
+   "c_name": "FACTORY_RESET",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 304,
+   "name": "enterBl",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Enter bootloader",
+   "c_name": "ENTER_BOOTLOADER",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 305,
+   "name": "identify",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Identify to user",
+   "c_name": "IDENTIFY_TO_USER",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 309,
+   "name": "chipId",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Chip ID - Hardcoded MCU chip ID (On STM32, UUID)",
+   "c_name": "CHIP_ID",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 310,
+   "name": "uptime",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "sec",
+   "access": "r",
+   "desc": "Uptime - Time since the system started or was reset",
+   "c_name": "UPTIME",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 311,
+   "name": "peakMem",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "byte",
+   "access": "r",
+   "desc": "Peak memory use - Diagnoses software memory utilization",
+   "c_name": "PEAK_MEMORY_USE",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 312,
+   "name": "pcbTemp",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "celsius",
+   "access": "r",
+   "desc": "PCB Temperature - Temperature measured on the circuit board",
+   "c_name": "PCB_TEMPERATURE",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 313,
+   "name": "mcuTemp",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "celsius",
+   "access": "r",
+   "desc": "MCU Temperature - Temperature measured by the microcontroller",
+   "c_name": "MCU_TEMPERATURE",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 314,
+   "name": "bat",
+   "type": "Float volt",
+   "unit": "volt",
+   "access": "r",
+   "desc": "Supply voltage",
+   "c_name": "BATTERY_VOLTAGE",
+   "ontology_file": "device.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "s2": "sub"
+   }
+  },
+  {
+   "id": 322,
+   "name": "batMin",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "volt",
+   "access": "r",
+   "desc": "Supply voltage low point - Lowest observed supply voltage since the figure was reset",
+   "c_name": "BATTERY_VOLTAGE_MIN",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 323,
+   "name": "batAvg",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "volt",
+   "access": "r",
+   "desc": "Supply voltage block average - Average reading of supply voltage",
+   "c_name": "BATTERY_VOLTAGE_AVG",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 324,
+   "name": "batMax",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "volt",
+   "access": "r",
+   "desc": "Supply voltage peak - Highest reading of supply voltage",
+   "c_name": "BATTERY_VOLTAGE_MAX",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 343,
+   "name": "isCharging",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "bool",
+   "access": "r",
+   "desc": "Is charging - If the battery is charging",
+   "c_name": "IS_CHARGING",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 330,
+   "name": "enChrg",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Enable charging - If the device charges the internal battery once a suitable power source is connected",
+   "c_name": "ENABLE_CHARGING",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 336,
+   "name": "condition",
+   "type": "Uint32 bitmask (bits 0-10 errors, bits 16-23 warnings)",
+   "unit": "",
+   "access": "r",
+   "desc": "Condition - The current run-time situation of the device signalling any errors or warnings",
+   "c_name": "CONDITION",
+   "ontology_file": "device.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "s2": "sub"
+   }
+  },
+  {
+   "id": 338,
+   "name": "powerStatus",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Power status - If the supply voltage is within the range required for full operation",
+   "c_name": "POWER_STATUS",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 337,
+   "name": "shutdownInhibit",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Shutdown inhibition - Reasons the device must not power off at the moment",
+   "c_name": "SHUTDOWN_INHIBITION",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 329,
+   "name": "error",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Error - Internal errors that occurred since the variable was last cleared. Useful for a lasting record of errors when an event might not be delivered such as at startup or for communication errors.",
+   "c_name": "ERROR",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 331,
+   "name": "beep",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Beep - Make a sound",
+   "c_name": "BEEP",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 341,
+   "name": "lowBatWarnV",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "volt",
+   "access": "rw",
+   "desc": "Low battery warning level - The device will warn about low battery charge below this voltage",
+   "c_name": "LOW_BATTERY_VOLTAGE_WARNING",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 342,
+   "name": "lowBatErrV",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "volt",
+   "access": "rw",
+   "desc": "Low battery error level - The device will warn about very low battery charge below this voltage",
+   "c_name": "LOW_BATTERY_VOLTAGE_ERROR",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 321,
+   "name": "state",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "",
+   "c_name": "SSPCOMPONENT_STATE",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 307,
+   "name": "count",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Counter - For debug. Incremented for each update",
+   "c_name": "COUNTER",
+   "ontology_file": "device.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 770,
+   "name": "year",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Year - Year in the current century in the Gregorian calendar",
+   "c_name": "YEAR",
+   "ontology_file": "time.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 771,
+   "name": "month",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Month - Month in the Gregorian year using January = 1",
+   "c_name": "MONTH",
+   "ontology_file": "time.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 772,
+   "name": "day",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Day - Day in the Gregorian month using first day in the month = 1",
+   "c_name": "DAY",
+   "ontology_file": "time.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 773,
+   "name": "utcDate",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Date - Date in the Gregorian calendar in the UTC timezone.",
+   "c_name": "DATE",
+   "ontology_file": "time.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 774,
+   "name": "utcSyncSource",
+   "type": "Uint8 (<=2 bad, 3 uncertain, >=4 good)",
+   "unit": "",
+   "access": "r",
+   "desc": "UTC synchronization source - The accuracy of synchronization with global time expressed as the type of synchronization",
+   "c_name": "UTC_SYNC_SOURCE",
+   "ontology_file": "time.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "rr4": "sub"
+   }
+  },
+  {
+   "id": 775,
+   "name": "rtcStatus",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "RTC time fix status - Whether the real-time clock knows the time",
+   "c_name": "RTC_STATUS",
+   "ontology_file": "time.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 776,
+   "name": "unixEpochStamp",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "seconds",
+   "access": "r",
+   "desc": "Unix epoch timestamp - Number of non-leap seconds since 1970-01-01 00:00:00 UTC",
+   "c_name": "UNIX_EPOCH_STAMP",
+   "ontology_file": "time.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 777,
+   "name": "utcSync",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Get latest value of UTC and internal time",
+   "c_name": "UTC_SYNCHRONIZATION",
+   "ontology_file": "time.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1200,
+   "name": "mac",
+   "type": "Uint32 (sonde number)",
+   "unit": "",
+   "access": "r",
+   "desc": "MAC - Unique address for networking",
+   "c_name": "MAC",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "s2": "sub"
+   }
+  },
+  {
+   "id": 1201,
+   "name": "net",
+   "type": "Struct REF105 (Network V6) or REF102 (V5) - read schema via getVarType",
+   "unit": "",
+   "access": "rw",
+   "desc": "Network settings",
+   "c_name": "NET",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "rr4": "sub,get,set",
+    "s2": "sub,set"
+   }
+  },
+  {
+   "id": 1207,
+   "name": "netId",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Network ID - Keeps different systems separated when sharing radio frequency",
+   "c_name": "RADIO_NET_ID",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1217,
+   "name": "freq",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "Hz",
+   "access": "rw",
+   "desc": "Radio frequency - Radio frequency",
+   "c_name": "FREQUENCY",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1208,
+   "name": "freqMhz",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "MHz",
+   "access": "rw",
+   "desc": "Radio frequency - Radio frequency",
+   "c_name": "FREQUENCY_MHZ",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1202,
+   "name": "power_mW",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "mWatt",
+   "access": "rw",
+   "desc": "Radio transmission power - Power for radio transmission",
+   "c_name": "POWER",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1203,
+   "name": "power_dBm",
+   "type": "Int8/Int16 dBm (-17..22)",
+   "unit": "dBm",
+   "access": "rw",
+   "desc": "Radio transmission power - Power for radio transmission",
+   "c_name": "POWER_DBM",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "s2": "sub,set"
+   }
+  },
+  {
+   "id": 1218,
+   "name": "loraSpreadingFactor",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "LoRa spreading factor",
+   "c_name": "LORA_SPREADING_FACTOR",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1219,
+   "name": "loraBandwidth",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "LoRa bandwidth",
+   "c_name": "LORA_BANDWIDTH",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1221,
+   "name": "loraCodingRate",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "LoRa coding rate - The amount of forward error correction to encode LoRa packets with",
+   "c_name": "LORA_CODING_RATE",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1220,
+   "name": "radioTimeslots",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Radio timeslot count - How many sondes to reserve time-division multiplexing (TDMA) for",
+   "c_name": "RADIO_TIMESLOTS",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1223,
+   "name": "radioSlotMs",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "msec",
+   "access": "rw",
+   "desc": "Sonde slot length - The maximum duration of each radio transmission",
+   "c_name": "RADIO_SLOT_MS",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1224,
+   "name": "radioMaxData",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "bytes",
+   "access": "rw",
+   "desc": "Radio max data - The max number of payload data in each sonde radio transmission",
+   "c_name": "RADIO_MAX_DATA",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1225,
+   "name": "radioGroundSlotMs",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "msec",
+   "access": "rw",
+   "desc": "Ground station slot length - The maximum duration of radio transmissions from the ground station",
+   "c_name": "RADIO_GROUND_SLOT_MS",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1222,
+   "name": "radioFrequency",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "Hz",
+   "access": "rw",
+   "desc": "Radio center frequency",
+   "c_name": "RADIO_FREQUENCY",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1215,
+   "name": "radioEnabled",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "bool",
+   "access": "rw",
+   "desc": "Enable built-in radio - If the built-in telemetry radio should be used at all (persistent)",
+   "c_name": "RADIO_ENABLED",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1216,
+   "name": "radioPaused",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "bool",
+   "access": "rw",
+   "desc": "Pause built-in radio - Stops the built-in radio until the next device reset",
+   "c_name": "RADIO_PAUSED",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1213,
+   "name": "radioState",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Current state of the radio",
+   "c_name": "RADIO_STATE",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1214,
+   "name": "radioCrystalCalib",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Radio crystal calibration - A device-dependent value controlling the load capacitance used for the local radio crystal",
+   "c_name": "RADIO_CRYSTAL_CALIBRATION",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1227,
+   "name": "snr",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "dB",
+   "access": "r",
+   "desc": "SNR - Signal to noise ratio (dB)",
+   "c_name": "SNR",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1229,
+   "name": "rssi",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "dBm",
+   "access": "r",
+   "desc": "RSSI - Received Signal Strength Indicator (dBm)",
+   "c_name": "RSSI",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1235,
+   "name": "encKey",
+   "type": "Struct REF104 {payload: Blob, unixEpochStamp: Uint64Fix1000}",
+   "unit": "",
+   "access": "rw",
+   "desc": "Encryption Key - Key for encrypted communication",
+   "c_name": "ENCRYPTION_KEY",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "rr4": "sub,get,set",
+    "s2": "get,set"
+   }
+  },
+  {
+   "id": 1237,
+   "name": "encTagSize",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Tag size - Number of bytes used in the encryption tag",
+   "c_name": "ENCRYPTION_TAG_SIZE",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1238,
+   "name": "encEnablePlain",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Enable unencrypted radio - Enable unencrypted radio",
+   "c_name": "ENCRYPTION_USE_PLAIN",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1240,
+   "name": "encUnlock",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Unlock encryption feature",
+   "c_name": "ENCRYPTION_UNLOCK",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1241,
+   "name": "encUnlocked",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Encryption feature flag",
+   "c_name": "ENCRYPTION_UNLOCKED",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "s2": "get"
+   }
+  },
+  {
+   "id": 1236,
+   "name": "payload",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Payload",
+   "c_name": "PAYLOAD",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1204,
+   "name": "sid",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Session ID - Temporary short radio ID",
+   "c_name": "SESSION_ID",
+   "ontology_file": "radio.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 1226,
+   "name": "txCriterion",
+   "type": "Uint8 enum: 0 always send, 3 require GPS, 4 require GPS (old 1PPS)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Criterion for transmitting - What level of time synchronization the device requires before sending repeated radio transmissions",
+   "c_name": "TX_CRITERION",
+   "ontology_file": "radio.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "s2": "sub,set"
+   }
+  },
+  {
+   "id": 570,
+   "name": "lat",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Latitude - Latitude as degrees in WGS-84 datum (with decimals)",
+   "c_name": "LATITUDE",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 571,
+   "name": "lon",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Longitude - Longitude as degrees in WGS-84 datum (with decimals)",
+   "c_name": "LONGITUDE",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 572,
+   "name": "pos",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "GNSS position - Global position",
+   "c_name": "POSITION",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 573,
+   "name": "alt",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "meter",
+   "access": "r",
+   "desc": "Altitude - Geopotential altitude above mean sea level (MSL)",
+   "c_name": "ALTITUDE",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 574,
+   "name": "sats",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "GPS Satellites - Number of satellites used for fix",
+   "c_name": "GPS_SATELLITES",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 575,
+   "name": "hdop",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "meter",
+   "access": "r",
+   "desc": "GNSS HDOP - Horizontal Dilution Of Precision",
+   "c_name": "GPS_HDOP",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 576,
+   "name": "dir",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "angleDeg",
+   "access": "r",
+   "desc": "Course - Travelling towards this direction with 'spd' speed. This can differ from heading. 0 = moving towards true N, 90 = towards true E",
+   "c_name": "COURSE",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 577,
+   "name": "spd",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "meterPerSec",
+   "access": "r",
+   "desc": "Speed - Speed of the vehicle relative to ground",
+   "c_name": "SPEED",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 586,
+   "name": "gnssGoodFix",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Good GPS fix",
+   "c_name": "GNSS_GOOD_FIX",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 587,
+   "name": "gnssEnabled",
+   "type": "Bool",
+   "unit": "bool",
+   "access": "rw",
+   "desc": "GNSS enabled - If the GNSS module is powered on and the device accepts data from it",
+   "c_name": "GNSS_ENABLED",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "s2": "sub"
+   }
+  },
+  {
+   "id": 591,
+   "name": "gnssLastDataTs",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "ticks",
+   "access": "r",
+   "desc": "Time of most recent GNSS data",
+   "c_name": "GNSS_LAST_DATA_TIMESTAMP",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 592,
+   "name": "gnssCrcErrors",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "GNSS discarded frames - Number of data frames from the GNSS receiver that have been discarded",
+   "c_name": "GNSS_CRC_ERRORS",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 594,
+   "name": "gnssCmd",
+   "type": "function: Blob (0xFF + UBX frame, sent in <=50-byte chunks) -> any",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Send command to the GNSS module",
+   "c_name": "GNSS_COMMAND",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "s2": "call"
+   }
+  },
+  {
+   "id": 595,
+   "name": "gnssTtff",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "seconds",
+   "access": "r",
+   "desc": "GNSS Time To First Fix - The time from GPS power-up to first position fix",
+   "c_name": "GNSS_TIME_TO_FIRST_FIX",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 596,
+   "name": "gnssSignals",
+   "type": "TypedMap(Uint8,Uint8) REF94 or TypedList(GnssSat) REF114",
+   "unit": "dB",
+   "access": "r",
+   "desc": "GNSS SNR - Signal-to-noise ratio for each tracked satellite",
+   "c_name": "GNSS_SIGNALS",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "rr4": "sub",
+    "s2": "sub"
+   }
+  },
+  {
+   "id": 598,
+   "name": "gnssGetAid",
+   "type": "function: no argument -> Blob (chunk of UBX-MGA data; empty blob = end)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Get GNSS-aiding information",
+   "c_name": "GNSS_GET_AIDING",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "rr4": "call"
+   }
+  },
+  {
+   "id": 599,
+   "name": "gnssHasAid",
+   "type": "Bool",
+   "unit": "",
+   "access": "r",
+   "desc": "Has GNSS-aiding information",
+   "c_name": "GNSS_HAS_AIDING",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "rr4": "sub"
+   }
+  },
+  {
+   "id": 600,
+   "name": "doColdGnssStart",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Do cold GNSS start - Restart the GNSS receiver without retaining state information",
+   "c_name": "DO_COLD_GNSS_START",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 601,
+   "name": "velX",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "meterPerSec",
+   "access": "r",
+   "desc": "Velocity x - Velocity towards true north relative ground",
+   "c_name": "VELOCITY_X",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 602,
+   "name": "velY",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "meterPerSec",
+   "access": "r",
+   "desc": "Velocity y - Velocity towards true east relative ground",
+   "c_name": "VELOCITY_Y",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 603,
+   "name": "velZ",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "meterPerSec",
+   "access": "r",
+   "desc": "Velocity z - Velocity upwards relative ground",
+   "c_name": "VELOCITY_Z",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 609,
+   "name": "gnssFixType",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Gps fix type - 0: no GPS connected. 1: no fix. 2: 2D position. 3: 3D position. 4: DGPS/SBAS aided 3D position. 5: RTK float. 6: RTK fixed. 7: Static Fixed. 8: PPP",
+   "c_name": "GNSS_FIX_TYPE",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 610,
+   "name": "horizAcc",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "meter",
+   "access": "r",
+   "desc": "Horizontal position uncertainty - Horizontal position uncertainty (standard deviation)",
+   "c_name": "HORIZ_ACC",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 611,
+   "name": "altAcc",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "meter",
+   "access": "r",
+   "desc": "Altitude uncertainty - Altitude uncertainty (standard deviation)",
+   "c_name": "ALT_ACC",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 612,
+   "name": "speedAcc",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "meter/s",
+   "access": "r",
+   "desc": "Speed uncertainty - Speed uncertainty (standard deviation)",
+   "c_name": "SPEED_ACC",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 625,
+   "name": "gnssId",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "GNSS ID - An ID for a constellation",
+   "c_name": "GNSS_ID",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 626,
+   "name": "satId",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Satellite ID - An ID for a satellite",
+   "c_name": "SAT_ID",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 627,
+   "name": "cno",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Carrier to noise ratio - Carrier to noise density ratio",
+   "c_name": "CARRIER_TO_NOISE_RATIO",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 628,
+   "name": "gnssEnabledConstellations",
+   "type": "Uint8 bitmask: bit0 GPS, bit1 SBAS, bit2 Galileo, bit3 BeiDou, bit4 IMES, bit5 QZSS, bit6 GLONASS (inferred)",
+   "unit": "",
+   "access": "rw",
+   "desc": "GNSS enabled constellations - Which GNSS constellations to enable",
+   "c_name": "GNSS_ENABLED_CONSTELLATIONS",
+   "ontology_file": "positioning.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "rr4": "get,set",
+    "s2": "get,set"
+   }
+  },
+  {
+   "id": 629,
+   "name": "flags",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Flags",
+   "c_name": "FLAGS",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 605,
+   "name": "magDec",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "angleDeg",
+   "access": "rw",
+   "desc": "Magnetic declination - How many degrees east magnetic north is from true north.",
+   "c_name": "MAGNETIC_DECLINATION",
+   "ontology_file": "positioning.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 700,
+   "name": "temp",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "celsius",
+   "access": "r",
+   "desc": "Ambient temperature - Air temperature undisturbed by the system",
+   "c_name": "AMBIENT_TEMPERATURE",
+   "ontology_file": "temp_rh.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 701,
+   "name": "rh",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "percent",
+   "access": "r",
+   "desc": "Relative humidity - Percent relative humidity in ambient air",
+   "c_name": "RELATIVE_HUMIDITY",
+   "ontology_file": "temp_rh.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 712,
+   "name": "tempK",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "kelvin",
+   "access": "r",
+   "desc": "Ambient temperature (Kelvin) - Air temperature undisturbed by the system (Kelvin)",
+   "c_name": "AMBIENT_TEMPERATURE_K",
+   "ontology_file": "temp_rh.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 713,
+   "name": "temp2",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "celsius",
+   "access": "r",
+   "desc": "Second temperature - Temperature measurement at system-specific location",
+   "c_name": "SECOND_TEMPERATURE",
+   "ontology_file": "temp_rh.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 890,
+   "name": "pr",
+   "type": "Uint32 or Float pascal",
+   "unit": "pascal",
+   "access": "r",
+   "desc": "Pressure - Absolute pressure",
+   "c_name": "PRESSURE",
+   "ontology_file": "barometer.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "s2": "sub"
+   }
+  },
+  {
+   "id": 891,
+   "name": "prCalOf",
+   "type": "Int (pascal)",
+   "unit": "pascal",
+   "access": "rw",
+   "desc": "Pressure calibration offset - Constant offset added to raw pressure measurement",
+   "c_name": "PRESSURE_CALIBRATION_OFFSET",
+   "ontology_file": "barometer.txt",
+   "confidence": "confirmed (used by Windsond 3.8.0)",
+   "windsond_ops": {
+    "s2": "get,set"
+   }
+  },
+  {
+   "id": 892,
+   "name": "prCalRef",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "pascal",
+   "access": "rw",
+   "desc": "Pressure calibration reference - Set this value to the current correct pressure to calibrate subsequent pressure measurements",
+   "c_name": "PRESSURE_CALIBRATION_REFERENCE",
+   "ontology_file": "barometer.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 893,
+   "name": "baroTemp",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "celsius",
+   "access": "r",
+   "desc": "Barometer temperature - Temperature reported by the barometer IC",
+   "c_name": "BAROMETER_TEMPERATURE",
+   "ontology_file": "barometer.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 894,
+   "name": "refPr",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "pascal",
+   "access": "rw",
+   "desc": "Reference pressure - Reference pressure/altitude for converting other pressure/altitude pairs",
+   "c_name": "REFERENCE_PRESSURE",
+   "ontology_file": "barometer.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 895,
+   "name": "refAlt",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "meter",
+   "access": "rw",
+   "desc": "Reference altitude - Reference pressure/altitude for converting other pressure/altitude pairs. MSL",
+   "c_name": "REFERENCE_ALTITUDE",
+   "ontology_file": "barometer.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 896,
+   "name": "prUnfiltered",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "pascal",
+   "access": "r",
+   "desc": "Unfiltered pressure - Absolute pressure before low-pass filtering",
+   "c_name": "PRESSURE_UNFILTERED",
+   "ontology_file": "barometer.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 503,
+   "name": "samplingInterval",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "msec",
+   "access": "rw",
+   "desc": "Sampling interval - How often sampling should be performed",
+   "c_name": "SAMPLING_INTERVAL",
+   "ontology_file": "sampling.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 509,
+   "name": "samplingMode",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Sampling mode - How sampling is requested to behave",
+   "c_name": "SAMPLING_MODE",
+   "ontology_file": "sampling.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 500,
+   "name": "snsState",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "sensorState",
+   "access": "r",
+   "desc": "Sensor state - Whether a sensor is ready to produce valid data. Values are currently defined in ssp_component.h.",
+   "c_name": "SENSOR_STATE",
+   "ontology_file": "sampling.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 501,
+   "name": "snsErr",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Sensing error - Error code indicating why a measurement value is missing (device-specific values?)",
+   "c_name": "SENSING_ERROR",
+   "ontology_file": "sampling.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 508,
+   "name": "configParams",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Configuration parameters - The variables that hold calibration, metadata and configuration data",
+   "c_name": "CONFIG_PARAMETERS",
+   "ontology_file": "sampling.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 5203,
+   "name": "rbeep",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Make an audible beep for every received radio packet",
+   "c_name": "RECEIVE_BEEP",
+   "ontology_file": "user.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 5202,
+   "name": "echo",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "Repeat all input characters to the user",
+   "c_name": "ECHO",
+   "ontology_file": "user.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 5200,
+   "name": "uiText",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "rw",
+   "desc": "User text - Text to display to the user",
+   "c_name": "UI_TEXT",
+   "ontology_file": "user.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 466,
+   "name": "sspTxCount",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Messages sent - Amount of messages sent",
+   "c_name": "SSP_TX_COUNT",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 467,
+   "name": "sspRxCount",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Messages received - Amount of messages received",
+   "c_name": "SSP_RX_COUNT",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 468,
+   "name": "sspTxErrCount",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Tx Error count - Amount of errors that have occurred while sending",
+   "c_name": "SSP_TX_ERR_COUNT",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 469,
+   "name": "sspRxErrCount",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Rx Error count - Amount of errors that have occurred while receiving",
+   "c_name": "SSP_RX_ERR_COUNT",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 473,
+   "name": "sspLinkCount",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Link Count - Amount of ssp links",
+   "c_name": "SSP_LINK_COUNT",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 472,
+   "name": "sspCondition",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "r",
+   "desc": "Ssp Condition - Ssp error flags",
+   "c_name": "SSP_CONDITION",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 474,
+   "name": "sspLinkStats",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Link Statistics - Get statistics for a link",
+   "c_name": "SPP_LINK_STATISTICS",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 475,
+   "name": "sspResetLinkStats",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Reset Link Statistics - Reset link statistics values",
+   "c_name": "SSP_RESET_LINK_STATISTICS",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 476,
+   "name": "sspLinkHandlerStats",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "Linkhandler Statistics - Get statistics for a link handler",
+   "c_name": "SSP_LINKHANDLER_STATISTICS",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 463,
+   "name": "sspLinkEvt",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "event",
+   "desc": "SSP link event",
+   "c_name": "LINK_EVENT",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  },
+  {
+   "id": 464,
+   "name": "sspLinkProbeOnce",
+   "type": "see getVarType (schema negotiated at runtime)",
+   "unit": "",
+   "access": "cmd",
+   "desc": "SSP probe a link for a neighbor once",
+   "c_name": "SSP_LINK_PROBE_ONCE",
+   "ontology_file": "ssp.txt",
+   "confidence": "inferred from ontology",
+   "windsond_ops": ""
+  }
+ ],
+ "registry": [
+  {
+   "regIx": 31,
+   "label": "NameMap",
+   "c_name": "SSP_TYPE_NAME_MAP",
+   "type": "TypedMap(Symbol, Any)"
+  },
+  {
+   "regIx": 32,
+   "label": "Uint16Fix10",
+   "c_name": "SSP_TYPE_UINT16_FIX10",
+   "type": "Fixpoint(0, 16, 1)"
+  },
+  {
+   "regIx": 33,
+   "label": "Uint16Fix100",
+   "c_name": "SSP_TYPE_UINT16_FIX100",
+   "type": "Fixpoint(0, 16, 2)"
+  },
+  {
+   "regIx": 34,
+   "label": "Uint16Fix1000",
+   "c_name": "SSP_TYPE_UINT16_FIX1000",
+   "type": "Fixpoint(0, 16, 3)"
+  },
+  {
+   "regIx": 35,
+   "label": "Int16Fix10",
+   "c_name": "SSP_TYPE_INT16_FIX10",
+   "type": "Fixpoint(1, 16, 1)"
+  },
+  {
+   "regIx": 36,
+   "label": "Int16Fix100",
+   "c_name": "SSP_TYPE_INT16_FIX100",
+   "type": "Fixpoint(1, 16, 2)"
+  },
+  {
+   "regIx": 37,
+   "label": "Int16Fix1000",
+   "c_name": "SSP_TYPE_INT16_FIX1000",
+   "type": "Fixpoint(1, 16, 3)"
+  },
+  {
+   "regIx": 38,
+   "label": "Uint32Fix1000",
+   "c_name": "SSP_TYPE_UINT32_FIX1000",
+   "type": "Fixpoint(0, 32, 3)"
+  },
+  {
+   "regIx": 39,
+   "label": "Int32Fix10",
+   "c_name": "SSP_TYPE_INT32_FIX10",
+   "type": "Fixpoint(1, 32, 1)"
+  },
+  {
+   "regIx": 40,
+   "label": "Int32Fix1e6",
+   "c_name": "SSP_TYPE_GPS",
+   "type": "Fixpoint(1, 32, 6)"
+  },
+  {
+   "regIx": 41,
+   "label": "SchemaDef",
+   "c_name": "SSP_GSCHEMA_DEFINITION",
+   "type": "Tuple(Uint8, Schema)"
+  },
+  {
+   "regIx": 42,
+   "label": "Uint8List",
+   "c_name": "SSP_GSCHEMA_LIST_OF_UINT8",
+   "type": "TypedList(Uint8)"
+  },
+  {
+   "regIx": 43,
+   "label": "SymbolList",
+   "c_name": "SSP_GSCHEMA_LIST_OF_SYMBOLS",
+   "type": "TypedList(Symbol)"
+  },
+  {
+   "regIx": 44,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_TWO_UINT8",
+   "type": "TypedList(2, Uint8)"
+  },
+  {
+   "regIx": 45,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_TWO_UINT32",
+   "type": "TypedList(2, Uint32)"
+  },
+  {
+   "regIx": 101,
+   "label": "Uint64Fix1000",
+   "c_name": "SSP_TYPE_UINT64_FIX1000",
+   "type": "Fixpoint(0, 64, 3)"
+  },
+  {
+   "regIx": 60,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_MAP_UINT8_TO_LIST_OF_SYMBOL",
+   "type": "TypedMap(Uint8, SymbolList)"
+  },
+  {
+   "regIx": 66,
+   "label": "FuncSig",
+   "c_name": "SSP_TYPE_FUNCTION_SIGNATURE",
+   "type": "Tuple(Ref, Ref)"
+  },
+  {
+   "regIx": 67,
+   "label": "FuncSigList",
+   "c_name": "SSP_TYPE_LIST_OF_FUNCTION_SIGNATURES",
+   "type": "TypedMap(Symbol, FuncSig)"
+  },
+  {
+   "regIx": 75,
+   "label": "Oid",
+   "c_name": "SSP_TYPE_OBJECT_ID",
+   "type": "Uint8"
+  },
+  {
+   "regIx": 76,
+   "label": "MsgBlob",
+   "c_name": "SSP_GSCHEMA_MESSAGE",
+   "type": "Blob"
+  },
+  {
+   "regIx": 86,
+   "label": "OidMap",
+   "c_name": "SSP_GSCHEMA_MAP_OID_TO_ANY",
+   "type": "TypedMap(Oid, Any)"
+  },
+  {
+   "regIx": 99,
+   "label": "SchemaUint8Tuple",
+   "c_name": "SSP_GSCMEMA_SCHEMA_UINT8_TUPLE",
+   "type": "Tuple(Schema, Uint8)"
+  },
+  {
+   "regIx": 96,
+   "label": "SchemaList",
+   "c_name": "SSP_GSCHEMA_LIST_OF_SCHEMAS",
+   "type": "TypedList(SchemaUint8Tuple)"
+  },
+  {
+   "regIx": 100,
+   "label": "Uint8AndUint32",
+   "c_name": "SSP_GSCHEMA_UINT8_AND_UINT32",
+   "type": "Tuple(Uint8, Uint32)"
+  },
+  {
+   "regIx": 103,
+   "label": "Uint8Uint32List",
+   "c_name": "SSP_GSCHEMA_LIST_OF_UINT8_AND_UINT32",
+   "type": "TypedList(Uint8AndUint32)"
+  },
+  {
+   "regIx": 68,
+   "label": "",
+   "c_name": "SSP_TYPE_ID_AND_STRING",
+   "type": "Tuple(Uint8, String)"
+  },
+  {
+   "regIx": 46,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_DATE",
+   "type": "Struct{year: Uint8, month: Uint8, day: Uint8}"
+  },
+  {
+   "regIx": 74,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_UTCSYNC",
+   "type": "Struct{lTime: Uint64, utc: Uint64}"
+  },
+  {
+   "regIx": 52,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_VERSION_2",
+   "type": "Struct{verMajor: Uint8, verMinor: Uint8}"
+  },
+  {
+   "regIx": 94,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_MAP_UINT8_UINT8",
+   "type": "TypedMap(Uint8, Uint8)"
+  },
+  {
+   "regIx": 113,
+   "label": "GnssSat",
+   "c_name": "SSP_GSCHEMA_GNSS_SAT",
+   "type": "Struct{gnssId: Uint8, satId: Uint8, cno: Uint8, flags: Uint8}"
+  },
+  {
+   "regIx": 114,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_GNSS_SATS",
+   "type": "TypedList(GnssSat)"
+  },
+  {
+   "regIx": 107,
+   "label": "Uint32List",
+   "c_name": "SSP_GSCHEMA_LIST_OF_UINT32",
+   "type": "TypedList(Uint32)"
+  },
+  {
+   "regIx": 108,
+   "label": "Uint16AndUint32List",
+   "c_name": "SSP_GSCHEMA_UINT16_AND_LIST_OF_UINT32",
+   "type": "Tuple(Uint16, Uint32List)"
+  },
+  {
+   "regIx": 109,
+   "label": "OidList",
+   "c_name": "SSP_GSCHEMA_LIST_OF_OBJECT_ID",
+   "type": "TypedList(Oid)"
+  },
+  {
+   "regIx": 57,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_MAP_FROM_UINT8_TO_STRING",
+   "type": "TypedMap(Uint8, String)"
+  },
+  {
+   "regIx": 73,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_UINT8_AND_STRING",
+   "type": "Tuple(Uint8, String)"
+  },
+  {
+   "regIx": 112,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_UINT8_AND_UINT16_AND_STRING",
+   "type": "Tuple(Uint8, Uint16, String)"
+  },
+  {
+   "regIx": 48,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_NETWORK",
+   "type": "Struct{netId: Uint8, freqMhz: Uint16Fix100, format: Uint8, baud: Uint8, duty: Uint8}"
+  },
+  {
+   "regIx": 102,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_NETWORK_V5",
+   "type": "Struct{netId: Uint8, freq: Uint32, loraSpreadingFactor: Uint8, loraBandwidth: Uint8, loraCodingRate: Uint8, radioTimeslots: Uint8, radioSlotMs: Uint16, radioMaxData: Uint8, samplingInterval: Uint16, radioGroundSlotMs: Uint16}"
+  },
+  {
+   "regIx": 105,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_NETWORK_V6",
+   "type": "Struct{freq: Uint32, loraSpreadingFactor: Uint8, loraBandwidth: Uint8, loraCodingRate: Uint8, radioTimeslots: Uint8, radioSlotMs: Uint16, radioMaxData: Uint8, samplingInterval: Uint16, radioGroundSlotMs: Uint16}"
+  },
+  {
+   "regIx": 104,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_ENCRYPTION_DATA",
+   "type": "Struct{payload: Blob, unixEpochStamp: Uint64Fix1000}"
+  },
+  {
+   "regIx": 106,
+   "label": "",
+   "c_name": "SSP_GSCHEMA_TIME_SERIES_UINT8",
+   "type": "Struct{samplingInterval: Float, payload: Uint8List}"
+  }
+ ],
+ "_meta": {
+  "source": "Derived from Windsond 3.8.0 ontology files + decompiled usage; interoperability description only",
+  "access_legend": {
+   "r": "readable variable (uget/sub)",
+   "rw": "readable and settable variable",
+   "cmd": "function (call)",
+   "event": "event (sub)"
+  },
+  "note": "The concrete SSP type of every variable must be read from the device with getVarType; the \"type\" column gives the best known value."
+ }
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>S2 Ground – Anmeldung</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f5f7;color:#14202e;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.4}
+a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.muted{color:#5b6b7f}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 22px;border-radius:10px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
+.btn.primary{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.in{min-height:50px;padding:0 14px;border-radius:8px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-size:16px;box-sizing:border-box;width:100%}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:14px;color:#5b6b7f;font-weight:500}
+.seg{display:flex;border:1px solid #c7d0dc;border-radius:10px;overflow:hidden;background:#fff}
+.seg button{flex:1;min-height:44px;border:0;background:#fff;color:#5b6b7f;font:inherit;font-weight:500;cursor:pointer}
+.seg button.on{background:#14202e;color:#fff}
+.logo{width:150px;height:44px;border:1px dashed #9aa7b6;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5b6b7f;text-align:center;background:#fff;flex:none}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;min-height:900px">
+  <header style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 28px;flex-wrap:wrap">
+    <div class="seg" style="width:96px" aria-label="Sprache"><button class="on" type="button">DE</button><button type="button">EN</button></div>
+    <img src="/_blob/0e4c30272f96a31d708cd9be18800e0a" alt="Wicki Partners Ballonteam" style="height:60px;width:auto;flex:none;align-self:flex-start">
+  </header>
+
+  <main style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
+    <form style="width:440px;max-width:100%;background:#fff;border:1px solid #d9dee6;border-radius:16px;padding:36px;display:flex;flex-direction:column;gap:20px;box-shadow:0 10px 30px rgba(20,32,46,.06)">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <h1 style="margin:0;font-size:30px;font-weight:600;letter-spacing:-.01em">S2 Ground</h1>
+        <span class="muted">Sondenstart mit Windsond S2 / RR4 · Wicki Partners Ballonteam</span>
+      </div>
+      <label class="f">Anmeldename<input class="in" type="text" value="bwicki" autocomplete="username"></label>
+      <label class="f">Passwort<input class="in" type="password" value="••••••••" autocomplete="current-password"></label>
+      <a class="btn primary" href="Planen.dc.html" style="min-height:56px;font-size:17px">Anmelden</a>
+      <p class="muted" style="margin:0;font-size:13px;line-height:1.5">Zugänge vergibt der Masteruser. Jede Anmeldung und jeder Schritt eines Sondenaufstiegs werden im Hintergrund protokolliert. Nach 2 h ohne Aktivität ist eine neue Anmeldung nötig.</p>
+    </form>
+  </main>
+
+  <footer style="display:flex;justify-content:space-between;padding:16px 28px;font-size:13px" class="muted">
+    <span>s2ground.wicki.aero · Version 0.1</span>
+    <span>Chrome oder Edge · Windows-Laptop und Android-Pad</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

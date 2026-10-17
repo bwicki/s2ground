@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>S2 Ground – Sonde vorbereiten</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f5f7;color:#14202e;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.4}
+a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.muted{color:#5b6b7f}
+.card{background:#fff;border:1px solid #d9dee6;border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{margin:0;font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7f}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid #eef1f5}
+.row:last-child{border-bottom:0}
+.val{white-space:nowrap;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:17px;font-weight:500}
+.ph{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;color:#5b6b7f;font-weight:500;min-height:44px;box-sizing:border-box;font-size:15px}
+.ph .n{display:inline-flex;width:26px;height:26px;border-radius:50%;align-items:center;justify-content:center;border:1.5px solid #b8c2d0;font-size:13px;font-family:"IBM Plex Mono",monospace;flex:none}
+.ph.active{background:#14202e;color:#fff}
+.ph.active .n{background:#f6b03d;border-color:#f6b03d;color:#14202e;font-weight:600}
+.ph.done .n{background:#1f8a4c;border-color:#1f8a4c;color:#fff}
+.ph.warn .n{background:#d98c00;border-color:#d98c00;color:#fff}
+.ph.bad .n{background:#c0392b;border-color:#c0392b;color:#fff}
+.ph.active.warn .n{background:#d98c00;border-color:#d98c00;color:#fff}
+.ph.active.bad .n{background:#c0392b;border-color:#c0392b;color:#fff}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid #d9dee6;background:#fff;font-size:14px;min-height:38px;box-sizing:border-box}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.g{background:#1f8a4c}.y{background:#d98c00}.r{background:#c0392b}.b{background:#1f5fbf}.x{background:#9aa7b6}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 20px;border-radius:10px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
+.btn.primary{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.btn.big{min-height:60px;font-size:18px;padding:0 28px}
+.in{min-height:46px;padding:0 12px;border-radius:8px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-size:15px;box-sizing:border-box;width:100%}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#5b6b7f;font-weight:500}
+.seg{display:flex;border:1px solid #c7d0dc;border-radius:10px;overflow:hidden;background:#fff}
+.seg button{flex:1;min-height:44px;border:0;background:#fff;color:#5b6b7f;font:inherit;font-weight:500;cursor:pointer}
+.seg button.on{background:#14202e;color:#fff}
+.banner{display:flex;gap:16px;align-items:flex-start;padding:16px 20px;border-radius:12px;border:1px solid}
+.banner.ok{background:#e6f6ec;border-color:#9fd8b4;color:#14532d}
+.banner h3{margin:0;font-size:18px;font-weight:600}
+.okline{display:flex;align-items:flex-start;gap:12px;min-height:44px}
+.okline .big{margin-top:5px;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none;color:#fff;font-size:15px;font-weight:700}
+details.menu{position:relative;display:flex;z-index:60}
+details.menu>summary{list-style:none;cursor:pointer;width:44px;height:40px;border:1px solid #c7d0dc;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;color:#14202e;box-sizing:border-box}
+details.menu>summary::-webkit-details-marker{display:none}
+details.menu[open]>summary{background:#14202e;border-color:#14202e;color:#fff}
+details.menu>.panel{position:absolute;right:0;top:calc(100% + 10px);width:min(940px,calc(100vw - 56px));max-height:calc(100vh - 130px);overflow:auto;background:#fff;border:1px solid #c7d0dc;border-radius:12px;box-shadow:0 18px 50px rgba(20,32,46,.22);text-align:left;font-weight:400}
+details.menu>.panel>h3{margin:0;padding:14px 20px;border-bottom:1px solid #eef1f5;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7f;display:flex;align-items:center;gap:10px}
+details.menu .body{padding:16px 20px 20px 20px}
+details.menu>.panel>.foot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid #eef1f5;font-size:14px;font-weight:500}
+.chk{display:flex;align-items:center;gap:10px;min-height:40px;font-size:14px}
+.chk input{width:20px;height:20px;accent-color:#1f5fbf}
+.logo{width:150px;height:44px;border:1px dashed #9aa7b6;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5b6b7f;text-align:center;background:#fff;flex:none}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;min-height:1150px">
+  <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff">
+    <div style="display:flex;flex-direction:column;min-width:120px"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Aufstieg 2026-10-13 · Rümlang</span></div>
+    <nav aria-label="Phasen" style="display:flex;gap:2px;flex-wrap:wrap">
+      <a class="ph done warn" href="Planen.dc.html"><span class="n">!</span>Aufstieg planen</a>
+      <a class="ph active" href="Vorbereiten.dc.html"><span class="n">2</span>Sonde vorbereiten</a>
+      <a class="ph " href="Checks.dc.html"><span class="n">3</span>Start-Checks</a>
+      <a class="ph " href="Aufstieg.dc.html"><span class="n">4</span>Aufstieg</a>
+      <a class="ph " href="Retrieve.dc.html"><span class="n">5</span>Sonde bergen</a>
+    </nav>
+    <div style="grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <img src="/_blob/0e4c30272f96a31d708cd9be18800e0a" alt="Wicki Partners Ballonteam" style="height:46px;width:auto">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <span class="pill">bwicki</span>
+        <div class="seg" style="width:90px" aria-label="Sprache"><button class="on" type="button">DE</button><button type="button">EN</button></div>
+        <a class="btn" href="Login.dc.html" style="min-height:40px;font-size:14px;padding:0 12px">Abmelden</a>
+        <details class="menu" open>
+          <summary aria-label="Menü (Experte)" title="Menü"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+          <div class="panel">
+            <h3>Experte: Einstellungen ändern, Funk, Anschluss</h3>
+<div class="body" style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:20px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Sonde</div>
+          <label class="f">Betriebsart<div class="seg"><button class="on" type="button">Aufstieg</button><button type="button">Abwurf (Dropsonde)</button></div><span style="font-size:12px;font-weight:400">Abwurf nur wählbar, wenn eine Dropsonde am Kabel erkannt wird; der Sondentyp wird automatisch gelesen</span></label>
+          <label class="f">Cutdown-Höhe über Grund (überschreibt Planung)<input class="in mono" type="text" value="1 600 m"></label>
+          <label class="chk"><input type="checkbox"> Kein automatischer Cutdown (nur manuell)</label>
+          <label class="chk"><input type="checkbox" checked=""> Bodenhöhe in Druckabgleich einbeziehen</label>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap">Funk RR4 ↔ S2 <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;background:#14202e;color:#fff;font-size:11px;letter-spacing:.03em"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>nur Masteruser</span></div>
+          <div class="muted" style="font-size:12px;font-weight:400;margin-top:-4px">Für alle anderen Benutzer nur lesbar (Felder gesperrt). Jede Änderung wird protokolliert.</div>
+          <label class="f">Frequenz<input class="in mono" type="text" value="433.900 MHz"></label>
+          <label class="f">Sendeleistung Sonde / vor Start<input class="in mono" type="text" value="13 dBm / 0 dBm"></label>
+          <label class="f">LoRa (SF · Bandbreite · Coding)<input class="in mono" type="text" value="SF 9 · 125 kHz · 4/5"></label>
+          <label class="f">Zeitschlitze<input class="in mono" type="text" value="1"></label>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Anschluss &amp; Firmware</div>
+          <div class="row"><span class="muted">Port</span><span class="val">COM5 · 115'200 Bd</span></div>
+          <div class="row"><span class="muted">RR4 Firmware</span><span class="val">1.4.x</span></div>
+          <div class="row"><span class="muted">S2 Firmware</span><span class="val">3.x</span></div>
+          <div class="row"><span class="muted">Sonde-Status</span><span class="val">wartet · LED 2× / 5 s</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button">Anderen Port wählen</button><button class="btn" type="button">Protokoll anzeigen</button></div>
+        </div>
+        <div style="grid-column:span 3;display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:20px;padding-top:12px;border-top:1px solid #eef1f5">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Verknüpfung s2stueve (nur im Ausnahmefall nötig)</div>
+            <div class="row"><span class="muted">Relay</span><span class="val" style="color:#1f8a4c">verbunden · 0 Fehler</span></div>
+            <div class="row"><span class="muted">Follow-Code (Gastzugang)</span><span class="val">7K2-M4Q</span></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button">Kopieren</button><button class="btn" type="button">Neu erzeugen</button><button class="btn" type="button">Gastlink</button></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Datenablage (zusätzlich zur App)</div>
+            <label class="f">Ordner – Vorgabe aus den Masteruser-Einstellungen<input class="in mono" type="text" value="…\Dropbox\S2 Ground\Aufstiege\" readonly></label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button">Ordner wählen</button><button class="btn" type="button">Vorgabe übernehmen</button></div>
+            <span class="muted" style="font-size:12px">Je Aufstieg werden CSV, .sounding und KML dort abgelegt (Dropbox synchronisiert). Zugriff einmalig im Browser erlauben (Chrome/Edge); auf dem Android-Pad landen die Dateien im Download-Ordner.</span>
+          </div>
+          <div class="muted" style="font-size:13px;align-self:end">Beobachter mit eigenem Login sehen den Aufstieg in s2stueve automatisch. Der Follow-Code dient nur für Gäste ohne Login.</div>
+        </div>
+        <div style="grid-column:span 3;display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-top:6px;border-top:1px solid #eef1f5">
+          <button class="btn primary" type="button">Geänderte Einstellungen an Sonde übertragen</button>
+          <span class="muted" style="font-size:13px">Die App liest alle Werte zurück und zeigt oben erst dann «OK», wenn sie übereinstimmen.</span>
+        </div>
+      </div>
+            <div class="foot"><a href="Admin.dc.html">Masteruser · Benutzer &amp; App-Einstellungen</a></div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <div style="display:flex;align-items:center;gap:12px;padding:10px 28px;background:#fff;border-bottom:1px solid #d9dee6;flex-wrap:wrap">
+    <a class="btn" href="Planen.dc.html">← Aufstieg planen</a>
+    <span class="muted" style="flex:1;font-size:14px">Schritt 2 von 5 · Sonde programmiert. Sonde und Ballon bereit.</span>
+    <a class="btn primary" href="Checks.dc.html">Weiter: Start-Checks →</a>
+  </div>
+
+  <main style="flex:1;padding:22px 28px;display:flex;flex-direction:column;gap:18px">
+
+    <div class="banner ok" role="status">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.7 2.7L16.5 9.5"></path></svg>
+      <div style="flex:1"><h3>OK – Sonde programmiert. Sonde und Ballon bereit.</h3><div style="font-size:15px;margin-top:2px">Empfänger und Sonde sind verbunden, die Planung ist auf die Sonde übertragen. Du kannst zu den Checks.</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:16px">
+      <section class="card">
+        <h2>Empfänger RR4</h2>
+        <div class="okline"><span class="big" style="background:#1f8a4c">✓</span><div><div style="font-weight:600">Verbunden über USB</div><div class="muted" style="font-size:13px">GPS fix · Batterie 87 % · 433.900 MHz</div></div></div>
+        <p class="muted" style="margin:0;font-size:13px">Nicht verbunden? Dann steht hier: «RR4 mit dem USB-Kabel anschliessen und <em>Verbinden</em> drücken».</p>
+      </section>
+      <section class="card">
+        <h2>Sonde S2</h2>
+        <div class="okline"><span class="big" style="background:#1f8a4c">✓</span><div><div style="font-weight:600">Erkannt am RR4 · Sonde-Nr. <span class="mono">00123</span></div><div class="muted" style="font-size:13px">S2H3-R-B20 · wiederverwendbar · Funkadresse (MAC) <span class="mono">1F3A</span> · Batterie lädt 4.1 V · Firmware 3.x</div></div></div>
+        <p class="muted" style="margin:0;font-size:13px">Nicht erkannt? Dann steht hier: «Schwarzes Kabel an RR4 und S2 stecken, ca. 5 s warten».</p>
+      </section>
+      <section class="card">
+        <h2>Ballon</h2>
+        <div class="okline"><span class="big" style="background:#1f8a4c">✓</span><div><div style="font-weight:600">Latex 9 g · Ballongas (Linde)</div><div class="muted" style="font-size:13px">aus der Planung übernommen</div></div></div>
+        <div>
+          <div class="row"><span class="muted">Bruttosteigkraft (ohne Sonde)</span><span class="val">≈ 39 g</span></div>
+          <div class="row"><span class="muted">Nettosteigkraft (mit Sonde 14 g)</span><span class="val">≈ 25 g</span></div>
+          <div class="row"><span class="muted">Ziel-Steigrate</span><span class="val">2.5 m/s</span></div>
+        </div>
+        <button class="btn" type="button" style="border-color:#9fd8b4;color:#14532d;background:#e6f6ec;text-align:left;line-height:1.3;justify-content:space-between"><span>Ballon mit ≈ 39 g Bruttosteigkraft bereit</span><span style="white-space:nowrap">✓&nbsp;Bestätigt</span></button>
+        <p class="muted" style="margin:0;font-size:13px">Vor der Bestätigung steht der Knopf gelb: «Ballon mit ≈ 39 g Bruttosteigkraft bereit? <span style="white-space:nowrap;font-weight:600">→&nbsp;Bestätigen</span>»</p>
+      </section>
+      <section class="card">
+        <h2>Externe Beobachter (S2Stueve-App)</h2>
+        <div class="okline"><span class="big" style="background:#1f8a4c">✓</span><div><div style="font-weight:600">Verbindung zu s2stueve steht (automatisch)</div><div class="muted" style="font-size:13px">Dieser Aufstieg ist dort unter «Follow sonde ascent» sichtbar</div></div></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#f4f5f7"><span><span class="dot g" style="display:inline-block;margin-right:8px"></span>Command Center <span class="muted">(cc)</span></span><span class="muted" style="font-size:13px">seit 14:19 UTC</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#f4f5f7"><span><span class="dot g" style="display:inline-block;margin-right:8px"></span>Crew Bergung <span class="muted">(crew1)</span></span><span class="muted" style="font-size:13px">seit 14:24 UTC</span></div>
+        </div>
+        <p class="muted" style="margin:0;font-size:13px">Ohne Beobachter steht hier: «Noch niemand schaut zu». Kein Code nötig – die Verknüpfung läuft im Hintergrund.</p>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>DATEN, DIE AUF DIE SONDE GESCHRIEBEN WURDEN</h2>
+      <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:12px">
+        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Betriebsart</div><div class="val">Aufstieg vom Boden</div></div>
+        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">CUTDOWN&nbsp;</div><div class="val">1'600 m AGL · 2'030 m AMSL</div></div>
+        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Frequenz</div><div class="val">433.900 MHz</div></div>
+        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Bodendruck / QNH</div><div class="val">962.4 hPa · 1013.8</div></div>
+      </div>
+      <div class="muted" style="font-size:13px">Zurückgelesen von der Sonde um 14:21:48 UTC – stimmt überein. Ändern: im Menü ☰ oben rechts.</div>
+    </section>
+
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1150}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

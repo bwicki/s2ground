@@ -1,0 +1,40 @@
+# S2 Ground – Cloudflare Worker (static app + API + live sessions)
+# Deployed by .github/workflows/deploy.yml (wrangler deploy). Secrets are NOT in this file.
+name = "s2ground"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Static web app (web/) served from the Worker's assets binding; hash routing → SPA fallback
+[assets]
+directory = "../web"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# Custom domain – the route is created automatically on the first deploy (zone wicki.aero in the same account)
+routes = [
+  { pattern = "s2ground.wicki.aero", custom_domain = true }
+]
+
+[vars]
+APP_ORIGINS = "https://s2ground.wicki.aero,https://s2stueve.wicki.aero"
+TOKEN_HOURS = "24"
+
+# D1 database: create it once in the Cloudflare dashboard (Workers & Pages → D1 → "s2ground")
+# and paste its ID below (README step 3). Apply worker/schema.sql via the "migrate" workflow input.
+[[d1_databases]]
+binding = "DB"
+database_name = "s2ground"
+database_id = "REPLACE-WITH-YOUR-D1-DATABASE-ID"
+
+# Durable Object: one LiveSession per ascent (WebSocket fan-out, history replay, chat)
+[[durable_objects.bindings]]
+name = "LIVE"
+class_name = "LiveSession"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["LiveSession"]
+
+[observability]
+enabled = true

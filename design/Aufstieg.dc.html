@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>S2 Ground – Aufstieg</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f5f7;color:#14202e;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.4}
+a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.muted{color:#5b6b7f}
+.card{background:#fff;border:1px solid #d9dee6;border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card h2{margin:0;font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7f}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid #eef1f5}
+.row:last-child{border-bottom:0}
+.val{white-space:nowrap;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:16px;font-weight:500}
+.ph{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;color:#5b6b7f;font-weight:500;min-height:44px;box-sizing:border-box;font-size:15px}
+.ph .n{display:inline-flex;width:26px;height:26px;border-radius:50%;align-items:center;justify-content:center;border:1.5px solid #b8c2d0;font-size:13px;font-family:"IBM Plex Mono",monospace;flex:none}
+.ph.active{background:#14202e;color:#fff}
+.ph.active .n{background:#f6b03d;border-color:#f6b03d;color:#14202e;font-weight:600}
+.ph.done .n{background:#1f8a4c;border-color:#1f8a4c;color:#fff}
+.ph.warn .n{background:#d98c00;border-color:#d98c00;color:#fff}
+.ph.bad .n{background:#c0392b;border-color:#c0392b;color:#fff}
+.ph.active.warn .n{background:#d98c00;border-color:#d98c00;color:#fff}
+.ph.active.bad .n{background:#c0392b;border-color:#c0392b;color:#fff}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid #d9dee6;background:#fff;font-size:14px;min-height:38px;box-sizing:border-box}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.g{background:#1f8a4c}.b{background:#1f5fbf}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 20px;border-radius:10px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
+.btn.primary{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.btn.danger{background:#c0392b;border-color:#c0392b;color:#fff}
+.btn.big{min-height:60px;font-size:18px;padding:0 28px}
+.seg{display:flex;border:1px solid #c7d0dc;border-radius:10px;overflow:hidden;background:#fff}
+.seg button{flex:1;min-height:44px;border:0;background:#fff;color:#5b6b7f;font:inherit;font-weight:500;cursor:pointer}
+.seg button.on{background:#14202e;color:#fff}
+.banner{display:flex;gap:16px;align-items:center;padding:14px 20px;border-radius:12px;border:1px solid}
+.banner.ok{background:#e6f6ec;border-color:#9fd8b4;color:#14532d}
+.banner h3{margin:0;font-size:18px;font-weight:600}
+.tile{background:#fff;border:1px solid #d9dee6;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tile .k{font-size:13px;color:#5b6b7f;text-transform:uppercase;letter-spacing:.04em}
+.tile .v{white-space:nowrap;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:32px;font-weight:600;line-height:1.1}
+.tile .u{white-space:nowrap;font-size:13px;color:#5b6b7f}
+.tile .cmp{display:flex;align-items:center;gap:7px;font-size:13px;color:#14202e;margin-top:6px;padding-top:7px;border-top:1px solid #e4e8ee}
+.dot.y{background:#d98c00}.dot.r{background:#c0392b}
+.msg{display:flex;flex-direction:column;gap:3px;max-width:88%}
+.msg .who{font-size:12px;color:#5b6b7f}
+.msg .t{padding:9px 12px;border-radius:10px;background:#eef1f5;font-size:15px}
+.msg.me{align-self:flex-end;align-items:flex-end}
+.msg.me .t{background:#e6f6ec}
+.in{min-height:46px;padding:0 14px;border-radius:8px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-size:16px;box-sizing:border-box;width:100%}
+details.menu{position:relative;display:flex;z-index:60}
+details.menu>summary{list-style:none;cursor:pointer;width:44px;height:40px;border:1px solid #c7d0dc;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;color:#14202e;box-sizing:border-box}
+details.menu>summary::-webkit-details-marker{display:none}
+details.menu[open]>summary{background:#14202e;border-color:#14202e;color:#fff}
+details.menu>.panel{position:absolute;right:0;top:calc(100% + 10px);width:min(940px,calc(100vw - 56px));max-height:calc(100vh - 130px);overflow:auto;background:#fff;border:1px solid #c7d0dc;border-radius:12px;box-shadow:0 18px 50px rgba(20,32,46,.22);text-align:left;font-weight:400}
+details.menu>.panel>h3{margin:0;padding:14px 20px;border-bottom:1px solid #eef1f5;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7f;display:flex;align-items:center;gap:10px}
+details.menu .body{padding:16px 20px 20px 20px}
+details.menu>.panel>.foot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid #eef1f5;font-size:14px;font-weight:500}
+details.viewer{border:1px solid #d9dee6;border-radius:12px;background:#fff;overflow:hidden}
+details.viewer summary{list-style:none;cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;font-weight:600;font-size:14px;color:#14202e;border-bottom:1px solid #eef1f5}
+details.viewer summary::-webkit-details-marker{display:none}
+details.viewer:not([open]) summary{border-bottom:0}
+details.viewer:not([open]) summary svg{transform:rotate(45deg)}
+.logo{width:150px;height:44px;border:1px dashed #9aa7b6;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5b6b7f;text-align:center;background:#fff;flex:none}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;min-height:980px">
+  <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff">
+    <div style="display:flex;flex-direction:column;min-width:120px"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Aufstieg 2026-10-13 · Rümlang</span></div>
+    <nav aria-label="Phasen" style="display:flex;gap:2px;flex-wrap:wrap">
+      <a class="ph done warn" href="Planen.dc.html"><span class="n">!</span>Aufstieg planen</a>
+      <a class="ph done" href="Vorbereiten.dc.html"><span class="n">✓</span>Sonde vorbereiten</a>
+      <a class="ph done" href="Checks.dc.html"><span class="n">✓</span>Start-Checks</a>
+      <a class="ph active" href="Aufstieg.dc.html"><span class="n">4</span>Aufstieg</a>
+      <a class="ph " href="Retrieve.dc.html"><span class="n">5</span>Sonde bergen</a>
+    </nav>
+    <div style="grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <img src="/_blob/0e4c30272f96a31d708cd9be18800e0a" alt="Wicki Partners Ballonteam" style="height:46px;width:auto">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <span class="pill">bwicki</span>
+        <div class="seg" style="width:90px" aria-label="Sprache"><button class="on" type="button">DE</button><button type="button">EN</button></div>
+        <a class="btn" href="Login.dc.html" style="min-height:40px;font-size:14px;padding:0 12px">Abmelden</a>
+        <details class="menu">
+          <summary aria-label="Menü (Experte)" title="Menü"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+          <div class="panel">
+            <h3>Experte: Funk, Position, Rohdaten, Dateien</h3>
+<div class="body" style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:4px 24px">
+        <div class="row"><span class="muted">RSSI / SNR</span><span class="val">−87 dBm / 6 dB</span></div>
+        <div class="row"><span class="muted">Pakete / Ausfälle</span><span class="val">1'243 / 3</span></div>
+        <div class="row"><span class="muted">Position</span><span class="val">472729N0083604E</span></div>
+        <div class="row"><span class="muted">Druck</span><span class="val">803 hPa</span></div>
+        <div class="row"><span class="muted">Batterie Sonde</span><span class="val">4.02 V</span></div>
+        <div class="row"><span class="muted">Sendeleistung</span><span class="val">13 dBm</span></div>
+        <div class="row"><span class="muted">Relay s2stueve</span><span class="val">1'243 Punkte gesendet</span></div>
+        <div class="row"><span class="muted">Wolken-Schwelle (RH) für Schattierung</span><span class="val"><input class="in mono" type="text" value="92 %" style="width:90px;min-height:34px;padding:0 8px;font-size:14px;text-align:right"></span></div>
+        <div class="row"><span class="muted">Rohdaten</span><span class="val"><a href="#log">Protokoll öffnen</a></span></div>
+        <div class="row"><span class="muted">Dateien</span><span class="val"><a href="#csv">CSV</a> · <a href="#snd">.sounding</a></span></div>
+      </div>
+            <div class="foot"><a href="Admin.dc.html">Masteruser · Benutzer &amp; App-Einstellungen</a></div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <div style="display:flex;align-items:center;gap:12px;padding:10px 28px;background:#fff;border-bottom:1px solid #d9dee6;flex-wrap:wrap">
+    <a class="btn" href="Checks.dc.html">← Start-Checks</a>
+    <span class="muted" style="flex:1;font-size:14px">Schritt 4 von 5 · Aufstieg läuft – Daten gehen live an s2stueve</span>
+    <a class="btn primary" href="Retrieve.dc.html">Weiter: Sonde bergen →</a>
+  </div>
+
+  <main style="flex:1;padding:20px 28px;display:flex;flex-direction:column;gap:16px">
+
+    <div class="banner ok" role="status">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.7 2.7L16.5 9.5"></path></svg>
+      <div style="flex:1"><h3>OK – Aufstieg läuft seit 12:34 min, Daten gehen live an s2stueve</h3><div style="font-size:15px;margin-top:2px">Funk stabil · 2 Beobachter im Follow-Modus · Cutdown automatisch bei 1'600 m über Grund (in ≈ 2 min)</div></div>
+    </div>
+
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:stretch">
+      <section style="flex:999 1 620px;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:12px">
+          <div class="tile" style="grid-column:span 2;border-color:#1f5fbf"><span class="k">Höhe</span><div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap"><div style="display:flex;align-items:baseline;gap:6px"><span class="v" style="font-size:44px;color:#1f5fbf">1'910</span><span class="u">m AMSL</span></div><div style="display:flex;align-items:baseline;gap:6px"><span class="v" style="font-size:44px;color:#1f5fbf">1'480</span><span class="u">m AGL</span></div></div><span class="u">6'270 ft · Cutdown bei 1'600 m AGL</span><div class="cmp"><span class="dot g"></span><span>Plan 1'880 m AMSL · 1'450 m AGL</span></div></div>
+          <div class="tile"><span class="k">Steigrate</span><div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:nowrap"><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap"><span class="v">+2.6</span><span class="u">m/s</span></div></div><div class="cmp"><span class="dot g"></span><span>Plan 2.5 m/s</span></div></div>
+          <div class="tile"><span class="k">Wind</span><div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:nowrap"><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap"><span class="v" style="font-size:28px">245° / 18</span><span class="u">kt</span></div></div><div class="cmp"><span class="dot y"></span><span>Plan 240° / 14 kt</span></div></div>
+          <div class="tile"><span class="k">Temperatur</span><div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:nowrap"><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap"><span class="v">−1.2</span><span class="u">°C</span></div></div><div class="cmp"><span class="dot g"></span><span>Modell −1.5 °C</span></div></div>
+          <div class="tile"><span class="k">Feuchte</span><div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:nowrap"><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap"><span class="v">68</span><span class="u">% RH</span></div></div><div class="cmp"><span class="dot g"></span><span>Modell 65 %</span></div></div>
+          <div class="tile"><span class="k">Abstand zum Start</span><div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:nowrap"><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap"><span class="v">2.1</span><span class="u">km</span></div></div><div class="cmp"><span class="dot g"></span><span>Plan 1.9 km · 058°</span></div></div>
+          <div class="tile"><span class="k">Bis Cutdown</span><div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:nowrap"><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap"><span class="v">≈ 2</span><span class="u">min</span></div></div><div class="cmp"><span class="dot g"></span><span>Plan 14:41 UTC</span></div></div>
+          <div class="tile" style="grid-column:span 4"><span class="k">Funkverbindung RR4 ↔ Sonde</span><div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:12px 20px;align-items:end"><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="u">Signalstärke</span><div style="display:flex;align-items:baseline;gap:8px;white-space:nowrap"><span class="v" style="font-size:28px">−87</span><span class="u">dBm</span><svg width="34" height="20" viewBox="0 0 34 20" aria-label="Signal 4 von 5 Balken" style="flex:none;align-self:center"><rect x="0" y="14" width="5" height="6" fill="#1f8a4c"/><rect x="7" y="11" width="5" height="9" fill="#1f8a4c"/><rect x="14" y="8" width="5" height="12" fill="#1f8a4c"/><rect x="21" y="5" width="5" height="15" fill="#1f8a4c"/><rect x="28" y="2" width="5" height="18" fill="#d9dee6"/></svg></div></div><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="u">Pakete empfangen</span><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap"><span class="v" style="font-size:28px">1'243</span></div></div><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="u">Pakete verloren</span><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap"><span class="v" style="font-size:28px">3</span><span class="u">(0.2 %)</span></div></div><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="u">Letztes Paket</span><div style="display:flex;align-items:baseline;gap:6px;white-space:nowrap"><span class="v" style="font-size:28px">vor 1</span><span class="u">s</span></div></div></div><div class="cmp"><span class="dot g"></span><span>Verbindung gut · Sonde sendet jede Sekunde</span></div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:14px">
+          <details class="viewer" open="">
+            <summary><span>Karte · Soll-Ist-Vergleich</span><span style="display:flex;gap:8px;align-items:center"><a class="btn" href="Detail.dc.html" style="min-height:30px;font-size:12px;padding:0 10px;font-weight:600">Detailsicht ⤢</a><span aria-hidden="true" style="display:inline-flex;width:28px;height:28px;border-radius:6px;border:1px solid #c7d0dc;align-items:center;justify-content:center;color:#5b6b7f"><a href="Detail.dc.html" aria-label="Detailsicht öffnen" style="display:block"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"></path></svg></a></span></span></summary>
+            <svg viewBox="0 0 440 300" width="100%" height="300" role="img" aria-label="Karte mit geplanter Trajektorie (grau gestrichelt), tatsächlicher Trajektorie (blau) und blinkendem Punkt an der aktuellen Sondenposition">
+              <rect x="0" y="0" width="440" height="300" fill="#eef3ea"></rect>
+              <path d="M0 210 Q80 180 150 200 T300 170 T440 160 L440 300 L0 300Z" fill="#e3ebdc"></path>
+              <path d="M0 90 Q120 70 200 110 T440 70" fill="none" stroke="#cfd9e3" stroke-width="8"></path>
+              <path d="M40 300 L90 210 L150 170 L220 140 L300 105 L380 75 L440 50" fill="none" stroke="#fff" stroke-width="5"></path>
+              <path d="M40 300 L90 210 L150 170 L220 140 L300 105 L380 75 L440 50" fill="none" stroke="#d6a84e" stroke-width="1.5"></path>
+              <path d="M230 40 L380 28 L420 110 L330 160 L240 130Z" fill="#c0392b" fill-opacity=".10" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="5 4"></path>
+              <text x="285" y="66" fill="#7b1f14" font-size="11" font-weight="600">LS-R12 ab 2'100 m</text>
+              <polyline fill="none" stroke="#9aa7b6" stroke-width="2.5" stroke-dasharray="6 5" points="90,230 130,205 170,178 215,150 262,126 305,108 340,100 365,125 380,152 388,178"></polyline>
+              <polyline fill="none" stroke="#1f5fbf" stroke-width="3" points="90,230 132,202 176,172 222,146"></polyline>
+              <circle cx="90" cy="230" r="7" fill="#1f8a4c" stroke="#fff" stroke-width="2"></circle>
+              <text x="100" y="246" fill="#14202e" font-size="11" font-weight="600">Start</text>
+              <polygon points="349.0,100.0 344.2,101.7 346.4,106.4 341.7,104.2 340.0,109.0 338.3,104.2 333.6,106.4 335.8,101.7 331.0,100.0 335.8,98.3 333.6,93.6 338.3,95.8 340.0,91.0 341.7,95.8 346.4,93.6 344.2,98.3" fill="#f6b03d" stroke="#e07b00" stroke-width="1.5"></polygon>
+              <text x="300" y="92" fill="#5b6b7f" font-size="11">Cutdown (Plan)</text>
+              <g stroke="#c0392b" stroke-width="2" fill="none"><circle cx="388" cy="178" r="9"></circle><line x1="373" y1="178" x2="403" y2="178"></line><line x1="388" y1="163" x2="388" y2="193"></line></g><circle cx="388" cy="178" r="2.5" fill="#c0392b"></circle>
+              <text x="372" y="198" fill="#5b6b7f" font-size="11">Landung (Plan)</text>
+              <circle cx="222" cy="146" r="12" fill="#1f5fbf" fill-opacity=".25"><animate attributeName="r" values="8;16;8" dur="1.6s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" values=".35;.05;.35" dur="1.6s" repeatCount="indefinite"></animate></circle>
+              <circle cx="222" cy="146" r="6" fill="#1f5fbf" stroke="#fff" stroke-width="2"></circle>
+              <text x="234" y="140" fill="#14202e" font-size="12" font-weight="600">Sonde jetzt · 1'480 m AGL</text>
+              <g transform="translate(12,12)" aria-hidden="true"><rect width="100" height="26" rx="5" fill="#fff" stroke="#c7d0dc"></rect><rect x="2" y="2" width="48" height="22" rx="4" fill="#14202e"></rect><text x="26" y="18" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Karte</text><text x="75" y="18" text-anchor="middle" font-size="11" fill="#14202e">Satellit</text></g>
+              <g font-size="11" fill="#5b6b7f"><line x1="300" y1="282" x2="330" y2="282" stroke="#9aa7b6" stroke-width="2.5" stroke-dasharray="6 5"></line><text x="336" y="286">Plan</text><line x1="370" y1="282" x2="400" y2="282" stroke="#1f5fbf" stroke-width="3"></line><text x="406" y="286">Ist</text></g><g font-size="10" fill="#5b6b7f"><circle cx="22" cy="282" r="5" fill="#1f8a4c" stroke="#fff" stroke-width="2"></circle><text x="32" y="286">Start</text><polygon points="86.0,282.0 82.8,283.1 84.2,286.2 81.1,284.8 80.0,288.0 78.9,284.8 75.8,286.2 77.2,283.1 74.0,282.0 77.2,280.9 75.8,277.8 78.9,279.2 80.0,276.0 81.1,279.2 84.2,277.8 82.8,280.9" fill="#f6b03d" stroke="#e07b00" stroke-width="1.5"></polygon><text x="92" y="286">Cutdown</text><g stroke="#c0392b" stroke-width="2" fill="none"><circle cx="150" cy="282" r="6"></circle><line x1="140" y1="282" x2="160" y2="282"></line><line x1="150" y1="267" x2="150" y2="297"></line></g><circle cx="150" cy="282" r="2.5" fill="#c0392b"></circle><text x="164" y="286">Landung</text><circle cx="222" cy="282" r="5" fill="#1f5fbf" stroke="#fff" stroke-width="1.5"></circle><text x="232" y="286">Sonde jetzt</text></g>
+            </svg>
+          </details>
+          <details class="viewer" open="">
+            <summary><span>Vertikalsicht · Gelände, Lufträume</span><span style="display:flex;gap:8px;align-items:center"><a class="btn" href="Detail.dc.html" style="min-height:30px;font-size:12px;padding:0 10px;font-weight:600">Detailsicht ⤢</a><span aria-hidden="true" style="display:inline-flex;width:28px;height:28px;border-radius:6px;border:1px solid #c7d0dc;align-items:center;justify-content:center;color:#5b6b7f"><a href="Detail.dc.html" aria-label="Detailsicht öffnen" style="display:block"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"></path></svg></a></span></span></summary>
+            <svg viewBox="0 0 440 300" width="100%" height="300" role="img" aria-label="Vertikalprofil: Höhe über der Distanz vom Start mit Geländerelief, Luftraum LS-R12 ab 2 100 m, geplantem Profil (grau gestrichelt) und tatsächlichem Profil (blau) mit blinkendem Punkt">
+              <rect x="0" y="0" width="440" height="300" fill="#fbfcfd"></rect>
+              <g stroke="#eef1f5"><line x1="48" y1="60" x2="430" y2="60"></line><line x1="48" y1="120" x2="430" y2="120"></line><line x1="48" y1="180" x2="430" y2="180"></line><line x1="48" y1="240" x2="430" y2="240"></line></g>
+              <g font-size="10" fill="#5b6b7f"><text x="44" y="64" text-anchor="end">2500</text><text x="44" y="124" text-anchor="end">2000</text><text x="44" y="184" text-anchor="end">1500</text><text x="44" y="244" text-anchor="end">1000</text><text x="44" y="292" text-anchor="end">500</text><text x="14" y="160" transform="rotate(-90 14 160)" text-anchor="middle">m AMSL</text></g>
+              <path d="M200 108 L430 108 L430 60 L200 60Z" fill="#c0392b" fill-opacity=".10" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="5 4"></path>
+              <text x="300" y="80" fill="#7b1f14" font-size="11" font-weight="600">LS-R12 · 2'100 m AMSL – FL 100</text>
+              <path d="M48 262 L90 258 L130 266 L170 250 L210 244 L250 252 L290 236 L330 228 L370 240 L410 232 L430 236 L430 300 L48 300Z" fill="#cdb995" stroke="#a88a5a" stroke-width="1"></path>
+              <text x="60" y="286" fill="#6b5634" font-size="10">Gelände</text>
+              <polyline fill="none" stroke="#9aa7b6" stroke-width="2.5" stroke-dasharray="6 5" points="90,258 140,224 190,186 240,150 290,120 320,116 350,150 375,190 395,232"></polyline>
+              <polyline fill="none" stroke="#1f5fbf" stroke-width="3" points="90,258 142,222 192,184 232,140"></polyline>
+              <circle cx="232" cy="140" r="12" fill="#1f5fbf" fill-opacity=".25"><animate attributeName="r" values="8;16;8" dur="1.6s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" values=".35;.05;.35" dur="1.6s" repeatCount="indefinite"></animate></circle>
+              <circle cx="232" cy="140" r="6" fill="#1f5fbf" stroke="#fff" stroke-width="2"></circle>
+              <text x="244" y="134" fill="#14202e" font-size="12" font-weight="600">1'910 m AMSL</text>
+              <line x1="48" y1="116" x2="430" y2="116" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="3 3"></line><text x="52" y="112" fill="#c0392b" font-size="10">Cutdown 2'030 m AMSL</text>
+              <g font-size="10" fill="#5b6b7f"><text x="90" y="299" text-anchor="middle">0 km</text><text x="190" y="299" text-anchor="middle">2</text><text x="290" y="299" text-anchor="middle">4</text><text x="390" y="299" text-anchor="middle">6 km</text></g>
+              <g font-size="11" fill="#5b6b7f"><line x1="300" y1="22" x2="330" y2="22" stroke="#9aa7b6" stroke-width="2.5" stroke-dasharray="6 5"></line><text x="336" y="26">Plan</text><line x1="370" y1="22" x2="400" y2="22" stroke="#1f5fbf" stroke-width="3"></line><text x="406" y="26">Ist</text></g>
+            </svg>
+          </details>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn danger big" type="button" style="width:100%;min-height:68px;font-size:22px;letter-spacing:.04em">CUTDOWN JETZT</button>
+          <span class="muted" style="font-size:13px;text-align:center">fragt einmal nach · die Sonde quittiert per Funk · wird protokolliert</span>
+        </div>
+        <details class="viewer" open>
+          <summary><span>Stüve · vereinfacht, live</span><span style="display:flex;gap:8px;align-items:center"><a class="btn" href="Follow.dc.html" style="min-height:30px;font-size:12px;padding:0 10px;font-weight:600">Detailsicht ⤢</a><span aria-hidden="true" style="display:inline-flex;width:28px;height:28px;border-radius:6px;border:1px solid #c7d0dc;align-items:center;justify-content:center;color:#5b6b7f"><a href="Follow.dc.html" aria-label="Detailsicht öffnen" style="display:block"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></a></span></span></summary>
+          <div style="display:grid;grid-template-columns:minmax(0, 1fr) 230px;gap:12px;padding:10px 12px 12px 12px;align-items:start">
+            <svg viewBox="-34 0 634 250" width="100%" height="250" role="img" aria-label="Vereinfachtes Stüve-Diagramm: Temperatur rot und Taupunkt blau über dem Druck, Isothermen alle 10 Grad, aktuelle Sondenhöhe markiert, Windfiedern rechts">
+              <rect x="50" y="10" width="530" height="210" fill="#fff" stroke="#d9dee6"></rect><line x1="520" y1="10" x2="520" y2="220" stroke="#d9dee6"></line>
+              <g stroke="#eef1f5"><line x1="50" y1="220" x2="580" y2="220"></line><line x1="50" y1="170" x2="580" y2="170"></line><line x1="50" y1="112" x2="580" y2="112"></line><line x1="50" y1="48" x2="580" y2="48"></line><line x1="130" y1="10" x2="130" y2="220"></line><line x1="210" y1="10" x2="210" y2="220"></line><line x1="290" y1="10" x2="290" y2="220"></line><line x1="370" y1="10" x2="370" y2="220"></line><line x1="450" y1="10" x2="450" y2="220"></line></g>
+              <line x1="370" y1="10" x2="370" y2="220" stroke="#b8c2d0" stroke-width="1.5"></line>
+              <g font-size="10" fill="#5b6b7f"><text x="46" y="218" text-anchor="end" font-weight="600">1000 hPa</text><text x="46" y="229" text-anchor="end">≈ 110 m</text><text x="46" y="168" text-anchor="end" font-weight="600">900 hPa</text><text x="46" y="179" text-anchor="end">≈ 990 m</text><text x="46" y="110" text-anchor="end" font-weight="600">800 hPa</text><text x="46" y="121" text-anchor="end">≈ 1'950 m</text><text x="46" y="46" text-anchor="end" font-weight="600">700 hPa</text><text x="46" y="57" text-anchor="end">≈ 3'010 m</text><text x="-28" y="18" font-size="9">hPa</text><text x="-28" y="29" font-size="9">m AMSL</text><text x="130" y="236" text-anchor="middle">−30</text><text x="210" y="236" text-anchor="middle">−20</text><text x="290" y="236" text-anchor="middle">−10</text><text x="370" y="236" text-anchor="middle">0</text><text x="450" y="236" text-anchor="middle">+10 °C</text></g>
+              <g><rect x="50" y="134" width="530" height="34" fill="#8fa3bb" fill-opacity=".28"></rect><rect x="50" y="96" width="530" height="18" fill="#8fa3bb" fill-opacity=".28"></rect></g>
+              <polyline fill="none" stroke="#c0392b" stroke-width="2.5" points="460,220 446,196 430,170 418,150 404,128 386,112 372,96"></polyline>
+              <polyline fill="none" stroke="#1f5fbf" stroke-width="2.5" points="418,220 408,196 396,170 392,150 380,128 362,112 348,96"></polyline>
+              <circle cx="372" cy="96" r="10" fill="#1f5fbf" fill-opacity=".25"><animate attributeName="r" values="7;14;7" dur="1.6s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" values=".35;.05;.35" dur="1.6s" repeatCount="indefinite"></animate></circle>
+              <circle cx="372" cy="96" r="5" fill="#1f5fbf" stroke="#fff" stroke-width="2"></circle>
+              <text x="384" y="92" fill="#14202e" font-size="11" font-weight="600">jetzt · 803 hPa · 1'910 m</text>
+              <line x1="550" y1="14" x2="550" y2="220" stroke="#5b6b7f" stroke-width="1"></line><g stroke="#14202e" stroke-width="1.5" fill="none"><g transform="rotate(50 550 220)"><line x1="550" y1="220" x2="550" y2="196"></line><line x1="550" y1="196" x2="560" y2="192"></line></g><g transform="rotate(60 550 170)"><line x1="550" y1="170" x2="550" y2="146"></line><line x1="550" y1="146" x2="560" y2="142"></line><line x1="550" y1="152" x2="556" y2="150"></line></g><g transform="rotate(65 550 141)"><line x1="550" y1="141" x2="550" y2="117"></line><line x1="550" y1="117" x2="560" y2="113"></line><line x1="550" y1="123" x2="560" y2="119"></line></g><g transform="rotate(65 550 96)"><line x1="550" y1="96" x2="550" y2="72"></line><line x1="550" y1="72" x2="560" y2="68"></line><line x1="550" y1="78" x2="560" y2="74"></line></g></g><circle cx="550" cy="220" r="2.5" fill="#14202e"></circle><circle cx="550" cy="170" r="2.5" fill="#14202e"></circle><circle cx="550" cy="141" r="2.5" fill="#14202e"></circle><circle cx="550" cy="96" r="2.5" fill="#1f5fbf"></circle><text x="550" y="236" fill="#5b6b7f" font-size="10" text-anchor="middle">Wind (kt)</text>
+              <g font-size="11"><line x1="60" y1="20" x2="84" y2="20" stroke="#c0392b" stroke-width="2.5"></line><text x="88" y="24" fill="#5b6b7f">T</text><line x1="104" y1="20" x2="128" y2="20" stroke="#1f5fbf" stroke-width="2.5"></line><text x="132" y="24" fill="#5b6b7f">Td</text><rect x="152" y="14" width="14" height="12" fill="#8fa3bb" fill-opacity=".4"></rect><text x="170" y="24" fill="#5b6b7f">RH &gt; 92 %</text></g>
+            </svg>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Automatisch erkannt</div>
+              <div class="row"><span class="muted">Inversion</span><span class="val">1'150–1'300 m</span></div>
+              <div class="row"><span class="muted">Wolkenbasis (RH &gt; 92 %)</span><span class="val">≈ 1'150 m</span></div>
+              <div class="row"><span class="muted">Nullgradgrenze</span><span class="val">≈ 1'750 m</span></div>
+              <div class="row"><span class="muted">Wind 850 hPa</span><span class="val">245° / 18 kt</span></div>
+            </div>
+          </div>
+        </details>
+
+      </section>
+
+      <aside class="card" style="flex:1 1 320px;min-width:0;max-width:400px;padding:0;overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:1px solid #eef1f5;display:flex;justify-content:space-between;align-items:center">
+          <div><h2>Chat mit Command Center</h2><div class="muted" style="font-size:13px">über s2stueve · Command Center, Crew Bergung</div></div>
+          <span class="pill" style="min-height:30px;padding:3px 10px;font-size:13px"><span class="dot g"></span>2 online</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding:14px 16px;min-height:300px">
+          <div class="msg"><span class="who">Command Center · 14:33</span><span class="t">Daten kommen sauber an. Wir lassen bis zum Cutdown steigen.</span></div>
+          <div class="msg me"><span class="who">Ground · 14:34</span><span class="t">OK, Steigrate stabil.</span></div>
+          <div class="msg"><span class="who">Command Center · 14:41</span><span class="t">Profil reicht uns – bitte jetzt auslösen.</span></div>
+        </div>
+        <div style="padding:12px 16px;border-top:1px solid #eef1f5;display:flex;flex-direction:column;gap:8px">
+          <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Schnellantworten · vom Masteruser festgelegt</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" type="button" style="min-height:38px;font-size:13px;font-weight:500">Verstanden</button>
+            <button class="btn" type="button" style="min-height:38px;font-size:13px;font-weight:500">Ausgelöst ✓</button>
+            <button class="btn" type="button" style="min-height:38px;font-size:13px;font-weight:500">Funk schwach</button>
+            <button class="btn" type="button" style="min-height:38px;font-size:13px;font-weight:500">Gelandet</button>
+          </div>
+          <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Freier Text</div>
+          <div style="display:flex;gap:8px"><input class="in" type="text" placeholder="Nachricht an Command Center / Crew schreiben …" aria-label="Nachricht"><button class="btn primary" type="button">Senden</button></div>
+        </div>
+      </aside>
+    </div>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

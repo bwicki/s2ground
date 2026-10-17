@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>S2 Ground – Aufstieg planen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f5f7;color:#14202e;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.4}
+a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.muted{color:#5b6b7f}
+.card{background:#fff;border:1px solid #d9dee6;border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{margin:0;font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7f}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid #eef1f5}
+.row:last-child{border-bottom:0}
+.val{white-space:nowrap;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:17px;font-weight:500}
+.ph{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;color:#5b6b7f;font-weight:500;min-height:44px;box-sizing:border-box;font-size:15px}
+.ph .n{display:inline-flex;width:26px;height:26px;border-radius:50%;align-items:center;justify-content:center;border:1.5px solid #b8c2d0;font-size:13px;font-family:"IBM Plex Mono",monospace;flex:none}
+.ph.active{background:#14202e;color:#fff}
+.ph.active .n{background:#f6b03d;border-color:#f6b03d;color:#14202e;font-weight:600}
+.ph.done .n{background:#1f8a4c;border-color:#1f8a4c;color:#fff}
+.ph.warn .n{background:#d98c00;border-color:#d98c00;color:#fff}
+.ph.bad .n{background:#c0392b;border-color:#c0392b;color:#fff}
+.ph.active.warn .n{background:#d98c00;border-color:#d98c00;color:#fff}
+.ph.active.bad .n{background:#c0392b;border-color:#c0392b;color:#fff}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid #d9dee6;background:#fff;font-size:14px;min-height:38px;box-sizing:border-box}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.g{background:#1f8a4c}.y{background:#d98c00}.r{background:#c0392b}.b{background:#1f5fbf}.x{background:#9aa7b6}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 20px;border-radius:10px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-weight:600;font-size:16px;cursor:pointer}
+.btn.primary{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.btn.big{min-height:60px;font-size:18px;padding:0 28px}
+.in{min-height:48px;padding:0 14px;border-radius:8px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-size:16px;box-sizing:border-box;width:100%}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:14px;color:#5b6b7f;font-weight:500}
+.seg{display:flex;border:1px solid #c7d0dc;border-radius:10px;overflow:hidden;background:#fff}
+.seg button{flex:1;min-height:44px;border:0;background:#fff;color:#5b6b7f;font:inherit;font-weight:500;cursor:pointer}
+.seg button.on{background:#14202e;color:#fff}
+.banner{display:flex;gap:16px;align-items:flex-start;padding:16px 20px;border-radius:12px;border:1px solid}
+.banner.ok{background:#e6f6ec;border-color:#9fd8b4;color:#14532d}
+.banner.warn{background:#fff4e0;border-color:#f3c97a;color:#7a3e00}
+.banner.bad{background:#fdecea;border-color:#f3b2ab;color:#7b1f14}
+.banner h3{margin:0;font-size:18px;font-weight:600}
+.banner ol{margin:6px 0 0 0;padding-left:20px;font-size:15px;line-height:1.5}
+details.menu{position:relative;display:flex;z-index:60}
+details.menu>summary{list-style:none;cursor:pointer;width:44px;height:40px;border:1px solid #c7d0dc;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;color:#14202e;box-sizing:border-box}
+details.menu>summary::-webkit-details-marker{display:none}
+details.menu[open]>summary{background:#14202e;border-color:#14202e;color:#fff}
+details.menu>.panel{position:absolute;right:0;top:calc(100% + 10px);width:min(940px,calc(100vw - 56px));max-height:calc(100vh - 130px);overflow:auto;background:#fff;border:1px solid #c7d0dc;border-radius:12px;box-shadow:0 18px 50px rgba(20,32,46,.22);text-align:left;font-weight:400}
+details.menu>.panel>h3{margin:0;padding:14px 20px;border-bottom:1px solid #eef1f5;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7f;display:flex;align-items:center;gap:10px}
+details.menu .body{padding:16px 20px 20px 20px}
+details.menu>.panel>.foot{display:flex;gap:16px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid #eef1f5;font-size:14px;font-weight:500}
+.logo{width:150px;height:44px;border:1px dashed #9aa7b6;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5b6b7f;text-align:center;background:#fff;flex:none}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;min-height:980px">
+  <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff">
+    <div style="display:flex;flex-direction:column;min-width:120px"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Aufstieg 2026-10-13 · Rümlang</span></div>
+    <nav aria-label="Phasen" style="display:flex;gap:2px;flex-wrap:wrap">
+      <a class="ph active warn" href="Planen.dc.html"><span class="n">1</span>Aufstieg planen</a>
+      <a class="ph " href="Vorbereiten.dc.html"><span class="n">2</span>Sonde vorbereiten</a>
+      <a class="ph " href="Checks.dc.html"><span class="n">3</span>Start-Checks</a>
+      <a class="ph " href="Aufstieg.dc.html"><span class="n">4</span>Aufstieg</a>
+      <a class="ph " href="Retrieve.dc.html"><span class="n">5</span>Sonde bergen</a>
+    </nav>
+    <div style="grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <img src="/_blob/0e4c30272f96a31d708cd9be18800e0a" alt="Wicki Partners Ballonteam" style="height:46px;width:auto">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <span class="pill">bwicki</span>
+        <div class="seg" style="width:90px" aria-label="Sprache"><button class="on" type="button">DE</button><button type="button">EN</button></div>
+        <a class="btn" href="Login.dc.html" style="min-height:40px;font-size:14px;padding:0 12px">Abmelden</a>
+        <details class="menu">
+          <summary aria-label="Menü (Experte)" title="Menü"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+          <div class="panel">
+            <h3>Experte: Steigrate, Sinkrate, Modell, Export</h3>
+<div class="body" style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:14px">
+        <label class="f">Steigrate<input class="in mono" type="text" value="2.5 m/s"></label>
+        <label class="f">Sinkrate (Meereshöhe)<input class="in mono" type="text" value="5.0 m/s"></label>
+        <label class="f">Wettermodell<input class="in" type="text" value="Best match"></label>
+        <label class="f">Sonde / Takelage<input class="in" type="text" value="S2 (9 g) + 5 g"></label>
+        <label class="f">Luftraum anzeigen<input class="in" type="text" value="Ein · openAIP"></label>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap"><button class="btn" type="button">KML</button><button class="btn" type="button">JSON</button><button class="btn" type="button">Link</button><button class="btn" type="button">Drucken</button></div>
+      </div>
+            <div class="foot"><a href="Admin.dc.html">Masteruser · Benutzer &amp; App-Einstellungen</a></div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <div style="display:flex;align-items:center;gap:12px;padding:10px 28px;background:#fff;border-bottom:1px solid #d9dee6;flex-wrap:wrap">
+    <span></span>
+    <span class="muted" style="flex:1;font-size:14px">Schritt 1 von 5 · Trajektorie berechnet · Luftraumwarnung offen (Schritt bleibt gelb, bis Du sie behebst oder bewusst ignorierst)</span>
+    <a class="btn primary" href="Vorbereiten.dc.html">Weiter: Sonde vorbereiten →</a>
+  </div>
+
+  <main style="flex:1;padding:22px 28px;display:flex;flex-direction:column;gap:18px">
+
+    <div class="banner warn" role="status">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none"><path d="M12 3L2 21h20L12 3z"></path><path d="M12 10v5M12 18h.01"></path></svg>
+      <div style="flex:1">
+        <h3>VORSICHT! – Die geplante Trajektorie kreuzt den Luftraum LS-R12 ab 2'100 m AMSL</h3>
+        <div style="font-size:15px;margin-top:4px">Was Du tun kannst:</div>
+        <ol>
+          <li>Cutdown-Höhe auf <strong>1'600 m über Grund</strong> senken (Vorschlag unten übernommen) – oder</li>
+          <li>Startzeit um ca. 2 h verschieben (Wind dreht nach Osten) – oder</li>
+          <li>Startort nach Süden verlegen – oder</li>
+          <li><strong>Warnung ignorieren</strong> und trotzdem weiter: Du bestätigst, dass Du den Luftraum geprüft hast und Dir <br>über die Risiken bewusst bist.</li>
+        </ol>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;flex:none">
+        <button class="btn" type="button">Vorschlag 1 übernehmen</button>
+        <button class="btn" type="button" style="border-color:#f3c97a;color:#7a3e00">Warnung ignorieren<br></button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:stretch">
+      <section class="card" style="flex:1 1 320px;max-width:400px">
+        <h2 style="position: relative">BASIS-INFORMATIONEN</h2>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:14px;color:#5b6b7f;font-weight:500">Startort
+          <div class="seg"><button class="on" type="button">Von RR4 übernehmen</button><a href="Startort.dc.html" style="flex:1;min-height:44px;display:inline-flex;align-items:center;justify-content:center;color:#5b6b7f;font-weight:500">Aus Karte wählen</a></div>
+          <input class="in" type="text" value="4727N00834E · 430 m AMSL · Rümlang" readonly="" aria-label="Startort">
+          <span style="font-size:12px;font-weight:400">RR4-GPS: Fix mit 11 Satelliten. «Aus Karte wählen» öffnet eine Karte mit Fadenkreuz und Ortssuche.</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:14px;color:#5b6b7f;font-weight:500">Startzeit
+          <div style="display:flex;gap:8px;align-items:stretch">
+            <input class="in mono" type="text" value="13.10.2026" aria-label="Datum" style="flex:1 1 130px">
+            <div style="display:flex;flex:1 1 200px;border:1px solid #c7d0dc;border-radius:8px;overflow:hidden;background:#fff">
+              <button type="button" aria-label="10 Minuten früher" style="width:48px;border:0;background:#eef1f5;color:#14202e;font:inherit;font-size:20px;cursor:pointer">−</button>
+              <input class="in mono" type="text" value="16:30" aria-label="Uhrzeit, in 10-Minuten-Schritten" style="border:0;border-radius:0;text-align:center;font-size:20px;font-weight:600;min-width:0">
+              <button type="button" aria-label="10 Minuten später" style="width:48px;border:0;background:#eef1f5;color:#14202e;font:inherit;font-size:20px;cursor:pointer">+</button>
+            </div>
+            <div class="seg" style="width:120px" aria-label="Zeitzone"><button class="on" type="button">LT</button><button type="button">UTC</button></div>
+          </div>
+          <span style="font-size:12px;font-weight:400">10-Minuten-Schritte · LT = Lokalzeit am Startort (MESZ) · entspricht 14:30 UTC</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:14px;color:#5b6b7f;font-weight:500">Cutdown
+          <div class="seg"><button class="on" type="button">Cutdown bei Höhe über Grund</button><button type="button">Kein Cutdown</button></div>
+          <input class="in mono" type="text" value="1 600 m" style="font-size:22px;font-weight:600" aria-label="Cutdown-Höhe über Grund">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:10px;border:1px dashed #c7d0dc;background:#f9fafb">
+          <span class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">So erscheint es bei «Kein Cutdown»</span>
+          <div style="font-size:14px;line-height:1.45">Die Sonde steigt, bis zur Bersthöhe des Ballons: berechnet&nbsp;&nbsp;<strong class="mono">≈ 9'800 m AMSL</strong> (aus Ballon, Füllung und Nutzlast). Die Trajektorie wird bis dorthin gerechnet. Manueller Cutdown bleibt jederzeit möglich (sofern die Sonde korrekt verbunden ist).</div>
+          <label style="display:flex;align-items:center;gap:10px;min-height:40px;font-size:14px;color:#14202e"><input type="checkbox" style="width:20px;height:20px;accent-color:#1f5fbf"><span>Ich bestätige: kein automatischer Cutdown, Aufstieg bis ≈ 9'800 m AMSL</span> </label>
+          <span class="muted" style="font-size:12px">Ohne Bestätigung bleibt «Weiter» gesperrt.</span>
+        </div>
+        <label class="f">Betriebsart
+          <div class="seg"><button class="on" type="button">Aufstieg vom Boden</button><button type="button">Abwurf aus dem Ballon</button></div>
+        </label>
+        <button class="btn primary big" type="button">Trajektorie neu berechnen</button>
+        <p class="muted" style="margin:0;font-size:13px">Wetter: Open-Meteo «Best match» 14:00 UTC · Luftraum: openAIP · Steigrate 2.5 m/s (Standard). Ändern im Menü ☰ oben rechts.</p>
+      </section>
+
+      <div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:18px">
+      <section class="card" style="padding:12px;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:4px 8px">
+          <h2>Voraussichtliche Trajektorie der Sonde</h2>
+          <span class="muted" style="font-size:13px">Karte: OSM, Satellit: Esri · Luftraum: openAIP · «nur Planungshilfe – DABS/NOTAM prüfen»</span>
+        </div>
+        <svg viewBox="0 0 760 430" width="100%" height="430" role="img" aria-label="Karte mit Startort, Aufstiegstrajektorie nach Nordosten, Cutdown und Landepunkt; ein rot schraffierter Luftraum wird von der Trajektorie gekreuzt">
+          <rect x="0" y="0" width="760" height="430" fill="#eef3ea"></rect>
+          <path d="M0 300 Q120 260 220 290 T430 250 T760 230 L760 430 L0 430Z" fill="#e3ebdc"></path>
+          <path d="M0 120 Q200 100 320 150 T760 90" fill="none" stroke="#cfd9e3" stroke-width="10"></path>
+          <path d="M80 430 L140 300 L210 240 L300 200 L420 150 L560 110 L700 60" fill="none" stroke="#fff" stroke-width="6"></path>
+          <path d="M80 430 L140 300 L210 240 L300 200 L420 150 L560 110 L700 60" fill="none" stroke="#d6a84e" stroke-width="2"></path>
+          <path d="M0 200 L180 190 L330 230 L410 330 L300 430 L0 430Z" fill="#dfe6ee"></path>
+          <text x="60" y="400" fill="#5b6b7f" font-size="12">Rümlang</text>
+          <text x="470" y="330" fill="#5b6b7f" font-size="12">Bülach</text>
+          <text x="640" y="200" fill="#5b6b7f" font-size="12">Eglisau</text>
+          <g>
+            <path d="M380 60 L640 40 L700 170 L560 240 L400 200Z" fill="#c0392b" fill-opacity=".12" stroke="#c0392b" stroke-width="2" stroke-dasharray="6 4"></path>
+            <text x="470" y="100" fill="#7b1f14" font-size="13" font-weight="600">LS-R12 · ab 2'100 m AMSL</text>
+          </g>
+          <polyline fill="none" stroke="#1f5fbf" stroke-width="3.5" points="150,330 200,300 250,262 310,222 380,186 450,160 520,140"></polyline>
+          <polyline fill="none" stroke="#1f5fbf" stroke-width="3.5" stroke-dasharray="7 6" points="520,140 560,175 585,215 600,250"></polyline>
+          <circle cx="150" cy="330" r="7" fill="#1f8a4c" stroke="#fff" stroke-width="2"></circle>
+          <text x="165" y="347" fill="#14202e" font-size="13" font-weight="600">Start 14:30</text>
+          <polygon points="530.0,140.0 524.6,141.9 527.1,147.1 521.9,144.6 520.0,150.0 518.1,144.6 512.9,147.1 515.4,141.9 510.0,140.0 515.4,138.1 512.9,132.9 518.1,135.4 520.0,130.0 521.9,135.4 527.1,132.9 524.6,138.1" fill="#f6b03d" stroke="#e07b00" stroke-width="1.5"></polygon>
+          <text x="400" y="128" fill="#14202e" font-size="13" font-weight="600">Cutdown 1'600 m AGL · 14:41</text>
+          <g stroke="#c0392b" stroke-width="2" fill="none"><circle cx="600" cy="250" r="9"></circle><line x1="585" y1="250" x2="615" y2="250"></line><line x1="600" y1="235" x2="600" y2="265"></line></g><circle cx="600" cy="250" r="2.5" fill="#c0392b"></circle>
+          <text x="612" y="268" fill="#14202e" font-size="13" font-weight="600">Landung ca. 14:52</text>
+          <circle cx="455" cy="158" r="11" fill="none" stroke="#c0392b" stroke-width="3"></circle>
+          <text x="330" y="60" fill="#7b1f14" font-size="13" font-weight="600">Konflikt bei 2'100 m</text>
+          <g transform="translate(20,20)" aria-hidden="true"><rect width="34" height="34" rx="6" fill="#fff" stroke="#c7d0dc"></rect><text x="17" y="22" text-anchor="middle" font-size="16" fill="#14202e">+</text></g>
+          <g transform="translate(20,60)" aria-hidden="true"><rect width="34" height="34" rx="6" fill="#fff" stroke="#c7d0dc"></rect><text x="17" y="22" text-anchor="middle" font-size="16" fill="#14202e">−</text></g>
+          <g transform="translate(616,20)" aria-label="Kartenart: Karte oder Satellit" role="group"><rect width="124" height="34" rx="6" fill="#fff" stroke="#c7d0dc"></rect><rect x="2" y="2" width="58" height="30" rx="5" fill="#14202e"></rect><text x="31" y="22" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Karte</text><text x="92" y="22" text-anchor="middle" font-size="13" fill="#14202e">Satellit</text></g>
+        </svg>
+        <div style="display:grid;grid-template-columns:repeat(5, minmax(0, 1fr));gap:10px;padding:4px 8px">
+          <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Landepunkt</div><div class="val">6.9 km · 058°</div></div>
+          <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Höchste Höhe</div><div class="val">2'030 m AMSL</div></div>
+          <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Aufstieg</div><div class="val">11 min</div></div>
+          <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Gesamt</div><div class="val">22 min</div></div>
+          <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Luftraum</div><div class="val" style="color:#c0392b">Konflikt</div></div>
+        </div>
+      </section>
+      <section class="card">
+        <h2>Ballondaten</h2>
+        <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:12px;align-items:start">
+          <label class="f">Ballontyp<input class="in" type="text" value="Latex 9 g (Standard)"></label>
+          <label class="f">Ballongas<input class="in" type="text" value="Ballongas (Linde)"></label>
+          <div style="display:flex;flex-direction:column;gap:4px;padding:8px 12px;border-radius:8px;background:#f4f8ff;border:1px solid #c9dcf7">
+            <span class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Erforderliche Bruttosteigkraft · Ballon allein, ohne Sonde</span>
+            <span class="val" style="font-size:24px;color:#1f5fbf">≈ 39 g</span>
+            <span class="muted" style="font-size:12px">für 2.5 m/s · Gas ≈ 48 L · mit Sonde (14 g) bleiben ≈ 25 g Nettosteigkraft</span>
+          </div>
+        </div>
+      </section>
+      </div>
+    </div>
+
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

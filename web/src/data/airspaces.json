@@ -1,0 +1,145 @@
+{
+  "_comment": "SAMPLE airspaces in openAIP item format – used ONLY by the in-memory mock API (?sim=1 demo) so the planning warning flow can be exercised without an openAIP key. Shapes/limits are illustrative, NOT authoritative. In production the Worker route /api/airspaces fetches live data from api.core.openaip.net.",
+  "bbox": [
+    8.2,
+    47.2,
+    9.0,
+    47.8
+  ],
+  "fetchedAt": 0,
+  "items": [
+    {
+      "_id": "LS-R12",
+      "name": "LS-R12 (Beispiel)",
+      "type": 1,
+      "icaoClass": 8,
+      "lowerLimit": {
+        "value": 6890,
+        "unit": 1,
+        "referenceDatum": 1
+      },
+      "upperLimit": {
+        "value": 100,
+        "unit": 6,
+        "referenceDatum": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.6,
+              47.44
+            ],
+            [
+              8.58,
+              47.5
+            ],
+            [
+              8.7,
+              47.53
+            ],
+            [
+              8.8,
+              47.47
+            ],
+            [
+              8.72,
+              47.43
+            ],
+            [
+              8.6,
+              47.44
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "_id": "LS-D-SAMPLE",
+      "name": "LS-D Schiessplatz (Beispiel)",
+      "type": 2,
+      "icaoClass": 8,
+      "lowerLimit": {
+        "value": 0,
+        "unit": 1,
+        "referenceDatum": 0
+      },
+      "upperLimit": {
+        "value": 4920,
+        "unit": 1,
+        "referenceDatum": 1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.7,
+              47.4
+            ],
+            [
+              8.72,
+              47.43
+            ],
+            [
+              8.78,
+              47.42
+            ],
+            [
+              8.76,
+              47.38
+            ],
+            [
+              8.7,
+              47.4
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "_id": "TMA-SAMPLE",
+      "name": "TMA Zürich 4 (Beispiel)",
+      "type": 7,
+      "icaoClass": 8,
+      "lowerLimit": {
+        "value": 100,
+        "unit": 6,
+        "referenceDatum": 2
+      },
+      "upperLimit": {
+        "value": 195,
+        "unit": 6,
+        "referenceDatum": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8.3,
+              47.3
+            ],
+            [
+              8.3,
+              47.75
+            ],
+            [
+              8.95,
+              47.75
+            ],
+            [
+              8.95,
+              47.3
+            ],
+            [
+              8.3,
+              47.3
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

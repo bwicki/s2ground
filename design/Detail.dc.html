@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>S2 Ground – Detailsicht</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f5f7;color:#14202e;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.4}
+a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.muted{color:#5b6b7f}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-weight:600;font-size:15px;cursor:pointer}
+.btn.primary{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.btn.danger{background:#c0392b;border-color:#c0392b;color:#fff}
+.tab{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:999px;color:#5b6b7f;font-weight:600;border:1px solid transparent}
+.tab.on{background:#14202e;color:#fff}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid #d9dee6;background:#fff;font-size:14px;min-height:38px;box-sizing:border-box}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.g{background:#1f8a4c}.b{background:#1f5fbf}
+.chk{display:flex;align-items:center;gap:10px;min-height:40px;font-size:14px}
+.chk input{width:20px;height:20px;accent-color:#1f5fbf}
+.val{white-space:nowrap;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:16px;font-weight:500}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px solid #eef1f5}
+.row:last-child{border-bottom:0}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;min-height:980px">
+  <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff">
+    <div style="display:flex;flex-direction:column;min-width:120px"><strong style="font-size:18px">Detailsicht</strong><span class="muted" style="font-size:13px">Aufstieg 2026-10-13 · Rümlang · live</span></div>
+    <nav aria-label="Ansichten" style="display:flex;gap:4px;flex-wrap:wrap">
+      <a class="tab on" href="Detail.dc.html">Karte</a>
+      <a class="tab" href="Detail.dc.html">Vertikalsicht</a>
+      <a class="tab" href="Follow.dc.html">Stüve</a>
+    </nav>
+    <div style="grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <img src="/_blob/0e4c30272f96a31d708cd9be18800e0a" alt="Wicki Partners Ballonteam" style="height:46px;width:auto">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <span class="pill"><span class="dot g"></span>1'910 m AMSL · +2.6 m/s · letztes Paket vor 1 s</span>
+        <a class="btn" href="Aufstieg.dc.html" aria-label="Detailsicht schliessen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg> Schliessen</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex:1;display:flex;gap:16px;padding:16px 28px 24px 28px;flex-wrap:wrap;align-items:stretch">
+    <div style="width:100%;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <button class="btn danger" type="button" style="min-height:56px;font-size:18px;padding:0 26px;letter-spacing:.04em">CUTDOWN JETZT</button>
+      <span class="muted" style="font-size:13px">fragt einmal nach · wird protokolliert</span>
+    </div>
+    <section style="flex:999 1 700px;min-width:0;background:#fff;border:1px solid #d9dee6;border-radius:12px;overflow:hidden;display:flex">
+      <svg viewBox="0 0 960 720" width="100%" height="720" role="img" aria-label="Grosse Karte: geplante Trajektorie grau gestrichelt, tatsächliche Trajektorie blau, Start grün, Cutdown als Explosionswölkchen, Landeort als rotes Koordinatenkreuz, aktuelle Sondenposition blau blinkend, Luftraum rot schraffiert">
+        <rect x="0" y="0" width="960" height="720" fill="#eef3ea"></rect>
+        <path d="M0 520 Q180 440 330 490 T660 420 T960 400 L960 720 L0 720Z" fill="#e3ebdc"></path>
+        <path d="M0 210 Q260 160 430 260 T960 170" fill="none" stroke="#cfd9e3" stroke-width="14"></path>
+        <path d="M90 720 L200 500 L330 400 L480 330 L650 250 L830 180 L960 120" fill="none" stroke="#fff" stroke-width="9"></path>
+        <path d="M90 720 L200 500 L330 400 L480 330 L650 250 L830 180 L960 120" fill="none" stroke="#d6a84e" stroke-width="2.5"></path>
+        <path d="M500 95 L830 70 L920 260 L720 380 L520 310Z" fill="#c0392b" fill-opacity=".10" stroke="#c0392b" stroke-width="2" stroke-dasharray="7 5"></path>
+        <text x="620" y="150" fill="#7b1f14" font-size="15" font-weight="600">LS-R12 · ab 2'100 m AMSL</text>
+        <text x="110" y="660" fill="#5b6b7f" font-size="14">Rümlang</text><text x="640" y="560" fill="#5b6b7f" font-size="14">Bülach</text><text x="860" y="330" fill="#5b6b7f" font-size="14">Eglisau</text>
+        <polyline fill="none" stroke="#9aa7b6" stroke-width="3.5" stroke-dasharray="8 7" points="200,560 290,500 380,435 470,370 570,312 665,268 740,250 790,305 830,370 850,430"></polyline>
+        <polyline fill="none" stroke="#1f5fbf" stroke-width="4.5" points="200,560 294,496 388,428 486,362"></polyline>
+        <circle cx="200" cy="560" r="9" fill="#1f8a4c" stroke="#fff" stroke-width="2.5"></circle><text x="214" y="580" fill="#14202e" font-size="14" font-weight="600">Start 14:30</text>
+        <polygon points="753.0,250.0 746.3,252.6 749.6,259.2 743.4,257.4 741.0,264.0 738.6,257.4 732.4,259.2 735.7,252.6 729.0,250.0 735.7,247.4 732.4,240.8 738.6,242.6 741.0,236.0 743.4,242.6 749.6,240.8 746.3,247.4" fill="#f6b03d" stroke="#e07b00" stroke-width="1.5"></polygon><text x="690" y="235" fill="#14202e" font-size="14" font-weight="600">Cutdown (Plan) 14:41</text>
+        <g stroke="#c0392b" stroke-width="2.5" fill="none"><circle cx="850" cy="430" r="12"></circle><line x1="830" y1="430" x2="870" y2="430"></line><line x1="850" y1="410" x2="850" y2="450"></line></g><circle cx="850" cy="430" r="3" fill="#c0392b"></circle><text x="800" y="470" fill="#14202e" font-size="14" font-weight="600">Landung (Plan) 14:52</text>
+        <circle cx="486" cy="362" r="16" fill="#1f5fbf" fill-opacity=".25"><animate attributeName="r" values="10;24;10" dur="1.6s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" values=".35;.05;.35" dur="1.6s" repeatCount="indefinite"></animate></circle>
+        <circle cx="486" cy="362" r="8" fill="#1f5fbf" stroke="#fff" stroke-width="2.5"></circle><text x="502" y="356" fill="#14202e" font-size="15" font-weight="600">Sonde jetzt · 1'480 m AGL · 14:42:31</text>
+        <g transform="translate(16,16)" aria-hidden="true"><rect width="124" height="34" rx="6" fill="#fff" stroke="#c7d0dc"></rect><rect x="2" y="2" width="58" height="30" rx="5" fill="#14202e"></rect><text x="31" y="22" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Karte</text><text x="92" y="22" text-anchor="middle" font-size="13" fill="#14202e">Satellit</text></g>
+        <g transform="translate(16,60)" aria-hidden="true"><rect width="34" height="34" rx="6" fill="#fff" stroke="#c7d0dc"></rect><text x="17" y="22" text-anchor="middle" font-size="16" fill="#14202e">+</text></g>
+        <g transform="translate(16,100)" aria-hidden="true"><rect width="34" height="34" rx="6" fill="#fff" stroke="#c7d0dc"></rect><text x="17" y="22" text-anchor="middle" font-size="16" fill="#14202e">−</text></g>
+      </svg>
+    </section>
+
+    <aside style="flex:1 1 260px;max-width:320px;display:flex;flex-direction:column;gap:12px">
+      <div style="background:#fff;border:1px solid #d9dee6;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px">
+        <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Ebenen</div>
+        <label class="chk"><input type="checkbox" checked> Geplante Trajektorie</label>
+        <label class="chk"><input type="checkbox" checked> Tatsächliche Trajektorie</label>
+        <label class="chk"><input type="checkbox" checked> Lufträume (openAIP)</label>
+        <label class="chk"><input type="checkbox"> Landezone (Unsicherheit)</label>
+        <label class="chk"><input type="checkbox"> Zeitmarken alle 2 min</label>
+        <label class="chk"><input type="checkbox" checked> Karte folgt der Sonde</label>
+      </div>
+      <div style="background:#fff;border:1px solid #d9dee6;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column">
+        <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Abweichung zum Plan</div>
+        <div class="row"><span class="muted">Seitlich</span><span class="val">0.3 km rechts</span></div>
+        <div class="row"><span class="muted">Zeitlich</span><span class="val">+40 s voraus</span></div>
+        <div class="row"><span class="muted">Höhe</span><span class="val">+30 m</span></div>
+        <div class="row"><span class="muted">Landung neu geschätzt</span><span class="val">14:51 · 7.1 km</span></div>
+      </div>
+      <div style="background:#fff;border:1px solid #d9dee6;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px">
+        <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Signaturen</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span class="dot g"></span>Start</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px"><svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true"><polygon points="19,10 15.6,11.5 17,15 13.5,14.3 12.5,18 10,15 7.5,18 6.5,14.3 3,15 4.4,11.5 1,10 4.4,8.5 3,5 6.5,5.7 7.5,2 10,5 12.5,2 13.5,5.7 17,5 15.6,8.5" fill="#f6b03d" stroke="#e07b00"/></svg>Cutdown</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px"><svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6" fill="none" stroke="#c0392b" stroke-width="2"/><line x1="0" y1="10" x2="20" y2="10" stroke="#c0392b" stroke-width="2"/><line x1="10" y1="0" x2="10" y2="20" stroke="#c0392b" stroke-width="2"/><circle cx="10" cy="10" r="2" fill="#c0392b"/></svg>Landeort</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px"><span class="dot b"></span>Sonde jetzt (blinkend)</div>
+      </div>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

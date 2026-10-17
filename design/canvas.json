@@ -1,0 +1,164 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Admin.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "Masteruser · Benutzer & Protokoll",
+      "w": 1280,
+      "x": 1360,
+      "y": 0
+    },
+    "Aufstieg.dc.html": {
+      "expand": "fill",
+      "h": 1320,
+      "is_interactive": true,
+      "title": "Phase 4 · Aufstieg (live)",
+      "w": 1280,
+      "x": 4080,
+      "y": 1320
+    },
+    "Checks.dc.html": {
+      "expand": "fill",
+      "h": 980,
+      "is_interactive": true,
+      "title": "Phase 3 · Start-Checks (noch nicht OK)",
+      "w": 1280,
+      "x": 2720,
+      "y": 1320
+    },
+    "Follow.dc.html": {
+      "expand": "fill",
+      "h": 1080,
+      "is_interactive": true,
+      "title": "s2stueve · Follow (Chat rechts angedockt, Darstellung verkleinert)",
+      "w": 1280,
+      "x": 1360,
+      "y": 2720
+    },
+    "FollowStart.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "s2stueve · Follow-Code eingeben",
+      "w": 1280,
+      "x": 0,
+      "y": 2720
+    },
+    "Login.dc.html": {
+      "expand": "fill",
+      "h": 900,
+      "is_interactive": true,
+      "title": "Anmeldung (wie ops.wicki.aero)",
+      "w": 1280,
+      "x": 0,
+      "y": 0
+    },
+    "Planen.dc.html": {
+      "expand": "fill",
+      "h": 980,
+      "is_interactive": true,
+      "title": "Phase 1 · Aufstieg planen (s2planning integriert)",
+      "w": 1280,
+      "x": 0,
+      "y": 1331
+    },
+    "Retrieve.dc.html": {
+      "expand": "fill",
+      "h": 1420,
+      "is_interactive": true,
+      "title": "Phase 5 · Sonde bergen",
+      "w": 1280,
+      "x": 5440,
+      "y": 1320
+    },
+    "Startort.dc.html": {
+      "expand": "fill",
+      "h": 980,
+      "is_interactive": true,
+      "title": "Phase 1 · Dialog «Startort aus Karte wählen»",
+      "w": 1280,
+      "x": 6800,
+      "y": 1320
+    },
+    "Vorbereiten.dc.html": {
+      "expand": "fill",
+      "h": 1150,
+      "is_interactive": true,
+      "title": "Phase 2 · Sonde vorbereiten (Menü ☰ geöffnet)",
+      "w": 1280,
+      "x": 1360,
+      "y": 1320
+    },
+    "Detail.dc.html": {
+      "expand": "fill",
+      "h": 980,
+      "is_interactive": true,
+      "title": "Phase 4 · Detailsicht (Karte / Vertikalsicht / Stüve)",
+      "w": 1280,
+      "x": 8160,
+      "y": 1320
+    },
+    "FollowMax.dc.html": {
+      "expand": "fill",
+      "h": 1040,
+      "is_interactive": true,
+      "title": "s2stueve · Follow – Stüve maximiert, Chat als Floating Button",
+      "w": 1280,
+      "x": 2720,
+      "y": 2720
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-13T15:25:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "t1": {
+      "kind": "title1",
+      "maxW": 2640,
+      "text": "Zugang & Verwaltung – Login wie ops.wicki.aero, Masteruser vergibt Zugänge, Nutzung wird protokolliert",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "t2": {
+      "kind": "title1",
+      "maxW": 9440,
+      "text": "S2 Ground – fünf Phasen: Aufstieg planen · Sonde vorbereiten · Start-Checks · Aufstieg · Sonde bergen (Tagfarben, «reduce to the max», Expertenteil im Menü ☰ oben rechts)",
+      "w": 240,
+      "x": 0,
+      "y": 1060
+    },
+    "t3": {
+      "kind": "title1",
+      "maxW": 2640,
+      "text": "s2stueve.wicki.aero – neuer Modus «Follow sonde ascent» (Command Center, remote)",
+      "w": 240,
+      "x": 0,
+      "y": 2460
+    }
+  },
+  "order": [
+    "Login.dc.html",
+    "Admin.dc.html",
+    "Planen.dc.html",
+    "Startort.dc.html",
+    "Vorbereiten.dc.html",
+    "Checks.dc.html",
+    "Aufstieg.dc.html",
+    "Detail.dc.html",
+    "Retrieve.dc.html",
+    "FollowStart.dc.html",
+    "Follow.dc.html",
+    "FollowMax.dc.html"
+  ],
+  "pages": [],
+  "title": "S2 Ground – UI-Entwurf"
+}

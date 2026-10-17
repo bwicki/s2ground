@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>S2 Ground – Benutzer und Protokoll</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f4f5f7;color:#14202e;font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.4}
+a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.muted{color:#5b6b7f}
+.card{background:#fff;border:1px solid #d9dee6;border-radius:12px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card h2{margin:0;font-size:14px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7f}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:0 18px;border-radius:10px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-weight:600;font-size:15px;cursor:pointer}
+.btn.primary{background:#1f5fbf;border-color:#1f5fbf;color:#fff}
+.in{min-height:46px;padding:0 12px;border-radius:8px;border:1px solid #c7d0dc;background:#fff;color:#14202e;font:inherit;font-size:15px;box-sizing:border-box;width:100%}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;color:#5b6b7f;font-weight:500}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th{text-align:left;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#5b6b7f;font-weight:600;padding:8px 10px;border-bottom:1px solid #d9dee6}
+td{padding:10px;border-bottom:1px solid #eef1f5;vertical-align:middle}
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:#eef1f5;color:#14202e}
+.tag.m{background:#14202e;color:#fff}
+.sw{width:44px;height:26px;border-radius:999px;background:#1f8a4c;position:relative;display:inline-block}
+.sw::after{content:"";position:absolute;top:3px;left:21px;width:20px;height:20px;border-radius:50%;background:#fff}
+.sw.off{background:#c7d0dc}.sw.off::after{left:3px}
+.logo{width:150px;height:44px;border:1px dashed #9aa7b6;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#5b6b7f;text-align:center;background:#fff;flex:none}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:1px solid #d9dee6;background:#fff;font-size:14px;min-height:38px;box-sizing:border-box}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;min-height:900px">
+  <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Verwaltung · nur Masteruser</span></div>
+    <div style="grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <img src="/_blob/0e4c30272f96a31d708cd9be18800e0a" alt="Wicki Partners Ballonteam" style="height:46px;width:auto">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end">
+        <span class="pill">bwicki · Masteruser</span>
+        <a class="btn" href="Planen.dc.html">Zu den Aufstiegen</a>
+        <a class="btn" href="Login.dc.html">Abmelden</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex:1;padding:26px 28px;display:flex;flex-direction:column;gap:22px">
+    <h1 style="margin:0;font-size:26px;font-weight:600">Benutzer &amp; Protokoll</h1>
+
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+      <section class="card" style="flex:999 1 560px">
+        <h2>Benutzer</h2>
+        <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Anmeldename</th><th>Name</th><th>Rolle</th><th>Letzte Anmeldung</th><th>Aufstiege</th><th>Aktiv</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">bwicki</td><td>Balthasar Wicki</td><td><span class="tag m">Masteruser</span></td><td class="mono">13.10.2026 17:02</td><td class="mono">14</td><td><span class="sw" role="img" aria-label="aktiv"></span></td></tr>
+            <tr><td class="mono">crew1</td><td>[Name Groundcrew]</td><td><span class="tag">Nutzer</span></td><td class="mono">05.10.2026 06:41</td><td class="mono">3</td><td><span class="sw" role="img" aria-label="aktiv"></span></td></tr>
+            <tr><td class="mono">cc</td><td>[Name Command Center]</td><td><span class="tag">Nutzer</span></td><td class="mono">05.10.2026 06:55</td><td class="mono">–</td><td><span class="sw" role="img" aria-label="aktiv"></span></td></tr>
+            <tr><td class="mono">gast</td><td>[Gast]</td><td><span class="tag">Nutzer</span></td><td class="mono">–</td><td class="mono">–</td><td><span class="sw off" role="img" aria-label="inaktiv"></span></td></tr>
+          </tbody>
+        </table>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:12px;align-items:end;padding-top:6px;border-top:1px solid #eef1f5">
+          <label class="f">Anmeldename<input class="in" type="text" placeholder="z. B. crew2"></label>
+          <label class="f">Name<input class="in" type="text" placeholder="Vorname Name"></label>
+          <label class="f">Passwort<input class="in" type="text" placeholder="wird angezeigt"></label>
+          <button class="btn primary" type="button">Benutzer hinzufügen</button>
+        </div>
+      </section>
+
+      <section class="card" style="flex:1 1 320px">
+        <h2>App-Einstellungen</h2>
+        <label class="f">Relay für s2stueve (Live-Daten &amp; Chat)<input class="in mono" type="text" value="[Firebase-Projekt-ID]"></label>
+        <label class="f">Standard-Frequenz<input class="in mono" type="text" value="433.900 MHz"></label>
+        <label class="f">Standard-Steigrate (Planung)<input class="in mono" type="text" value="2.5 m/s"></label>
+        <label class="f">RR4 Hardware-ID (USB VID/PID) – wird beim ersten Verbinden automatisch erkannt<input class="in mono" type="text" value="noch nicht erkannt" readonly></label>
+        <label class="f">Bekannte Sondentypen<input class="in" type="text" value="S2H3-R-B20 (wiederverwendbar) · S2H3-S-C1-B9 · Dropsonde (geplant)"></label>
+        <label class="f">Wolken-Schwelle RH für Schattierung im Stüve<input class="in mono" type="text" value="92 %"></label>
+        <label class="f">Standard-Ablageordner (Dropbox)<input class="in mono" type="text" value="…\Dropbox\S2 Ground\Aufstiege\"></label>
+        <label class="f">Automatische Abmeldung nach<input class="in mono" type="text" value="2 h"></label>
+        <button class="btn" type="button">Speichern</button>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Schnellantworten im Chat (Knöpfe) – nur Masteruser</h2>
+      <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:20px">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Bodenstation (S2 Ground)</div>
+          <div style="display:flex;gap:8px"><input class="in" type="text" value="Verstanden"><button class="btn" type="button" aria-label="Entfernen" style="min-width:46px;padding:0">×</button></div>
+          <div style="display:flex;gap:8px"><input class="in" type="text" value="Ausgelöst ✓"><button class="btn" type="button" aria-label="Entfernen" style="min-width:46px;padding:0">×</button></div>
+          <div style="display:flex;gap:8px"><input class="in" type="text" value="Funk schwach"><button class="btn" type="button" aria-label="Entfernen" style="min-width:46px;padding:0">×</button></div>
+          <div style="display:flex;gap:8px"><input class="in" type="text" value="Gelandet"><button class="btn" type="button" aria-label="Entfernen" style="min-width:46px;padding:0">×</button></div>
+          <button class="btn" type="button" style="align-self:flex-start">+ Antwort hinzufügen</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em;font-weight:600">Beobachter (s2stueve · Follow)</div>
+          <div style="display:flex;gap:8px"><input class="in" type="text" value="Bitte jetzt auslösen"><button class="btn" type="button" aria-label="Entfernen" style="min-width:46px;padding:0">×</button></div>
+          <div style="display:flex;gap:8px"><input class="in" type="text" value="Weiter steigen lassen"><button class="btn" type="button" aria-label="Entfernen" style="min-width:46px;padding:0">×</button></div>
+          <div style="display:flex;gap:8px"><input class="in" type="text" value="Daten reichen"><button class="btn" type="button" aria-label="Entfernen" style="min-width:46px;padding:0">×</button></div>
+          <button class="btn" type="button" style="align-self:flex-start">+ Antwort hinzufügen</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn primary" type="button">Speichern</button><span class="muted" style="font-size:13px">Reihenfolge per Ziehen änderbar · max. 6 Knöpfe je Seite · freier Text bleibt immer möglich</span></div>
+    </section>
+
+    <section class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <h2>Aktivitätsprotokoll (automatisch)</h2>
+        <div style="display:flex;gap:8px"><button class="btn" type="button">Als CSV exportieren</button><button class="btn" type="button">Älter als 2 Jahre löschen</button></div>
+      </div>
+      <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Zeit (UTC)</th><th>Benutzer</th><th>Aktion</th><th>Details</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">13.10.2026 14:42:10</td><td class="mono">bwicki</td><td>Cutdown manuell</td><td>Aufstieg 2026-10-13 Rümlang · 2'480 m AGL · auf Bitte Command Center</td></tr>
+          <tr><td class="mono">13.10.2026 14:30:05</td><td class="mono">bwicki</td><td>Start freigegeben</td><td>Aufstieg 2026-10-13 Rümlang · alle Checks grün</td></tr>
+          <tr><td class="mono">13.10.2026 14:21:48</td><td class="mono">bwicki</td><td>Sonde programmiert</td><td>S2H3-R-B20 · Aufstieg · Cutdown 1'900 m AGL · 433.900 MHz</td></tr>
+          <tr><td class="mono">13.10.2026 14:19:02</td><td class="mono">cc</td><td>Follow beigetreten</td><td>Aufstieg 2026-10-13 Rümlang · s2stueve</td></tr>
+          <tr><td class="mono">13.10.2026 14:12:30</td><td class="mono">bwicki</td><td>Planung gerechnet</td><td>Startort 4727N00834E · Luftraumwarnung LS-R12 → Cutdown gesenkt</td></tr>
+          <tr><td class="mono">13.10.2026 14:02:11</td><td class="mono">bwicki</td><td>Anmeldung</td><td>Chrome · Windows</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
