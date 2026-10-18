@@ -613,9 +613,9 @@
   "quick.sd.waiting": "Sonde: zuerst den Empfänger verbinden",
   "quick.here": "hier",
   "quick.start.rx": "Startort = {here} (GPS des Empfängers) ·",
-  "quick.start.device": "Startort = {here} (GPS dieses Geräts – der Empfänger hat noch keinen Fix) ·",
+  "quick.start.device": "Startort = {here} (GPS dieses Geräts – nur vorläufig, der Empfänger hat noch keinen Fix) ·",
   "quick.start.default": "Startort = Standardort {name} (kein GPS-Fix) ·",
-  "quick.start.fix": "Empfänger ins Freie stellen, damit er seine Position bestimmen kann – die App übernimmt sie dann selbst.",
+  "quick.start.fix": "Empfänger ins Freie stellen, damit er seine Position bestimmen kann – ohne GPS-Fix des Empfängers kein Start.",
   "quick.cut.label": "Cutdown-Höhe über Grund",
   "quick.cut.minus": "Cutdown-Höhe um 500 m senken",
   "quick.cut.plus": "Cutdown-Höhe um 500 m erhöhen",
@@ -712,5 +712,7 @@
   "quick.hdr.obs0": "Noch niemand schaut zu",
   "quick.hdr.obs1": "1 Beobachter schaut zu",
   "quick.hdr.obsN": "{n} Beobachter schauen zu",
-  "log.quickstart": "Schnellstart"
+  "log.quickstart": "Schnellstart",
+  "quick.go.needFix": "Start erst möglich, wenn der Empfänger seine Position kennt (GPS-Fix) – Empfänger ins Freie stellen.",
+  "asc.cutdownDescent": "Der Abstieg hat begonnen – der Cutdown-Draht wird nicht mehr geheizt."
 }

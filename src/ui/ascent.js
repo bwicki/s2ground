@@ -10,7 +10,7 @@ import { createMap } from './map.js';
 import { renderVertical } from './vertical.js';
 import { renderStueve } from './stueve.js';
 import { mountChat } from './chat.js';
-import { manualCutdown } from './cutdown.js';
+import { manualCutdown, cutdownAvailable } from './cutdown.js';
 
 const dot = (ok, warn) => `<span class="dot ${ok ? 'g' : warn ? 'y' : 'r'}"></span>`;
 const tile = (k, v, u, cmp, extra = '', cls = '') => `<div class="tile ${cls}"><span class="k">${esc(k)}</span><div class="vals"><div class="vu"><span class="v">${v}</span><span class="u">${u}</span></div></div>${extra}<div class="cmp">${cmp}</div></div>`;
@@ -65,7 +65,7 @@ export function mountAscent(root, ctx) {
           <details class="viewer" open><summary><span>${esc(t('asc.viewer.map'))}</span><span class="tools"><a class="btn xs" href="#detail/map">${esc(t('asc.detail'))} ⤢</a></span></summary><div class="mapbox"></div></details>
           <details class="viewer" open><summary><span>${esc(t('asc.viewer.vertical'))}</span><span class="tools"><a class="btn xs" href="#detail/vertical">${esc(t('asc.detail'))} ⤢</a></span></summary><div class="vertbox"></div></details>
         </div>
-        <div style="display:flex;flex-direction:column;gap:6px"><button class="btn danger big" type="button" data-act="cutdown" style="width:100%;min-height:68px;font-size:22px;letter-spacing:.04em">${esc(t('asc.cutdownNow'))}</button><span class="muted small" style="text-align:center">${esc(t('asc.cutdownNote'))}</span></div>
+        <div class="cutwrap" style="display:flex;flex-direction:column;gap:6px"><button class="btn danger big" type="button" data-act="cutdown" style="width:100%;min-height:68px;font-size:22px;letter-spacing:.04em">${esc(t('asc.cutdownNow'))}</button><span class="muted small" style="text-align:center">${esc(t('asc.cutdownNote'))}</span></div>
         <details class="viewer" open><summary><span>${esc(t('asc.viewer.stueve'))}</span><span class="tools"><a class="btn xs" href="#detail/stueve">${esc(t('asc.detail'))} ⤢</a></span></summary>
           <div class="stueve-wrap"><div class="stbox"></div><div class="derived" style="display:flex;flex-direction:column;gap:8px"></div></div></details>
       </section>
@@ -145,6 +145,7 @@ export function mountAscent(root, ctx) {
   };
   const onTelemetry = (rec) => {
     renderTiles(); renderBanner();
+    const cw = qs(el, '.cutwrap'); if (cw) cw.classList.toggle('hidden', !cutdownAvailable());
     if (map && rec.lat !== null) map.setSonde(rec.lat, rec.lon, `${t('asc.sondeNow')} · ${fmtInt(rec.altAgl)} m AGL`);
     renderViewers();
   };

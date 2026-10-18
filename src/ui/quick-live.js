@@ -8,7 +8,7 @@ import { esc, html, qs, onAct } from '../util/dom.js';
 import { state, bus, now } from '../state.js';
 import { fmtInt, fmtNum, fmtDuration, distanceM, bearingDeg, fmtBearing, icaoSeconds, googleMapsNavUrl, fmtTimeUTC } from '../util/format.js';
 import { landingPoint, drawQr } from './retrieve.js';
-import { manualCutdown } from './cutdown.js';
+import { manualCutdown, cutdownAvailable } from './cutdown.js';
 
 const ICON = {
   ok: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16.5 9.5"/></svg>',
@@ -105,7 +105,7 @@ export function mountQuickLive(host, ctx) {
     if (qrBox) { const lp = landingPoint(); if (lp) drawQr(qrBox, googleMapsNavUrl(lp.lat, lp.lon), 90); }
     setHtml(f('tiles'), tilesHtml());
     f('tiles').classList.toggle('hidden', landed);
-    f('cutwrap').classList.toggle('hidden', landed);
+    f('cutwrap').classList.toggle('hidden', landed || !cutdownAvailable());
     setHtml(f('archive'), landed ? `<button class="btn primary big" type="button" data-act="archive" style="align-self:flex-start">${esc(t('ret.archiveBtn'))}</button>` : '');
   };
   onAct(el, {

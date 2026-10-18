@@ -8,11 +8,26 @@ import { fmtInt } from '../util/format.js';
 
 let cutBusy = false;                   // one confirm dialog / one relBal at a time (double click, repeated key)
 
+/**
+ * Owner's rule: the button stays until the cutdown has fired or the descent has begun (balloon burst) – after that
+ * it disappears (firing the wire during the descent or on the ground only burns the wire and the battery).
+ * Descent = below the peak by > 30 m with the last two records falling faster than 1 m/s.
+ */
+export function cutdownAvailable() {
+  if (state.landed || state.cutdown) return false;
+  if (!state.launch || !state.peak) return true;
+  const n = state.telemetry.length, a = state.telemetry[n - 1], b = state.telemetry[n - 2];
+  if (!a || !b) return true;
+  const falling = (a.rise ?? 0) < -1 && (b.rise ?? 0) < -1;
+  return !(falling && a.alt < state.peak.alt - 30);
+}
+
 /** `where` is only appended to the log entry (e.g. «Detailsicht», «Schnellstart»). */
 export async function manualCutdown(ctx, { where = '' } = {}) {
   if (cutBusy) return;
   // After landing the hot wire must not be fired again (burns the wire for nothing, drains the battery).
   if (state.landed) { toast(t('asc.cutdownLanded'), true); return; }
+  if (!cutdownAvailable()) { toast(t('asc.cutdownDescent'), true); return; }
   cutBusy = true;
   const suffix = where ? ` (${where})` : '';
   const agl = () => (state.last ? fmtInt(state.last.altAgl) : '?');

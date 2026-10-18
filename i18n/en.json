@@ -613,9 +613,9 @@
   "quick.sd.waiting": "Sonde: connect the receiver first",
   "quick.here": "here",
   "quick.start.rx": "Start = {here} (receiver GPS) ·",
-  "quick.start.device": "Start = {here} (GPS of this device – the receiver has no fix yet) ·",
+  "quick.start.device": "Start = {here} (this device’s GPS – provisional only, the receiver has no fix yet) ·",
   "quick.start.default": "Start = default site {name} (no GPS fix) ·",
-  "quick.start.fix": "Put the receiver outdoors so it can find its position – the app then takes it over by itself.",
+  "quick.start.fix": "Put the receiver outdoors so it can determine its position – no start without the receiver’s GPS fix.",
   "quick.cut.label": "Cutdown altitude above ground",
   "quick.cut.minus": "Lower the cutdown altitude by 500 m",
   "quick.cut.plus": "Raise the cutdown altitude by 500 m",
@@ -712,5 +712,7 @@
   "quick.hdr.obs0": "Nobody is watching yet",
   "quick.hdr.obs1": "1 observer is watching",
   "quick.hdr.obsN": "{n} observers are watching",
-  "log.quickstart": "Quick start"
+  "log.quickstart": "Quick start",
+  "quick.go.needFix": "Start is possible only once the receiver knows its position (GPS fix) – put the receiver outdoors.",
+  "asc.cutdownDescent": "The descent has begun – the cutdown wire is not fired any more."
 }

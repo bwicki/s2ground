@@ -10,13 +10,13 @@ import { createMap } from './map.js';
 import { renderVertical } from './vertical.js';
 import { renderStueve } from './stueve.js';
 import { flightTime, ascentRecords } from './ascent.js';
-import { manualCutdown } from './cutdown.js';
+import { manualCutdown, cutdownAvailable } from './cutdown.js';
 
 export function mountDetail(root, ctx, tab = 'map') {
   const p = state.plan;
   const layers = state.detailLayers || (state.detailLayers = { plan: true, actual: true, airspace: true, zone: false, marks: false, follow: true });
   const el = html(`<main class="page" style="padding:16px 28px 24px 28px;gap:16px">
-    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="btn danger" type="button" data-act="cutdown" style="min-height:56px;font-size:18px;padding:0 26px;letter-spacing:.04em">${esc(t('asc.cutdownNow'))}</button><span class="muted small">${esc(t('detail.cutNote'))}</span></div>
+    <div class="${cutdownAvailable() ? '' : 'hidden'}" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><button class="btn danger" type="button" data-act="cutdown" style="min-height:56px;font-size:18px;padding:0 26px;letter-spacing:.04em">${esc(t('asc.cutdownNow'))}</button><span class="muted small">${esc(t('detail.cutNote'))}</span></div>
     <div class="row-wrap" style="gap:16px">
       <section class="viewer-big" style="flex:999 1 700px;min-width:0;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden"></section>
       <aside style="flex:1 1 260px;max-width:320px;display:flex;flex-direction:column;gap:12px">

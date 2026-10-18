@@ -110,8 +110,8 @@ function mountPre(host, ctx, q) {
     const s = p.start;
     const pos = `<span class="q-val">${esc(icaoSeconds(s.lat, s.lon))}</span> · <span class="q-val">${esc(fmtInt(s.alt))}</span> <span class="q-u">m AMSL</span>`;
     const out = q.src === 'rx' ? line('g', '✓', `${t('quick.start.rx', { here: here() })} ${pos}`)
-      : q.src === 'device' ? line('y', '!', `${t('quick.start.device', { here: here() })} ${pos}`) + help(t('quick.start.fix'))
-        : line('y', '!', `${tx('quick.start.default', { name: s.name || '–' })} ${pos}`) + help(t('quick.start.fix'));
+      : q.src === 'device' ? line('r', '✗', `${t('quick.start.device', { here: here() })} ${pos}`) + help(t('quick.start.fix'))
+        : line('r', '✗', `${tx('quick.start.default', { name: s.name || '–' })} ${pos}`) + help(t('quick.start.fix'));
     setHtml(f('start'), out);
   };
   const paintCut = () => {
@@ -184,9 +184,11 @@ function mountPre(host, ctx, q) {
   };
   const paintGo = () => {
     const ls = state.linkState, sdOk = ls.port === 'open' && !!ls.sonde, busy = q.run === 'working';
+    // Owner's rule: the start position must come from the receiver's own GPS fix (device GPS has no usable altitude).
+    const fixOk = q.src === 'rx';
     const verdict = q.run === 'idle' ? null : startVerdict(computeChecks(), { md: curMd(), working: busy ? q.step : null, error: q.run === 'failed' ? q.error : null });
-    qs(el, '[data-act=go]').disabled = !(sdOk && !busy && !state.released && (q.run !== 'waiting' || verdict.level === 'fail'));
-    setHtml(f('goNote'), esc(sdOk ? t('quick.go.note') : t('quick.go.needSonde')));
+    qs(el, '[data-act=go]').disabled = !(sdOk && fixOk && !busy && !state.released && (q.run !== 'waiting' || verdict.level === 'fail'));
+    setHtml(f('goNote'), esc(!sdOk ? t('quick.go.needSonde') : !fixOk ? t('quick.go.needFix') : t('quick.go.note')));
     let out = verdict ? statusHtml(verdict) : '';
     if (verdict && verdict.level === 'go' && state.released && !state.launch && q.armedAt && now() - q.armedAt > 60000) {
       out += `<div class="q-status warn" role="status">${ICON.wait}<div><div class="big">${esc(t('quick.st.stalled.t'))}</div><div class="sub">${esc(t('quick.st.stalled.s'))}</div></div></div>`;
