@@ -19,7 +19,7 @@ TOKEN_HOURS = "24"
 [[d1_databases]]
 binding = "DB"
 database_name = "s2ground"
-database_id = "REPLACE-WITH-YOUR-D1-DATABASE-ID"
+database_id = "ba4bd4ba-3bee-495f-8750-b1e604b6d0a2"
 
 # Durable Object: one LiveSession per ascent (WebSocket fan-out, history replay, chat, kick list)
 [[durable_objects.bindings]]
