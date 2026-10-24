@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="S2 Ground – Bodenstation">
+  <rect width="100" height="100" rx="22" fill="#f2f4f7"/><rect x=".75" y=".75" width="98.5" height="98.5" rx="21.4" fill="none" stroke="#d7dce3" stroke-width="1.5"/>
+  <rect x="24" y="56" width="52" height="30" rx="4" fill="#14202e"/>
+  <rect x="30" y="62" width="40" height="18" rx="2" fill="#f2f4f7"/>
+  <rect x="16" y="86" width="68" height="6" rx="3" fill="#1f8a4c"/>
+  <circle cx="70" cy="24" r="12" fill="#1f5fbf" opacity=".25"/>
+  <circle cx="70" cy="24" r="7" fill="#1f5fbf"/>
+  <path d="M30 40 A28 28 0 0 1 56 20" fill="none" stroke="#f6b03d" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 9"/>
+</svg>
