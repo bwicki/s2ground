@@ -69,13 +69,13 @@ async function restoreSession() {
     return true;
   } catch { api.setToken(null); return false; }
 }
-async function login(user, password, opts = {}) {
+async function login(user, password) {
   const r = await api.login(user, password);
   api.setToken(r.token);
   const me = await api.me();
   state.session = { user: me.user, role: me.role, master: !!me.master, settings: { ...DEFAULT_SETTINGS, ...me.settings }, loginAt: Date.now(), lastActivity: Date.now() };
   if (r.lang) await setLang(r.lang);
-  location.hash = opts.quick ? '#quick' : '#plan';
+  location.hash = '#plan';                                   // the quick start is a button in step 1, never a way around the login
 }
 async function logout() {
   await api.logout(); api.setToken(null); state.session = null;

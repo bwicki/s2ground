@@ -203,8 +203,9 @@ Folgen: https://s2stueve.wicki.aero → Follow sonde ascent · Dein Code: 7K2M4Q
 
 ### 6d. Schnellstart: «Sonde sofort hier starten»
 
-Für den Fall, dass nichts geplant ist und es schnell gehen muss: Auf der Anmeldeseite (zweiter, orange umrandeter Knopf)
-oder oben in der Planungsseite → **Sonde sofort hier starten**. Eine Seite, drei Schritte, keine Phasenleiste:
+Für den Fall, dass nichts geplant ist und es schnell gehen muss: **zuerst anmelden** (die Anmeldeseite bietet keine
+Abkürzung – jeder Schritt wird einem Benutzer zugeordnet), dann oben in Schritt 1 der blaue Knopf
+**Sonde sofort hier starten**. Eine Seite, drei Schritte, keine Phasenleiste:
 
 1. **Verbinden** – RR4 am USB-Kabel und Sonde werden automatisch erkannt (✓ / ✗ mit Anweisung, was zu tun ist).
 2. **Einstellen** – Startort = **hier** (GPS des Empfängers, sonst GPS des Geräts, sonst Standard-Startort; als ICAO-Koordinaten und m AMSL).

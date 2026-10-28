@@ -176,15 +176,19 @@ try {
   // ---------------------------------------------------------------------------------------------------------------
   // Schnellstart: login via the amber button → step 1/2 → stepper → PROGRAMMIEREN & FREIGEBEN → BEREIT → live → cutdown → landed
   // ---------------------------------------------------------------------------------------------------------------
-  step('quick start: login page has the second, prominent button');
+  step('quick start: the login page has NO shortcut – login first, then the blue button in step 1');
   qp = await browser.newPage({ viewport: { width: 1280, height: 980 } });
   track(qp);
   const qshot = (name) => qp.screenshot({ path: path.join(shots, name), fullPage: true });
   const qtext = (sel) => qp.textContent(sel, { timeout: 2000 }).catch(() => null);
-  await qp.goto(`${base}/?sim=1&speed=5&fast=1#login`);
-  await qp.waitForSelector('form.login [data-act=quick]');
+  await qp.goto(`${base}/?sim=1&speed=5&fast=1#quick`);           // deep link without a session → login page
+  await qp.waitForSelector('form.login');
+  if (await qp.$('form.login [data-act=quick]')) throw new Error('the login page must not offer the quick start');
   await qshot('12-quick-0-login.png');
-  await qp.click('form.login [data-act=quick]');
+  await qp.click('form.login button[type=submit]');
+  await qp.waitForURL(/#plan/);                                     // never straight to #quick
+  await qp.waitForSelector('.actionbar a.q-blue');
+  await qp.click('.actionbar a.q-blue');
   await qp.waitForURL(/#quick/);
   await qp.waitForSelector('.q-step');
 
@@ -277,10 +281,13 @@ try {
   step('quick start: English');
   await qp.evaluate(() => localStorage.setItem('s2ground.lang', 'en'));
   await qp.reload();                                    // the simulation keeps no session over a reload → login page, now in English
-  await qp.waitForSelector('form.login [data-act=quick]');
-  if (!/Start the sonde right here/.test(await qp.textContent('form.login [data-act=quick]'))) throw new Error('EN login quick button');
+  await qp.waitForSelector('form.login button[type=submit]');
+  if (await qp.$('form.login [data-act=quick]')) throw new Error('the login page must not offer the quick start (EN)');
   await qshot('12-quick-10-login-en.png');
-  await qp.click('form.login [data-act=quick]');
+  await qp.click('form.login button[type=submit]');
+  await qp.waitForSelector('.actionbar a.q-blue', { timeout: 20000 });
+  if (!/Start the sonde right here/.test(await qp.textContent('.actionbar a.q-blue'))) throw new Error('EN quick button in the action bar');
+  await qp.click('.actionbar a.q-blue');
   await qp.waitForSelector('.q-step', { timeout: 20000 });
   await qp.waitForFunction(() => /Start the sonde right here/.test(document.querySelector('h1, .q-page h1') ? document.querySelector('h1, .q-page h1').textContent : ''), null, { timeout: 10000 });
   if (!/PROGRAM SONDE & RELEASE/.test(await qp.textContent('[data-act=go]'))) throw new Error('EN start button');

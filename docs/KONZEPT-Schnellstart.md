@@ -10,10 +10,10 @@ wissen kann, meldet nur, was der Laie jetzt braucht, und sagt bei jedem Problem 
 
 ## 2. Einstieg
 
-* Auf dem Anmeldebildschirm steht unter «Anmelden» ein zweiter, deutlich sichtbarer Knopf: **«Sonde sofort hier starten – ohne
-  Planung · eine Seite · nur das Nötigste»**. Anmeldename und Passwort bleiben nötig (Cutdown ist eine Hardware-Aktion; jeder
-  Schritt wird dem Benutzer zugeordnet und protokolliert).
-* Derselbe Knopf steht oben in Phase 1 «Aufstieg planen», falls jemand schon angemeldet ist.
+* Die Anmeldung ist immer der erste Schritt – auch für den Schnellstart (Cutdown ist eine Hardware-Aktion; jeder Schritt
+  wird dem Benutzer zugeordnet und protokolliert). Die Anmeldeseite bietet deshalb keine Abkürzung (Entscheid 28.10.2026;
+  der ursprünglich vorgesehene zweite Knopf auf der Anmeldeseite ist entfallen).
+* Nach der Anmeldung steht oben in Phase 1 «Aufstieg planen» der blaue Knopf **«Sonde sofort hier starten»**.
 * Von der Schnellstart-Seite führt jederzeit ein Link «Stattdessen vollständig planen →» in den normalen Ablauf; nach dem Start
   «Vollständige Ansicht →» (Karte, Vertikalsicht, Stüve, Chat).
 

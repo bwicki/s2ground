@@ -2,6 +2,7 @@
 // setup form shown when the Worker's user table is still empty (so Balthasar never needs a
 // terminal to create the first login). Observers never log in here – they use their code in s2stueve.
 
+import { VERSION } from '../version.js';
 import { t, currentLang } from '../i18n.js';
 import { esc, html, qs, onAct } from '../util/dom.js';
 import { api, SIM } from '../api.js';
@@ -24,12 +25,11 @@ export function mountLogin(root, ctx) {
         <label class="f">${esc(t('login.password'))}<input class="in" name="password" type="password" autocomplete="current-password" value="${SIM ? 'demo' : ''}" required></label>
         <div class="err hidden" role="alert"></div>
         <button class="btn primary" type="submit" style="min-height:56px;font-size:17px">${esc(t('login.submit'))}</button>
-        <button class="btn q-blue login-quick" type="button" data-act="quick" style="min-height:64px;font-size:17px;flex-direction:column;gap:2px;line-height:1.2"><span>${esc(t('quick.btn.title'))}</span><span style="font-size:13px;font-weight:500">${esc(t('quick.btn.sub'))}</span></button>
         <p class="muted" style="margin:0;font-size:13px;line-height:1.5">${esc(t('login.note'))}</p>
         ${SIM ? `<p class="muted" style="margin:0;font-size:13px">${esc(t('login.simHint'))}</p>` : ''}
       </form>
     </main>
-    <footer class="foot"><span>s2ground.wicki.aero · Version 0.1</span><span>${esc(t('login.browsers'))}</span></footer>
+    <footer class="foot"><span>s2ground.wicki.aero · Version ${esc(VERSION)}</span><span>${esc(t('login.browsers'))}</span></footer>
   </div>`);
   const form = qs(el, 'form'), err = qs(el, '.err');
   let setupMode = false;
@@ -37,26 +37,24 @@ export function mountLogin(root, ctx) {
     if (!needed) return;
     setupMode = true;
     el.querySelectorAll('.setup, .setup-only').forEach((x) => x.classList.remove('hidden'));
-    qs(el, '.login-quick').classList.add('hidden');            // the first login creates the master user, no shortcut yet
     qs(el, 'button[type=submit]').textContent = t('login.setupSubmit');
   });
-  /** Normal login → #plan; quick = «Sonde sofort hier starten» → same credentials, then straight to #quick. */
-  const doLogin = async (quick) => {
+  /** Login → #plan. The quick start («Sonde sofort hier starten») is reached from step 1 – after the login, never instead of it. */
+  const doLogin = async () => {
     err.classList.add('hidden');
     const user = form.user.value.trim(), password = form.password.value;
     const btns = el.querySelectorAll('form.login button'); btns.forEach((b) => { b.disabled = true; });
     try {
       if (setupMode) await api.setup(user, password, form.fullName.value.trim());
-      await ctx.onLogin(user, password, { quick });
+      await ctx.onLogin(user, password);
     } catch (ex) {
       err.textContent = ex.status === 401 ? t('login.badCredentials') : ex.status === 429 ? t('login.rateLimited') : `${t('login.failed')} (${ex.message})`;
       err.classList.remove('hidden');
     } finally { btns.forEach((b) => { b.disabled = false; }); }
   };
-  form.addEventListener('submit', (e) => { e.preventDefault(); doLogin(false); });
+  form.addEventListener('submit', (e) => { e.preventDefault(); doLogin(); });
   onAct(el, {
     lang: (b) => ctx.onLang(b.dataset.lang),
-    quick: () => { if (form.reportValidity()) doLogin(true); },
   });
   root.replaceChildren(el);
   return { destroy() { el.remove(); } };
