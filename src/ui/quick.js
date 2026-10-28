@@ -63,7 +63,7 @@ function mountPre(host, ctx, q) {
     <section class="q-step"><div class="q-n">2</div><h2>${esc(t('quick.s2'))}</h2><div class="q-body">
       <div data-f="start"></div>
       <div class="q-cutrow"><span class="q-cutlabel">${esc(t('quick.cut.label'))}</span>
-        <div class="q-stepper" role="group" aria-label="${esc(t('quick.cut.label'))}"><button type="button" data-act="cutMinus" aria-label="${esc(t('quick.cut.minus'))}">−&nbsp;500</button><div class="v"><span data-f="cut"></span><span class="q-u" style="font-size:16px">m AGL</span></div><button type="button" data-act="cutPlus" aria-label="${esc(t('quick.cut.plus'))}">+&nbsp;500</button></div>
+        <div class="q-stepper" role="group" aria-label="${esc(t('quick.cut.label'))}"><button type="button" data-act="cutMinus" aria-label="${esc(t('quick.cut.minus'))}">−&nbsp;500</button><div class="v"><span data-f="cut"></span><span class="q-u">m AGL</span></div><button type="button" data-act="cutPlus" aria-label="${esc(t('quick.cut.plus'))}">+&nbsp;500</button></div>
         <span class="muted small" data-f="cutHint"></span></div>
       <div data-f="air"></div>
       <div class="muted small">${esc(t('quick.air.note'))}</div>
@@ -125,7 +125,7 @@ function mountPre(host, ctx, q) {
     const r = p.result;
     let out;
     if (q.checking || (!r && !q.planError)) out = line('x', '…', esc(t('quick.air.checking')));
-    else if (!r) out = line('y', '!', esc(t('quick.air.unchecked'))) + help(t('quick.air.failed')) + `<div><button class="btn" type="button" data-act="retryAir">${esc(t('plan.airspace.retry'))}</button></div>`;
+    else if (!r) out = line('y', '!', esc(t('quick.air.unchecked'))) + help(t('quick.air.failed')) + `<div class="q-actions"><button class="btn" type="button" data-act="retryAir">${esc(t('plan.airspace.retry'))}</button></div>`;
     else if (r.conflicts.length && p.ignoreAirspace) out = line('y', '!', esc(tx('quick.air.ignored', { name: r.conflicts[0].airspace.name })));
     else if (r.conflicts.length) {
       const c = r.conflicts[0], sug = r.suggestAgl;
@@ -134,7 +134,7 @@ function mountPre(host, ctx, q) {
         canLower ? `<button class="btn" type="button" data-act="applySuggest" ${locked() ? 'disabled' : ''}>${esc(t('quick.air.lower', { cut: fmtInt(sug) }))}</button>` : '');
     } else if (p.showAirspace && r.airspaceError) {
       const why = r.airspaceError === 'E_NO_OPENAIP_KEY' ? t('plan.airspace.noKey') : r.airspaceError === 'E_OPENAIP_KEY_REJECTED' ? t('plan.airspace.badKey') : t('plan.airspace.unreachable');
-      out = line('y', '!', esc(t('quick.air.unchecked'))) + help(why) + `<div><button class="btn" type="button" data-act="retryAir">${esc(t('plan.airspace.retry'))}</button></div>`;
+      out = line('y', '!', esc(t('quick.air.unchecked'))) + help(why) + `<div class="q-actions"><button class="btn" type="button" data-act="retryAir">${esc(t('plan.airspace.retry'))}</button></div>`;
     } else {
       const wind = p.windSource === 'open-meteo' ? 'Open-Meteo' : p.windSource === 'sim' ? t('plan.srcSim') : t('plan.srcFallback');
       out = line('g', '✓', `${tx('quick.air.ok', { src: { html: tx('quick.air.src', { wind }) } })} <strong>${esc(t('quick.air.okRes', { alt: fmtInt(p.cutAltAgl) }))}</strong>`);

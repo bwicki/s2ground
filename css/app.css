@@ -321,17 +321,21 @@ main.page.q-page{max-width:1000px;width:100%;margin:0 auto;gap:16px;font-size:17
 .q-line>span:not(.q-ic){flex:1 1 280px;min-width:0}
 .q-ic{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex:none}
 .q-ic.g{background:var(--green)}.q-ic.y{background:var(--amber)}.q-ic.r{background:var(--red)}.q-ic.x{background:var(--grey)}
-.q-help{margin:-6px 0 0 48px;font-size:15px;color:var(--muted)}
+.q-help{margin:-4px 0 0 48px;font-size:14px;color:var(--muted)}
 .q-help.r{color:var(--bad-text)}
 .q-val{white-space:nowrap;font-family:var(--mono);font-weight:600}
-.q-u{white-space:nowrap;font-size:15px;color:var(--muted)}
-.q-cutrow{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.q-u{white-space:nowrap;font-size:14px;color:var(--muted)}
+.q-cutrow{display:flex;align-items:center;gap:14px 18px;flex-wrap:wrap}
 .q-cutrow>.q-cutlabel{font-size:18px;min-width:220px}
-.q-stepper{display:inline-flex;align-items:stretch;border:1px solid var(--border-strong);border-radius:12px;overflow:hidden;background:var(--surface)}
-.q-stepper button{min-width:76px;min-height:64px;border:0;background:var(--surface);color:var(--text);font:inherit;font-size:22px;font-weight:600;cursor:pointer}
+/* Stepper: one text size for the buttons (18 px like the rest of the page), the value 28 px mono, the unit 14 px.
+   The value cell wraps with align-content:center so the baseline-aligned pair sits vertically centred. */
+.q-stepper{display:inline-flex;align-items:stretch;border:1px solid var(--border-strong);border-radius:12px;overflow:hidden;background:var(--surface);min-height:56px}
+.q-stepper button{min-width:72px;border:0;background:var(--surface);color:var(--text);font:inherit;font-size:18px;font-weight:600;cursor:pointer;white-space:nowrap}
 .q-stepper button:hover:not(:disabled){background:var(--hair)}
 .q-stepper button:disabled{color:#b8c2d0;cursor:not-allowed}
-.q-stepper .v{display:flex;align-items:baseline;gap:8px;padding:0 22px;border-left:1px solid var(--border-strong);border-right:1px solid var(--border-strong);font-family:var(--mono);font-size:34px;font-weight:600}
+.q-stepper .v{display:flex;flex-wrap:wrap;align-items:baseline;align-content:center;justify-content:center;gap:8px;min-width:170px;padding:0 18px;border-left:1px solid var(--border-strong);border-right:1px solid var(--border-strong);font-family:var(--mono);font-size:28px;font-weight:600;line-height:1;white-space:nowrap}
+.q-stepper .v .q-u{font-size:14px;font-family:var(--sans)}
+.q-actions{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 0 48px}
 .q-status{border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:18px;border:1px solid}
 .q-status.ok{background:var(--ok-bg);border-color:var(--ok-border);color:var(--ok-text)}
 .q-status.warn{background:var(--warn-bg);border-color:var(--warn-border);color:var(--warn-text)}
