@@ -144,6 +144,10 @@ Die Planung holt die Lufträume selbständig von openAIP. Dazu braucht der Worke
    Originalantwort von openAIP). Später jederzeit mit dem Knopf **openAIP-Schlüssel testen** wiederholbar.
    Wird der Schlüssel abgelehnt: auf openaip.net muss es ein Eintrag unter **API Keys** sein (nicht die Client-ID
    oder das Passwort), vollständig kopiert, ohne Leerzeichen.
+   Meldet der Test «403 … <!doctype html> … 403 Forbidden» für alle drei Varianten, ist nicht der Schlüssel
+   das Problem, sondern der Gateway vor openAIP blockt Anfragen aus Cloudflare Workers (Stand 28.10.2026).
+   Dann hilft nur eine Rückfrage bei openAIP (Forum/Support: Worker-Zugriff mit gültigem API-Key freigeben)
+   oder ein anderer Weg für die Luftraumdaten – siehe Abschnitt 11, offene Punkte.
 
 Der Schlüssel bleibt auf dem Server (Cloudflare D1) und wird nie an den Browser geschickt. Die Antworten werden
 pro Kartenausschnitt 24 h zwischengespeichert. Welche Kategorien als Konflikt zählen, steht im Feld
@@ -270,6 +274,12 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 * **Luftraumdaten** kommen live von openAIP (Abschnitt 6a); Untergrenzen «GND» werden mit der Startplatzhöhe angenähert,
   Lufträume sind nicht tagesaktuell aktiviert/deaktiviert – deshalb immer DABS/NOTAM prüfen. Ohne Schlüssel (und in der
   Simulation) werden Beispiel-Lufträume aus `src/data/airspaces.json` gezeigt.
+* **openAIP blockt den Worker** (28.10.2026): api.core.openaip.net antwortet auf Anfragen aus dem Cloudflare Worker mit
+  einer HTML-Seite «403 Forbidden», unabhängig vom Schlüssel (Schlüsseltest in den App-Einstellungen zeigt alle drei
+  Anfrage-Varianten). Mögliche Wege: (a) bei openAIP nachfragen, ob Zugriffe aus Cloudflare Workers mit gültigem API-Key
+  freigegeben werden; (b) Luftraumdaten über die öffentlichen CORS-Relays holen wie s2planning – dann läuft der Schlüssel
+  durch fremde Relays (bewusster Entscheid des Masterusers nötig); (c) den Proxy auf einer anderen Plattform betreiben.
+  Bis dahin bleibt Schritt 1 gelb («Lufträume von Hand prüfen»), alles Übrige funktioniert.
 * **Trajektorie** ist ein einfaches Modell (Open-Meteo-Windprofil, konstante Steig-/Sinkrate, flaches Gelände am Landepunkt).
 * **Protokollmodul** (`src/protocol/`) ist aus der Windsond-Software abgeleitet, aber noch **nicht an echter Hardware geprüft** – die offenen Punkte stehen in `docs/protocol/ssp-windsond-protocol.md`, Abschnitt 8. Erster Test mit RR4 am Laptop: Menü ☰ → Protokoll anzeigen, Rohzeilen mitschneiden.
 * **Dropsonde/Abwurf** ist vorbereitet, aber nicht getestet.

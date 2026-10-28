@@ -98,8 +98,9 @@ export function mountAdmin(root, ctx) {
   async function testKey() {
     try {
       const r = await api.airspacesTest();
-      if (r.ok) toast(t('admin.s.testOk', { n: r.count }));
-      else toast((r.message === 'E_NO_OPENAIP_KEY' ? t('admin.s.keyMissing') : t('admin.s.testFail')) + ' ' + (r.message || r.status), true);
+      const report = (r.tried || []).map((a) => `${a.via}: ${a.status}${a.body ? ' – ' + a.body.slice(0, 80) : ''}`).join(' · ');
+      if (r.ok) toast(t('admin.s.testOk', { n: r.count, via: r.via }));
+      else toast((r.message === 'E_NO_OPENAIP_KEY' ? t('admin.s.keyMissing') : t('admin.s.testFail') + ' ' + (report || r.message || r.status)), true);
     } catch (ex) { toast(t('admin.s.testFail') + ' ' + ex.message, true); }
   }
   onAct(el, {

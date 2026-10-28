@@ -9,42 +9,77 @@ const TTL_S = 24 * 3600;
 const UPSTREAM = 'https://api.core.openaip.net/api/airspaces';
 
 /**
- * One request to openAIP. The key is sent BOTH as the documented header and as the `apiKey` query
- * parameter (the owner's s2planning app uses the query form successfully) – whichever the API honours.
- * A User-Agent is set because some gateways answer 403 to anonymous Worker fetches.
+ * How the Worker reaches openAIP.
+ * In production (28.10.2026) api.core.openaip.net answered the Worker's request with an HTML "403 Forbidden"
+ * page – a gateway refusal, not the API's own JSON 401 for a wrong key. To find out which part of the
+ * request the gateway objects to, three honest variants are tried in turn (no spoofing: either no
+ * User-Agent at all or the app's own name) and every attempt is recorded so the admin's key test shows
+ * exactly what openAIP answered. The variant that works is used for the real request.
  */
-async function fetchOpenAip(key, upstreamUrl) {
+const UA_APP = 's2ground/1.0';
+export const VARIANTS = [
+  { via: 'header',       query: false, ua: null },      // documented header only, no User-Agent
+  { via: 'header+query', query: true,  ua: null },      // + apiKey query parameter (as s2planning sends it)
+  { via: 'header+query+ua', query: true, ua: UA_APP },  // + the app's own User-Agent
+];
+const TIMEOUT_MS = 9000;
+
+function upstreamUrl(key, params, withQuery) {
+  const u = new URL(UPSTREAM);
+  for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
+  if (withQuery) u.searchParams.set('apiKey', key);
+  return u.toString();
+}
+
+/** One attempt with one variant → {via, ok, status, ms, data, body}; never throws. */
+async function fetchVariant(v, key, params) {
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), 12000);
+  const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+  const headers = { Accept: 'application/json', 'x-openaip-api-key': key };
+  if (v.ua) headers['User-Agent'] = v.ua;
+  const t0 = Date.now();
   try {
-    const u = new URL(upstreamUrl); u.searchParams.set('apiKey', key);
-    return await fetch(u.toString(), { headers: { 'x-openaip-api-key': key, Accept: 'application/json', 'User-Agent': 's2ground/1.0 (+https://s2ground.wicki.aero)' }, signal: ctl.signal });
-  } catch (err) {
-    throw new HttpError(502, 'E_OPENAIP_UNREACHABLE');
+    const res = await fetch(upstreamUrl(key, params, v.query), { headers, signal: ctl.signal });
+    const text = await res.text();
+    let data = null;
+    try { data = JSON.parse(text); } catch { data = null; }
+    const ok = res.ok && !!data && Array.isArray(data.items);
+    return { via: v.via, ok, status: res.status, ms: Date.now() - t0, data, body: ok ? '' : text.replace(/\s+/g, ' ').slice(0, 160) };
+  } catch (e) {
+    return { via: v.via, ok: false, status: 0, ms: Date.now() - t0, data: null, body: String((e && e.message) || e).slice(0, 160) };
   } finally { clearTimeout(timer); }
 }
 
-/** Error code + what openAIP actually answered (status and the first 160 characters), so the admin can see why. */
-async function describe(res) {
-  let body = '';
-  try { body = (await res.text()).replace(/\s+/g, ' ').slice(0, 160); } catch { body = ''; }
-  const code = res.status === 401 || res.status === 403 ? 'E_OPENAIP_KEY_REJECTED' : `E_OPENAIP_${res.status}`;
-  return `${code} (openAIP ${res.status}${body ? ': ' + body : ''})`;
+/** Try the variants in order until one answers with items → {ok, via, status, data, tried[]}. */
+async function fetchAny(key, params) {
+  const tried = [];
+  for (const v of VARIANTS) {
+    const r = await fetchVariant(v, key, params);
+    tried.push({ via: r.via, ok: r.ok, status: r.status, ms: r.ms, body: r.body });
+    if (r.ok) return { ok: true, via: r.via, status: r.status, data: r.data, tried };
+    if (r.status === 401) break;                                   // the API itself refused the key – no variant changes that
+  }
+  return { ok: false, tried };
 }
 
-/** Master-only key test: a tiny request; returns {ok, status, message} instead of throwing. */
+/** Error code + what every attempt answered, e.g. "E_OPENAIP_UNREACHABLE (header 403: <!doctype …; …)". */
+function describe(tried) {
+  // JSON 401/403 = the API itself refused the key; an HTML 403 or a network error = gateway block / unreachable
+  const keyRejected = tried.some((t) => t.status === 401 || (t.status === 403 && /^\s*\{/.test(t.body)));
+  const code = keyRejected ? 'E_OPENAIP_KEY_REJECTED' : 'E_OPENAIP_UNREACHABLE';
+  const parts = tried.map((t) => `${t.via} ${t.status}${t.body ? ': ' + t.body.slice(0, 90) : ''}`);
+  return { code, status: keyRejected ? 409 : 502, message: `${code} (${parts.join('; ')})` };
+}
+
+/** Master-only key test: a tiny request; returns a report with every attempt, never throws. */
 export async function testOpenAipKey(env) {
   const settings = await getSettings(env);
   const key = (settings.openaipKey || '').trim();
-  if (!key) return { ok: false, status: 0, message: 'E_NO_OPENAIP_KEY' };
-  try {
-    const res = await fetchOpenAip(key, `${UPSTREAM}?bbox=8.4,47.3,8.6,47.5&limit=1`);
-    if (!res.ok) return { ok: false, status: res.status, message: await describe(res) };
-    const data = await res.json();
-    return { ok: true, status: res.status, count: Array.isArray(data.items) ? data.items.length : 0, keyLength: key.length };
-  } catch (e) {
-    return { ok: false, status: 0, message: e.message || 'E_OPENAIP_UNREACHABLE' };
-  }
+  if (!key) return { ok: false, status: 0, message: 'E_NO_OPENAIP_KEY', tried: [] };
+  const r = await fetchAny(key, { bbox: '8.4,47.3,8.6,47.5', limit: '1' });
+  if (r.ok) return { ok: true, via: r.via, status: r.status, count: r.data.items.length, keyLength: key.length, tried: r.tried };
+  const d = describe(r.tried);
+  return { ok: false, status: d.status, message: d.message, tried: r.tried };
 }
 
 export async function airspaces(env, url, ctx) {
@@ -63,12 +98,12 @@ export async function airspaces(env, url, ctx) {
   const hit = await cache.match(cacheKey);
   if (hit) return hit;
 
-  const res = await fetchOpenAip(key, `${UPSTREAM}?bbox=${bbox.join(',')}&limit=1000`);
-  if (!res.ok) throw new HttpError(res.status === 401 || res.status === 403 ? 409 : 502, await describe(res));
-  const data = await res.json();
+  const r = await fetchAny(key, { bbox: bbox.join(','), limit: '1000' });
+  if (!r.ok) { const d = describe(r.tried); throw new HttpError(d.status, d.message); }
+  const data = r.data;
   // keep only what the client needs – geometry, limits, type, name – to stay small
   const items = (data.items || []).map((it) => ({ _id: it._id, name: it.name, type: it.type, icaoClass: it.icaoClass, lowerLimit: it.lowerLimit, upperLimit: it.upperLimit, geometry: it.geometry }));
-  const out = new Response(JSON.stringify({ bbox: bbox.map(Number), fetchedAt: Date.now(), items }), {
+  const out = new Response(JSON.stringify({ bbox: bbox.map(Number), fetchedAt: Date.now(), via: r.via, items }), {
     headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': `public, max-age=${TTL_S}` },
   });
   if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(cacheKey, out.clone())); else await cache.put(cacheKey, out.clone());

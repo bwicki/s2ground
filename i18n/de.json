@@ -536,7 +536,7 @@
   "admin.s.openaipHint": "Kostenlos unter openaip.net → Konto → API-Schlüssel. Wird nur auf dem Server gespeichert und nie an den Browser gesendet.",
   "admin.s.testKey": "openAIP-Schlüssel testen",
   "admin.s.testKeyHint": "Prüft den gespeicherten Schlüssel mit einer kleinen Anfrage an openAIP (läuft nach dem Speichern automatisch).",
-  "admin.s.testOk": "openAIP antwortet – Schlüssel in Ordnung ({n} Lufträume im Testausschnitt).",
+  "admin.s.testOk": "openAIP antwortet (Variante {via}) – Schlüssel in Ordnung, {n} Lufträume im Testausschnitt.",
   "admin.s.testFail": "openAIP-Test fehlgeschlagen:",
   "admin.s.airspaceCats": "Luftraum-Kategorien, die als Konflikt zählen",
   "prep.expert.ascentId": "Aufstiegs-ID (Live-Kanal)",

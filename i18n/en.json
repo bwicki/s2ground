@@ -536,7 +536,7 @@
   "admin.s.openaipHint": "Free at openaip.net → account → API key. Stored on the server only, never sent to the browser.",
   "admin.s.testKey": "Test openAIP key",
   "admin.s.testKeyHint": "Checks the stored key with one small request to openAIP (runs automatically after saving).",
-  "admin.s.testOk": "openAIP answers – key OK ({n} airspaces in the test area).",
+  "admin.s.testOk": "openAIP answers (variant {via}) – key OK, {n} airspaces in the test area.",
   "admin.s.testFail": "openAIP test failed:",
   "admin.s.airspaceCats": "Airspace categories that count as a conflict",
   "prep.expert.ascentId": "Ascent ID (live channel)",
