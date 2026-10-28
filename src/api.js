@@ -5,6 +5,7 @@
 // Demo ground users: bwicki / demo (master) and crew1 / demo. Demo observers: see mock.observers.
 
 import { config } from './config.js';
+import { fetchAirspacesDirect } from './openaip-direct.js';
 
 const TOKEN_KEY = 's2ground.token';
 const params = new URLSearchParams(location.search);
@@ -26,7 +27,8 @@ export const DEFAULT_SETTINGS = {
   windFallbackDir: 240,                 // used when Open-Meteo is unreachable
   windFallbackSpd: 6,                   // m/s
   cutAltAgl: 3000,                      // planning default, m AGL
-  openaipKey: '',                       // 'set' when stored on the Worker; the key itself never reaches the browser
+  openaipKey: '',                       // 'set' when stored on the Worker; the key reaches the browser only via /api/airspaces/key (see openaipDirect)
+  openaipDirect: true,                  // browser fallback when openAIP refuses the Worker (master setting)
   airspaceCats: 'P,R,D,CTR,TMA',        // openAIP categories that count as a conflict
   waPhoneNumberId: '',                  // WhatsApp Cloud API (stage 2) – 'set' when stored, masked like openaipKey
   waToken: '',
@@ -105,6 +107,7 @@ async function mockHandle(method, path, body, token) {
     case 'GET airspaces': {
       need();
       if (arg === 'test') { need('master'); return { ok: true, via: 'header+ua', status: 200, count: 3, source: 'settings', keyLength: 32, keyHint: '0123…ef', keyFormatOk: true, tried: [{ via: 'header+ua', ok: true, status: 200, ms: 120, body: '' }] }; }   // demo: key test passes
+      if (arg === 'key') { if (!mock.settings.openaipDirect) throw new ApiError(403, 'E_DIRECT_DISABLED'); return { key: 'demo' }; }
       const r = await fetch('./src/data/airspaces.json'); return r.json();                                  // sample data for the demo
     }
     case 'POST log': need(); mock.log.unshift({ t: Date.now(), user: who.name, action: body.action, detail: body.detail || '' }); return { ok: true };
@@ -173,8 +176,29 @@ export const api = {
     list: (limit = 200) => api.request('GET', `/api/log?limit=${limit}`),
     add: (action, detail) => api.request('POST', '/api/log', { action, detail }).catch(() => null),
   },
-  /** openAIP airspaces for a bbox [w,s,e,n] via the Worker proxy (sample data in mock mode). */
-  airspaces: (bbox) => api.request('GET', `/api/airspaces?bbox=${bbox.map((v) => v.toFixed(3)).join(',')}`),
+  /**
+   * openAIP airspaces for a bbox [w,s,e,n]: Worker proxy first (key stays on the server); when openAIP
+   * refuses the Worker (HTML 403 → E_OPENAIP_UNREACHABLE) the browser loads them itself with the key
+   * from /api/airspaces/key – logged-in ground users only, master setting openaipDirect. Sample data in mock mode.
+   */
+  airspaces: async (bbox) => {
+    try { return await api.request('GET', `/api/airspaces?bbox=${bbox.map((v) => v.toFixed(3)).join(',')}`); }
+    catch (e) {
+      if (!(e instanceof ApiError) || !/^E_OPENAIP_UNREACHABLE/.test(e.message)) throw e;
+      let key;
+      try { ({ key } = await api.request('GET', '/api/airspaces/key')); } catch { throw e; }     // fallback off or no key → original error
+      try { return await fetchAirspacesDirect(bbox, key); }
+      catch (d) { throw new ApiError(d.status || 502, `${d.message}; worker: ${e.message.replace(/^E_OPENAIP_UNREACHABLE\s*/, '')}`); }
+    }
+  },
+  /** Master only: one tiny openAIP request from the browser with the key → {ok, status, count|message}. */
+  airspacesDirectTest: async () => {
+    if (MOCK) return { ok: true, status: 200, count: 3 };
+    let key;
+    try { ({ key } = await api.request('GET', '/api/airspaces/key')); } catch (e) { return { ok: false, status: e.status || 0, message: e.message }; }
+    try { const r = await fetchAirspacesDirect([8.4, 47.3, 8.6, 47.5], key, undefined, { limit: 1 }); return { ok: true, status: 200, count: r.items.length }; }
+    catch (d) { return { ok: false, status: d.status || 0, message: d.message }; }
+  },
   /** Master only: one tiny openAIP request with the stored key → {ok, status, count | message}. */
   airspacesTest: () => api.request('GET', '/api/airspaces/test'),
   ascents: {

@@ -82,3 +82,11 @@ test('key test reports every attempt and never throws', async () => {
     assert.equal(n.ok, false); assert.equal(n.tried[0].status, 0); assert.match(n.tried[0].body, /network/);
   } finally { globalThis.fetch = orig; }
 });
+
+test('browser key route: ground users get the key only while openaipDirect is on', async () => {
+  const { airspaceKeyForBrowser } = await import('../worker/src/airspaces.js');
+  const env = (settings) => ({ DB: { prepare: () => ({ first: async () => ({ value: JSON.stringify(settings) }) }) } });
+  assert.deepEqual(await airspaceKeyForBrowser(env({ openaipKey: 'abc', openaipDirect: true })), { key: 'abc' });
+  await assert.rejects(() => airspaceKeyForBrowser(env({ openaipKey: 'abc', openaipDirect: false })), (e) => e.status === 403 && e.message === 'E_DIRECT_DISABLED');
+  await assert.rejects(() => airspaceKeyForBrowser(env({ openaipKey: '', openaipDirect: true })), (e) => e.status === 409 && e.message === 'E_NO_OPENAIP_KEY');
+});

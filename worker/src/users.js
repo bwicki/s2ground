@@ -14,6 +14,7 @@ export const DEFAULT_SETTINGS = {
   windFallbackDir: 240, windFallbackSpd: 6,
   cutAltAgl: 3000,                       // planning default, m AGL
   openaipKey: '',                        // openAIP core API key – server-side only, never sent to clients
+  openaipDirect: true,                   // hand the key to logged-in ground users so the browser can load airspaces when openAIP refuses the Worker
   airspaceCats: 'P,R,D,CTR,TMA',         // openAIP categories that count as a conflict
   waPhoneNumberId: '',                   // Meta WhatsApp Cloud API: phone number id (stage 2, see whatsapp.js)
   waToken: '',                           // Meta WhatsApp Cloud API: permanent access token (secret)
@@ -43,6 +44,7 @@ export async function putSettings(env, auth, patch) {
     cur[k] = patch[k];
   }
   cur.cutAltAgl = Math.min(12000, Math.max(200, Math.round(Number(cur.cutAltAgl) || 3000)));
+  cur.openaipDirect = cur.openaipDirect === true || cur.openaipDirect === 1 || cur.openaipDirect === 'true';
   for (const k of SECRET_KEYS) cur[k] = String(cur[k] || '').trim().slice(0, 512);
   cur.quickRepliesGround = (cur.quickRepliesGround || []).map(String).slice(0, 6);
   cur.quickRepliesObserver = (cur.quickRepliesObserver || []).map(String).slice(0, 6);

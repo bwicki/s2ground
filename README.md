@@ -146,6 +146,9 @@ Die Planung holt die Lufträume selbständig von openAIP. Dazu braucht der Worke
    mit openaip.net – der Schlüssel selbst verlässt den Server nie. Ein openAIP-Schlüssel hat 32 Zeichen (0–9, a–f);
    sieht der gespeicherte Wert anders aus, hat meist der Browser ein gespeichertes Passwort ins Feld gefüllt –
    Schlüssel neu einfügen und speichern.
+   Meldet der Test «Der Server wird von openAIP abgewiesen (403) – die App lädt die Lufträume deshalb direkt im
+   Browser», ist alles in Ordnung: openAIP blockt zurzeit Anfragen aus Cloudflare Workers (Abschnitt 11), die App
+   holt die Daten im Browser (Haken **Lufträume direkt aus dem Browser laden**).
    **Alternative ohne Eingabe in der App:** den Schlüssel als GitHub-Secret `OPENAIP_KEY` hinterlegen (Repo →
    Settings → Secrets and variables → Actions → New repository secret). Beim nächsten Worker-Deploy wird er als
    Worker-Secret gesetzt und verwendet, solange in den App-Einstellungen kein Schlüssel steht. Dazu einmal
@@ -276,10 +279,12 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 * **Luftraumdaten** kommen live von openAIP (Abschnitt 6a); Untergrenzen «GND» werden mit der Startplatzhöhe angenähert,
   Lufträume sind nicht tagesaktuell aktiviert/deaktiviert – deshalb immer DABS/NOTAM prüfen. Ohne Schlüssel (und in der
   Simulation) werden Beispiel-Lufträume aus `src/data/airspaces.json` gezeigt.
-* **openAIP «403 Forbidden»** (28.10.2026): Der Worker ruft openAIP genau so auf wie der Worker von ops.wicki.aero
-  (Header `x-openaip-api-key`, eigene Kennung), der dort funktioniert. Antwortet openAIP trotzdem mit der HTML-Seite
-  «403 Forbidden» für alle Varianten, stimmt sehr wahrscheinlich der gespeicherte Schlüssel nicht (Fingerabdruck in den
-  App-Einstellungen prüfen, Abschnitt 6a). Bis dahin bleibt Schritt 1 gelb («Lufträume von Hand prüfen»).
+* **openAIP und Cloudflare Workers** (28.10.2026): api.core.openaip.net weist Anfragen aus Cloudflare Workers mit einer
+  HTML-Seite «403 Forbidden» ab – unabhängig vom Schlüssel (mit frisch erzeugtem Schlüssel geprüft; der ops-Worker
+  fängt denselben Fehler still ab). Aus dem Browser funktioniert derselbe Aufruf (cockpit.wicki.aero, seit 08/2026).
+  Deshalb lädt die App die Lufträume im Browser, sobald der Worker abgewiesen wird (Einstellung **Lufträume direkt aus
+  dem Browser laden**, Vorgabe an). Der Schlüssel geht dabei an angemeldete Ground-User (Route `/api/airspaces/key`),
+  nicht in den öffentlichen Code. Sobald openAIP Worker-Zugriffe zulässt, greift wieder der Server-Weg – ohne Änderung.
 * **Trajektorie** ist ein einfaches Modell (Open-Meteo-Windprofil, konstante Steig-/Sinkrate, flaches Gelände am Landepunkt).
 * **Protokollmodul** (`src/protocol/`) ist aus der Windsond-Software abgeleitet, aber noch **nicht an echter Hardware geprüft** – die offenen Punkte stehen in `docs/protocol/ssp-windsond-protocol.md`, Abschnitt 8. Erster Test mit RR4 am Laptop: Menü ☰ → Protokoll anzeigen, Rohzeilen mitschneiden.
 * **Dropsonde/Abwurf** ist vorbereitet, aber nicht getestet.

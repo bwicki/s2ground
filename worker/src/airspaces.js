@@ -104,12 +104,25 @@ export async function testOpenAipKey(env) {
   return { ok: false, status: d.status, message: d.message, tried: r.tried, ...fp };
 }
 
+/**
+ * The key for the browser fallback (logged-in ground users only, and only while the master allows it).
+ * WHY: openAIP refuses Cloudflare-Worker requests with an HTML 403; from a browser the same call works.
+ */
+export async function airspaceKeyForBrowser(env) {
+  const settings = await getSettings(env);
+  if (!settings.openaipDirect) throw new HttpError(403, 'E_DIRECT_DISABLED');
+  const { key } = await openAipKey(env);
+  if (!key) throw new HttpError(409, 'E_NO_OPENAIP_KEY');
+  return { key };
+}
+
 export async function airspaces(env, url, ctx) {
   const raw = (url.searchParams.get('bbox') || '').split(',').map(Number);
   if (raw.length !== 4 || raw.some((v) => !Number.isFinite(v))) throw new HttpError(400, 'bbox=w,s,e,n required');
   const [w, s, e, n] = raw;
   if (e - w > 4 || n - s > 3) throw new HttpError(400, 'bbox too large');
-  const bbox = [Math.floor(w / Q) * Q, Math.floor(s / Q) * Q, Math.ceil(e / Q) * Q, Math.ceil(n / Q) * Q].map((v) => v.toFixed(1));
+  const qn = (v) => Math.round(v / Q * 1e6) / 1e6;           // 47.4 / 0.2 is 236.99999… in floating point
+  const bbox = [Math.floor(qn(w)) * Q, Math.floor(qn(s)) * Q, Math.ceil(qn(e)) * Q, Math.ceil(qn(n)) * Q].map((v) => v.toFixed(1));
 
   const { key } = await openAipKey(env);
   if (!key) throw new HttpError(409, 'E_NO_OPENAIP_KEY');            // the admin page explains what to do
