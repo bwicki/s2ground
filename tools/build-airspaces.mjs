@@ -13,7 +13,7 @@ import { writeFile } from 'node:fs/promises';
 
 export const EXPORT_BASE = 'https://s3.openaip.net/openaip-system-exports';
 export const DEFAULT_REGION = [5.5, 45.3, 11.0, 48.2];          // Switzerland + ~80 km
-export const DEFAULT_COUNTRIES = ['ch', 'li', 'de', 'at', 'fr', 'it'];
+export const DEFAULT_COUNTRIES = ['ch', 'de', 'at', 'fr', 'it'];   // no li_asp export exists – Liechtenstein's airspace is in the CH file
 const DECIMALS = 4;                                               // ≈ 11 m – plenty for airspace boundaries
 
 /** Bounding box [w,s,e,n] of a (Multi)Polygon geometry, or null. */

@@ -15,7 +15,7 @@ on:
         description: "Region bbox w,s,e,n (default 5.5,45.3,11.0,48.2)"
         default: ''
       countries:
-        description: "Country codes (default ch,li,de,at,fr,it)"
+        description: "Country codes (default ch,de,at,fr,it)"
         default: ''
 
 permissions:

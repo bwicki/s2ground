@@ -136,7 +136,7 @@ Beides verwaltest Du im Menü ☰ → **Masteruser · Benutzer & App-Einstellung
 
 Die Planung holt die Lufträume aus einer **nächtlich erzeugten Luftraumdatei**: Der Workflow **Airspaces (openAIP
 export)** (`.github/workflows/airspaces.yml`) lädt jede Nacht um 03:17 UTC die schlüssellosen Länder-Exporte von
-openAIP (`https://s3.openaip.net/openaip-system-exports/<land>_asp.geojson`; CH, LI, DE, AT, FR, IT), schneidet sie
+openAIP (`https://s3.openaip.net/openaip-system-exports/<land>_asp.geojson`; CH, DE, AT, FR, IT – Liechtenstein steckt im CH-Export), schneidet sie
 mit `tools/build-airspaces.mjs` auf die Region um die Schweiz zu (5.5–11.0° E, 45.3–48.2° N) und legt das Ergebnis als
 einzige Datei auf dem Zweig **data** ab (`airspaces-region.json`, jeweils ersetzt – das Repository wächst nicht).
 Die App liest sie von `raw.githubusercontent.com` (Adresse in `src/config.js`, `airspacesUrl`) und zeigt in Schritt 1
@@ -286,7 +286,7 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 * **openAIP live** (28.10.2026): api.core.openaip.net weist Cloudflare Workers ab (HTML «403 Forbidden») und sendet
   Browsern keine CORS-Header. Deshalb kommen die Lufträume aus dem nächtlichen Export (Abschnitt 6a); die Live-Wege
   bleiben als Reserve für Startorte ausserhalb der Region und greifen von selbst, sobald openAIP sie wieder zulässt.
-* **Luftraumdatei** deckt 5.5–11.0° E / 45.3–48.2° N ab (CH, LI, DE, AT, FR, IT) und ist bis zu 24 h alt; Aktivierungen
+* **Luftraumdatei** deckt 5.5–11.0° E / 45.3–48.2° N ab (CH, DE, AT, FR, IT) und ist bis zu 24 h alt; Aktivierungen
   (DABS/NOTAM) sind nie enthalten.
 * **Trajektorie** ist ein einfaches Modell (Open-Meteo-Windprofil, konstante Steig-/Sinkrate, flaches Gelände am Landepunkt).
 * **Protokollmodul** (`src/protocol/`) ist aus der Windsond-Software abgeleitet, aber noch **nicht an echter Hardware geprüft** – die offenen Punkte stehen in `docs/protocol/ssp-windsond-protocol.md`, Abschnitt 8. Erster Test mit RR4 am Laptop: Menü ☰ → Protokoll anzeigen, Rohzeilen mitschneiden.

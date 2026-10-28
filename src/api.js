@@ -201,7 +201,7 @@ export const api = {
   },
   /** Master only: state of the regional export file → {ok, generated, count, countries, failed} or {ok:false, message}. */
   airspacesFileTest: async () => {
-    if (MOCK) return { ok: true, generated: new Date(Date.now() - 6 * 3600e3).toISOString(), count: 1234, countries: ['ch', 'li', 'de', 'at', 'fr', 'it'], failed: [] };
+    if (MOCK) return { ok: true, generated: new Date(Date.now() - 6 * 3600e3).toISOString(), count: 1234, countries: ['ch', 'de', 'at', 'fr', 'it'], failed: [] };
     try { const { meta } = await loadRegionFile(config.airspacesUrl, undefined, { force: true }); return { ok: true, ...meta }; }
     catch (e) { return { ok: false, message: e.message }; }
   },
