@@ -43,7 +43,7 @@ try {
   await page.waitForSelector('.actionbar', { timeout: 10000 });
 
   step('plan: small «Sonde sofort hier starten» button in the action bar');
-  const smallQuick = await page.getAttribute('.actionbar a.q-amber', 'href');
+  const smallQuick = await page.getAttribute('.actionbar a.q-blue', 'href');
   if (smallQuick !== '#quick') throw new Error(`quick button in the plan action bar: ${smallQuick}`);
 
   step('plan: airspace warning + suggestion');

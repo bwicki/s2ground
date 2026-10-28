@@ -115,7 +115,7 @@ export function mountPrepare(root, ctx) {
         <div><div class="row"><span class="muted">${esc(t('prep.bl.gross'))}</span><span class="val">${lift ? `≈ ${fmtInt(lift.grossLiftG)} g` : '–'}</span></div>
         <div class="row"><span class="muted">${esc(t('prep.bl.net', { g: p.payloadG }))}</span><span class="val">${lift ? `≈ ${fmtInt(lift.netLiftG)} g` : '–'}</span></div>
         <div class="row"><span class="muted">${esc(t('prep.bl.rise'))}</span><span class="val">${fmtNum(p.riseRate, 1)} m/s</span></div></div>
-        <button class="btn ${state.balloonConfirmed ? 'okish' : 'warnish'}" type="button" data-act="balloon" style="text-align:left;line-height:1.3;justify-content:space-between"><span>${esc(t('prep.bl.ready', { g: lift ? fmtInt(lift.grossLiftG) : '–' }))}${state.balloonConfirmed ? '' : '?'}</span><span class="nowrap">${state.balloonConfirmed ? `✓ ${esc(t('prep.bl.confirmed'))}` : `→ ${esc(t('prep.bl.confirm'))}`}</span></button>
+        <button class="btn bl-confirm ${state.balloonConfirmed ? 'okish' : 'warnish'}" type="button" data-act="balloon"><span>${esc(t('prep.bl.ready', { g: lift ? fmtInt(lift.grossLiftG) : '–' })).replace(/≈ (\S+) g/, '≈\u00a0$1\u00a0g')}${state.balloonConfirmed ? '' : '?'}</span><span class="nowrap">${state.balloonConfirmed ? `✓ ${esc(t('prep.bl.confirmed'))}` : `→ ${esc(t('prep.bl.confirm'))}`}</span></button>
       </section>
       <section class="card"><h2>${esc(t('prep.card.observers'))}</h2>
         ${state.relay.connected ? okline('ok', t('prep.ob.connected'), t('prep.ob.visible')) : okline('warn', t('prep.ob.notConnected'), t('prep.ob.retrying'))}

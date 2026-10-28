@@ -24,7 +24,7 @@ export function mountLogin(root, ctx) {
         <label class="f">${esc(t('login.password'))}<input class="in" name="password" type="password" autocomplete="current-password" value="${SIM ? 'demo' : ''}" required></label>
         <div class="err hidden" role="alert"></div>
         <button class="btn primary" type="submit" style="min-height:56px;font-size:17px">${esc(t('login.submit'))}</button>
-        <button class="btn q-amber login-quick" type="button" data-act="quick" style="min-height:64px;font-size:17px;flex-direction:column;gap:2px;line-height:1.2"><span>${esc(t('quick.btn.title'))}</span><span style="font-size:13px;font-weight:500">${esc(t('quick.btn.sub'))}</span></button>
+        <button class="btn q-blue login-quick" type="button" data-act="quick" style="min-height:64px;font-size:17px;flex-direction:column;gap:2px;line-height:1.2"><span>${esc(t('quick.btn.title'))}</span><span style="font-size:13px;font-weight:500">${esc(t('quick.btn.sub'))}</span></button>
         <p class="muted" style="margin:0;font-size:13px;line-height:1.5">${esc(t('login.note'))}</p>
         ${SIM ? `<p class="muted" style="margin:0;font-size:13px">${esc(t('login.simHint'))}</p>` : ''}
       </form>

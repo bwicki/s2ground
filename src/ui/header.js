@@ -1,6 +1,7 @@
 // Header (brand, phase bar, logo, user pill, DE/EN, logout, ☰ expert menu) and the action bar
 // ("Weiter" always at the top). Pure rendering; app.js wires the callbacks.
 
+import { VERSION } from '../version.js';
 import { t, currentLang } from '../i18n.js';
 import { esc, html, icons, onAct } from '../util/dom.js';
 import { state, PHASES } from '../state.js';
@@ -18,7 +19,7 @@ function phaseChips(current) {
     const cls = ['ph', p === current ? 'active' : '', done ? 'done' : '', (done || p === current) && st === 'warn' ? 'warn' : '', (done || p === current) && st === 'bad' ? 'bad' : ''].join(' ');
     const n = done ? (st === 'warn' || st === 'bad' ? '!' : '✓') : i + 1;
     const enabled = i <= maxVisited;
-    return `<button type="button" class="${cls}" data-act="goto" data-phase="${p}" ${enabled ? '' : 'disabled'}><span class="n">${n}</span>${esc(phaseLabel(p))}</button>`;
+    return `<button type="button" class="${cls}" data-act="goto" data-phase="${p}" ${enabled ? '' : 'disabled'}><span class="n">${n}</span><span class="lbl">${esc(phaseLabel(p))}</span></button>`;
   }).join('');
 }
 
@@ -54,7 +55,7 @@ export function renderHeader(o) {
   const el = html(`<header class="top">
     <div class="brand"><strong>${esc(title)}</strong><span>${esc(subtitle)}</span></div>
     ${middle}
-    <div class="right"><img src="./img/logo.png" alt="Wicki Partners Ballonteam"><div class="tools">${tools}</div></div>
+    <div class="right"><img src="./img/logo.png" alt="Wicki Partners Ballonteam"><div class="tools">${tools}</div><span class="version" title="S2 Ground ${esc(VERSION)}">S2 Ground v${esc(VERSION)}</span></div>
   </header>`);
   onAct(el, {
     goto: (b) => o.onGoto && o.onGoto(b.dataset.phase),
@@ -89,7 +90,7 @@ export function renderActionBar(o) {
   const el = html(`<div class="actionbar">
     ${o.back ? `<button class="btn" type="button" data-act="back">← ${esc(o.back.label)}</button>` : '<span></span>'}
     <span class="status">${o.status || ''}</span>
-    ${o.quick ? `<a class="btn sm q-amber" href="#quick">${esc(t('quick.btn.short'))}</a>` : ''}
+    ${o.quick ? `<a class="btn q-blue" href="#quick">${esc(t('quick.btn.short'))}</a>` : ''}
     ${o.next ? `<button class="btn ${lvlCls}" type="button" data-act="next" ${o.next.disabled ? 'disabled' : ''}>${esc(o.next.label)}</button>` : ''}
   </div>`);
   onAct(el, { back: () => o.onBack && o.onBack(), next: () => o.onNext && o.onNext() });

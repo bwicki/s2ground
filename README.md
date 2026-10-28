@@ -294,3 +294,14 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 * Karten (OpenStreetMap, Esri) und QR-Code-Bibliothek werden von cdnjs/OSM geladen – im Feld braucht es Internet.
 * **WhatsApp Stufe 2** (automatischer Versand) wartet auf Meta-Business-Konto und genehmigte Vorlage (Abschnitt 6c).
 * **s2stueve Follow-Modus** muss auf Code + Klarname umgestellt werden (eigenes Repo).
+
+## 12. Versionen
+
+Die Versionsnummer steht oben rechts unter den Knöpfen (`src/version.js`) und in den Aufstiegsdateien.
+
+* **0.2** (28.10.2026) – Lufträume aus dem nächtlichen openAIP-Export (ohne Schlüssel, Abschnitt 6a); Schlüsseltest mit
+  Fingerabdruck und Live-Diagnose; Schlüssel optional als GitHub-Secret `OPENAIP_KEY`; Kopfzeile: Phasen immer auf einer
+  Zeile, Version sichtbar, alle Knöpfe gleich hoch, «Sonde sofort hier starten» blau; Ballon-Bestätigung und
+  «Cutdown-Draht testen» ohne ungünstige Umbrüche; Protokollschicht auf Windsond 3.11.8 nachgezogen; Favicon.
+* **0.1** (17.10.2026) – Erste Fassung: Phasenablauf, Schnellstart, Beobachter-Codes, Follow-Modus in s2stueve, Worker auf
+  Cloudflare, App auf GitHub Pages.

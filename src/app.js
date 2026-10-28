@@ -18,8 +18,8 @@ import { mountDetail } from './ui/detail.js';
 import { mountRetrieve, updateRetrieveStatus } from './ui/retrieve.js';
 import { mountAdmin } from './ui/admin.js';
 import { mountQuick } from './ui/quick.js';
+import { VERSION } from './version.js';
 
-const VERSION = '0.1';
 const params = new URLSearchParams(location.search);
 const root = document.getElementById('app');
 const slots = { sim: null, header: null, action: null, confirm: null, view: null };
