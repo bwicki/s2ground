@@ -58,7 +58,7 @@ export function mountAdmin(root, ctx) {
       + f(t('admin.s.windFallback'), 'windFallback', `${s.windFallbackDir}° / ${s.windFallbackSpd} m/s`)
       + f(t('admin.s.cutAlt'), 'cutAltAgl', `${fmtInt(s.cutAltAgl || 3000)} m`)
       + `<label class="f">${esc(t('admin.s.openaipKey'))}<input class="in mono secret" name="openaipKey" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore value="" placeholder="${esc(s.openaipKey === 'set' ? t('admin.s.keySet') : t('admin.s.keyMissing'))}"><span class="muted small">${esc(t('admin.s.openaipHint'))}</span></label>`
-      + `<div class="f"><span class="muted small">${esc(t('admin.s.testKeyHint'))}</span><span><button class="btn" type="button" data-act="testKey">${esc(t('admin.s.testKey'))}</button></span><span class="muted small keyfp"></span></div>`
+      + `<div class="f"><span class="muted small">${esc(t('admin.s.testKeyHint2'))} ${esc(t('admin.s.testKeyHint'))}</span><span><button class="btn" type="button" data-act="testKey">${esc(t('admin.s.testKey'))}</button></span><span class="small exportstate"></span><span class="muted small keyfp"></span></div>`
       + `<label class="chk" style="align-items:flex-start"><input type="checkbox" name="openaipDirect" ${s.openaipDirect !== false ? 'checked' : ''}><span>${esc(t('admin.s.openaipDirect'))}<br><span class="muted small">${esc(t('admin.s.openaipDirectHint'))}</span></span></label>`
       + f(t('admin.s.airspaceCats'), 'airspaceCats', s.airspaceCats || 'P,R,D,CTR,TMA', 'placeholder="P,R,D,CTR,TMA,CTA,TMZ,ATZ,GLD"')
       + `<label class="f">${esc(t('admin.s.waPhoneNumberId'))}<input class="in mono secret" name="waPhoneNumberId" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore value="" placeholder="${esc(s.waPhoneNumberId === 'set' ? t('admin.s.keySet') : '')}"></label>`
@@ -95,20 +95,27 @@ export function mountAdmin(root, ctx) {
     try { Object.assign(s, await api.settings.put(patch)); toast(t('admin.saved')); renderSettings(); bus.emit('settings'); } catch (ex) { toast(ex.message, true); return; }
     if (patch.openaipKey) testKey();   // a freshly pasted key is checked at once so a wrong one shows up here, not in Phase 1
   });
-  /** One request to openAIP with the stored key; the toast shows the result including what openAIP answered. */
+  /**
+   * Airspace sources in the order the app uses them: the nightly export file (normal case), then the Worker
+   * with the stored key and the browser route as diagnostics. The toast says what the planning step will use.
+   */
   async function testKey() {
     try {
+      const x = await api.airspacesFileTest();
+      const xline = x.ok ? t('admin.s.exportOk', { d: fmtDateTimeUTC(Date.parse(x.generated)), n: x.count, cc: (x.countries || []).join(', ').toUpperCase() }) + (x.failed && x.failed.length ? ' ' + t('admin.s.exportFailed', { cc: x.failed.join(', ').toUpperCase() }) : '') : t('admin.s.exportMissing') + ' ' + (x.message || '');
+      qs(el, '.exportstate').textContent = xline;
       const r = await api.airspacesTest();
       const report = (r.tried || []).map((a) => `${a.via}: ${a.status}${a.body ? ' – ' + a.body.slice(0, 60) : ''}`).join(' · ');
       // fingerprint of the stored key (length, first 4 + last 2) so it can be compared with openaip.net; the key itself never leaves the Worker
       const fp = r.keyLength ? t('admin.s.keyFp', { n: r.keyLength, hint: r.keyHint, src: r.source === 'secret' ? 'GitHub-Secret' : t('admin.s.keySrcSettings') }) + (r.keyFormatOk ? '' : ' ' + t('admin.s.keyFormatBad')) : '';
       qs(el, '.keyfp').textContent = fp;
-      if (r.ok) { toast(t('admin.s.testOk', { n: r.count, via: r.via })); return; }
-      if (r.message === 'E_NO_OPENAIP_KEY') { toast(t('admin.s.keyMissing'), true); return; }
-      // The Worker is refused (openAIP blocks Cloudflare Workers) – check the browser route the app will use instead.
+      if (r.ok) { toast(xline + ' · ' + t('admin.s.testOk', { n: r.count, via: r.via }), !x.ok); return; }
+      if (r.message === 'E_NO_OPENAIP_KEY') { toast(xline + ' · ' + t('admin.s.keyMissing'), !x.ok); return; }
+      // The Worker is refused (openAIP blocks Cloudflare Workers) – check the browser route as well.
       const b = s.openaipDirect !== false ? await api.airspacesDirectTest() : { ok: false, status: 0, message: 'E_DIRECT_DISABLED' };
-      if (b.ok) { toast(t('admin.s.testDirectOk', { n: b.count }) + ' ' + t('admin.s.testWorkerBlocked'), false); qs(el, '.keyfp').textContent = fp + ' ' + t('admin.s.testDirectOk', { n: b.count }); }
-      else toast(t('admin.s.testFail') + ' ' + fp + ' ' + (report || r.message || r.status) + ' · ' + t('admin.s.testDirectFail') + ' ' + (b.message || b.status), true);
+      const live = b.ok ? t('admin.s.testDirectOk', { n: b.count }) + ' ' + t('admin.s.testWorkerBlocked')
+        : t('admin.s.testFail') + ' ' + fp + ' ' + (report || r.message || r.status) + ' · ' + t('admin.s.testDirectFail') + ' ' + (b.message || b.status);
+      toast(xline + ' · ' + live, !x.ok);
     } catch (ex) { toast(t('admin.s.testFail') + ' ' + ex.message, true); }
   }
   onAct(el, {

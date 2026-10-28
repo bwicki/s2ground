@@ -132,32 +132,36 @@ Beides verwaltest Du im Menü ☰ → **Masteruser · Benutzer & App-Einstellung
   Bodenstation einen Beobachter (Verbindung getrennt, für diesen Aufstieg gesperrt – der Code bleibt gültig).
 * Ausserdem: Standard-Frequenz, Steigrate, Cutdown-Vorgabe (3'000 m AGL), Wolken-Schwelle, Ablageordner, automatische Abmeldung, Schnellantworten.
 
-### 6a. Lufträume (openAIP) freischalten – einmalig
+### 6a. Lufträume (openAIP) – läuft ohne Schlüssel
 
-Die Planung holt die Lufträume selbständig von openAIP. Dazu braucht der Worker einen API-Schlüssel:
+Die Planung holt die Lufträume aus einer **nächtlich erzeugten Luftraumdatei**: Der Workflow **Airspaces (openAIP
+export)** (`.github/workflows/airspaces.yml`) lädt jede Nacht um 03:17 UTC die schlüssellosen Länder-Exporte von
+openAIP (`https://s3.openaip.net/openaip-system-exports/<land>_asp.geojson`; CH, LI, DE, AT, FR, IT), schneidet sie
+mit `tools/build-airspaces.mjs` auf die Region um die Schweiz zu (5.5–11.0° E, 45.3–48.2° N) und legt das Ergebnis als
+einzige Datei auf dem Zweig **data** ab (`airspaces-region.json`, jeweils ersetzt – das Repository wächst nicht).
+Die App liest sie von `raw.githubusercontent.com` (Adresse in `src/config.js`, `airspacesUrl`) und zeigt in Schritt 1
+unter «Luftraum» das Datum des Exports.
 
-1. https://www.openaip.net → anmelden → Konto → **API Keys** → Schlüssel kopieren (derselbe Schlüssel, der in
-   s2planning hinterlegt ist, kann wiederverwendet werden).
-2. In S2 Ground: Menü ☰ → **Masteruser · App-Einstellungen** → Feld **openAIP API-Schlüssel** → einfügen → Speichern.
-   Die App prüft den Schlüssel sofort mit einer kleinen Anfrage an openAIP und meldet das Ergebnis als Hinweis
-   («openAIP antwortet – Schlüssel in Ordnung» oder «openAIP-Test fehlgeschlagen: …» mit der Originalantwort von
-   openAIP je Anfrage-Variante). Später jederzeit mit dem Knopf **openAIP-Schlüssel testen** wiederholbar. Unter dem
-   Knopf steht der Fingerabdruck des gespeicherten Schlüssels (Länge, erste 4 und letzte 2 Zeichen) zum Vergleich
-   mit openaip.net – der Schlüssel selbst verlässt den Server nie. Ein openAIP-Schlüssel hat 32 Zeichen (0–9, a–f);
-   sieht der gespeicherte Wert anders aus, hat meist der Browser ein gespeichertes Passwort ins Feld gefüllt –
-   Schlüssel neu einfügen und speichern.
-   Meldet der Test «Der Server wird von openAIP abgewiesen (403) – die App lädt die Lufträume deshalb direkt im
-   Browser», ist alles in Ordnung: openAIP blockt zurzeit Anfragen aus Cloudflare Workers (Abschnitt 11), die App
-   holt die Daten im Browser (Haken **Lufträume direkt aus dem Browser laden**).
-   **Alternative ohne Eingabe in der App:** den Schlüssel als GitHub-Secret `OPENAIP_KEY` hinterlegen (Repo →
-   Settings → Secrets and variables → Actions → New repository secret). Beim nächsten Worker-Deploy wird er als
-   Worker-Secret gesetzt und verwendet, solange in den App-Einstellungen kein Schlüssel steht. Dazu einmal
-   Actions → **Deploy worker** → Run workflow (ohne «migrate»).
+**Einmalig nach dem Anlegen des Repos:** Actions → **Airspaces (openAIP export)** → Run workflow (Vorgaben belassen).
+Danach läuft es von allein. Region oder Länder lassen sich beim manuellen Start übersteuern (Eingaben `region`,
+`countries`) oder dauerhaft im Workflow ändern.
 
-Der Schlüssel bleibt auf dem Server (Cloudflare D1) und wird nie an den Browser geschickt. Die Antworten werden
-pro Kartenausschnitt 24 h zwischengespeichert. Welche Kategorien als Konflikt zählen, steht im Feld
-**Luftraum-Kategorien** (Vorgabe `P,R,D,CTR,TMA`; möglich zusätzlich `CTA,TMZ,ATZ,GLD`).
-Fehlt der Schlüssel oder ist openAIP nicht erreichbar, bleibt Schritt 1 gelb mit dem Hinweis, DABS/NOTAM manuell zu prüfen.
+**Warum nicht live von der API?** api.core.openaip.net weist Anfragen aus Cloudflare Workers mit einer HTML-Seite
+«403 Forbidden» ab (unabhängig vom Schlüssel, geprüft 28.10.2026 mit frisch erzeugtem Schlüssel) und sendet Browsern
+keine CORS-Header. Die Exporte sind der von openAIP für Programme vorgesehene Weg.
+
+**Live-Abruf (optional, nur ausserhalb der Region):** Liegt ein Startort ausserhalb der Datei-Region, versucht die App
+den Live-Weg: zuerst über den Worker, dann – Haken **Lufträume direkt aus dem Browser laden** – direkt im Browser.
+Beides braucht einen openAIP-Schlüssel (openaip.net → Konto → API Keys) unter Masteruser → App-Einstellungen → Feld
+**openAIP API-Schlüssel**, alternativ als GitHub-Secret `OPENAIP_KEY` (wird beim Worker-Deploy als Worker-Secret
+gesetzt). Der Knopf **openAIP-Schlüssel testen** zeigt den Stand der Luftraumdatei und das Ergebnis der Live-Wege
+samt Originalantwort von openAIP; unter dem Knopf steht der Fingerabdruck des gespeicherten Schlüssels (Länge, erste 4
+und letzte 2 Zeichen). Solange openAIP Worker und Browser abweist, melden die Live-Wege 403 bzw. «Failed to fetch» –
+das ist dann kein Fehler der App.
+
+Welche Kategorien als Konflikt zählen, steht im Feld **Luftraum-Kategorien** (Vorgabe `P,R,D,CTR,TMA`; möglich
+zusätzlich `CTA,TMZ,ATZ,GLD`). Fehlt die Luftraumdatei (Workflow nie gelaufen) und schlägt auch der Live-Weg fehl,
+bleibt Schritt 1 gelb mit dem Hinweis, DABS/NOTAM manuell zu prüfen.
 
 ### 6b. Zusammenspiel mit s2stueve
 
@@ -279,12 +283,11 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 * **Luftraumdaten** kommen live von openAIP (Abschnitt 6a); Untergrenzen «GND» werden mit der Startplatzhöhe angenähert,
   Lufträume sind nicht tagesaktuell aktiviert/deaktiviert – deshalb immer DABS/NOTAM prüfen. Ohne Schlüssel (und in der
   Simulation) werden Beispiel-Lufträume aus `src/data/airspaces.json` gezeigt.
-* **openAIP und Cloudflare Workers** (28.10.2026): api.core.openaip.net weist Anfragen aus Cloudflare Workers mit einer
-  HTML-Seite «403 Forbidden» ab – unabhängig vom Schlüssel (mit frisch erzeugtem Schlüssel geprüft; der ops-Worker
-  fängt denselben Fehler still ab). Aus dem Browser funktioniert derselbe Aufruf (cockpit.wicki.aero, seit 08/2026).
-  Deshalb lädt die App die Lufträume im Browser, sobald der Worker abgewiesen wird (Einstellung **Lufträume direkt aus
-  dem Browser laden**, Vorgabe an). Der Schlüssel geht dabei an angemeldete Ground-User (Route `/api/airspaces/key`),
-  nicht in den öffentlichen Code. Sobald openAIP Worker-Zugriffe zulässt, greift wieder der Server-Weg – ohne Änderung.
+* **openAIP live** (28.10.2026): api.core.openaip.net weist Cloudflare Workers ab (HTML «403 Forbidden») und sendet
+  Browsern keine CORS-Header. Deshalb kommen die Lufträume aus dem nächtlichen Export (Abschnitt 6a); die Live-Wege
+  bleiben als Reserve für Startorte ausserhalb der Region und greifen von selbst, sobald openAIP sie wieder zulässt.
+* **Luftraumdatei** deckt 5.5–11.0° E / 45.3–48.2° N ab (CH, LI, DE, AT, FR, IT) und ist bis zu 24 h alt; Aktivierungen
+  (DABS/NOTAM) sind nie enthalten.
 * **Trajektorie** ist ein einfaches Modell (Open-Meteo-Windprofil, konstante Steig-/Sinkrate, flaches Gelände am Landepunkt).
 * **Protokollmodul** (`src/protocol/`) ist aus der Windsond-Software abgeleitet, aber noch **nicht an echter Hardware geprüft** – die offenen Punkte stehen in `docs/protocol/ssp-windsond-protocol.md`, Abschnitt 8. Erster Test mit RR4 am Laptop: Menü ☰ → Protokoll anzeigen, Rohzeilen mitschneiden.
 * **Dropsonde/Abwurf** ist vorbereitet, aber nicht getestet.

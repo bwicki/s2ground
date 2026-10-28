@@ -57,7 +57,8 @@ async function loadAirspacesFor(points, groundAlt) {
   if (!airspaceCache || airspaceCache.key !== key) {
     try {
       const res = await api.airspaces(key.split(',').map(Number));
-      airspaceCache = { key, items: res.items || [] };
+      airspaceCache = { key, items: res.items || [], via: res.via || 'worker', generated: res.generated || null };
+      p.airspaceSource = { via: airspaceCache.via, generated: airspaceCache.generated };
       p.airspaceError = null;
     } catch (e) {
       p.airspaceError = e.message || 'E_AIRSPACE';
@@ -182,7 +183,7 @@ export function mountPlan(root, ctx) {
             <div class="stat"><div class="k">${esc(t('plan.maxAlt'))}</div><div class="val" data-f="maxAlt">–</div></div>
             <div class="stat"><div class="k">${esc(t('phase.ascent'))}</div><div class="val" data-f="ascentMin">–</div></div>
             <div class="stat"><div class="k">${esc(t('plan.total'))}</div><div class="val" data-f="totalMin">–</div></div>
-            <div class="stat"><div class="k">${esc(t('plan.airspace'))}</div><div class="val" data-f="airspace">–</div></div>
+            <div class="stat"><div class="k">${esc(t('plan.airspace'))}</div><div class="val" data-f="airspace">–</div><div class="muted small" data-f="airspaceSrc"></div></div>
           </div>
         </section>
         <section class="card">
@@ -222,6 +223,9 @@ export function mountPlan(root, ctx) {
     f('ascentMin').textContent = `${Math.round(r.ascentS / 60)} min`;
     f('totalMin').textContent = `${Math.round(r.totalS / 60)} min`;
     const as = f('airspace'); as.textContent = r.conflicts.length ? t('plan.conflict') : t('plan.noConflict'); as.style.color = r.conflicts.length ? 'var(--red)' : 'var(--green)';
+    // where the airspace data came from: nightly export (with its date) or the live API – the lay user sees the data's age
+    const src = p.airspaceSource; const asrc = f('airspaceSrc');
+    if (asrc) asrc.textContent = !p.showAirspace || p.airspaceError || !src ? '' : src.via === 'export' && src.generated ? t('plan.airspace.srcExport', { d: fmtDateCH(new Date(src.generated)) }) : t('plan.airspace.srcLive');
     f('gross').textContent = `≈ ${fmtInt(r.lift.grossLiftG)} g`;
     f('liftNote').textContent = t('plan.liftNote', { rise: fmtNum(p.riseRate, 1), gas: fmtInt(r.lift.gasL), payload: p.payloadG, net: fmtInt(r.lift.netLiftG) });
     f('burstText').innerHTML = t('plan.burstText', { alt: `<strong class="mono">≈ ${fmtInt(r.burstAlt)} m AMSL</strong>` });

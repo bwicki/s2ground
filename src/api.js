@@ -6,6 +6,7 @@
 
 import { config } from './config.js';
 import { fetchAirspacesDirect } from './openaip-direct.js';
+import { airspacesFromFile, loadRegionFile } from './airspaces-static.js';
 
 const TOKEN_KEY = 's2ground.token';
 const params = new URLSearchParams(location.search);
@@ -177,11 +178,18 @@ export const api = {
     add: (action, detail) => api.request('POST', '/api/log', { action, detail }).catch(() => null),
   },
   /**
-   * openAIP airspaces for a bbox [w,s,e,n]: Worker proxy first (key stays on the server); when openAIP
-   * refuses the Worker (HTML 403 → E_OPENAIP_UNREACHABLE) the browser loads them itself with the key
-   * from /api/airspaces/key – logged-in ground users only, master setting openaipDirect. Sample data in mock mode.
+   * openAIP airspaces for a bbox [w,s,e,n], three sources in order: the nightly regional export file
+   * (config.airspacesUrl – the normal case), the Worker proxy (live API, key on the server) and, when openAIP
+   * refuses the Worker (HTML 403 → E_OPENAIP_UNREACHABLE), the browser with the key from /api/airspaces/key
+   * (logged-in ground users only, master setting openaipDirect). Sample data in mock mode.
    */
   airspaces: async (bbox) => {
+    // 1) the nightly regional file (openAIP export, no key, no Worker) – whenever it covers the bbox
+    if (!MOCK && config.airspacesUrl) {
+      try { const r = await airspacesFromFile(bbox, config.airspacesUrl); if (r) return r; }
+      catch (e) { console.warn('airspace file:', e.message); }                 // fall through to the live routes
+    }
+    // 2) the Worker proxy (live API, key stays on the server) – 3) the browser with the key, if allowed
     try { return await api.request('GET', `/api/airspaces?bbox=${bbox.map((v) => v.toFixed(3)).join(',')}`); }
     catch (e) {
       if (!(e instanceof ApiError) || !/^E_OPENAIP_UNREACHABLE/.test(e.message)) throw e;
@@ -190,6 +198,12 @@ export const api = {
       try { return await fetchAirspacesDirect(bbox, key); }
       catch (d) { throw new ApiError(d.status || 502, `${d.message}; worker: ${e.message.replace(/^E_OPENAIP_UNREACHABLE\s*/, '')}`); }
     }
+  },
+  /** Master only: state of the regional export file → {ok, generated, count, countries, failed} or {ok:false, message}. */
+  airspacesFileTest: async () => {
+    if (MOCK) return { ok: true, generated: new Date(Date.now() - 6 * 3600e3).toISOString(), count: 1234, countries: ['ch', 'li', 'de', 'at', 'fr', 'it'], failed: [] };
+    try { const { meta } = await loadRegionFile(config.airspacesUrl, undefined, { force: true }); return { ok: true, ...meta }; }
+    catch (e) { return { ok: false, message: e.message }; }
   },
   /** Master only: one tiny openAIP request from the browser with the key → {ok, status, count|message}. */
   airspacesDirectTest: async () => {

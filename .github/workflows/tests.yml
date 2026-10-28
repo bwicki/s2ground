@@ -4,6 +4,7 @@ name: Tests
 
 on:
   push:
+    branches-ignore: [data]      # the data branch holds only the nightly airspace file
   pull_request:
 
 jobs:

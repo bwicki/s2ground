@@ -1,0 +1,51 @@
+# Nightly airspace data for the planning step – from openAIP's keyless country exports.
+# WHY: openAIP refuses live calls from the Cloudflare Worker (HTML 403) and from browsers (no CORS),
+# see README 6a. The exports (s3.openaip.net/openaip-system-exports/<cc>_asp.geojson) are the route
+# openAIP offers for programs. tools/build-airspaces.mjs cuts them down to the region around
+# Switzerland; the result is force-pushed as the single file of the `data` branch (no history, so the
+# repository does not grow) and read by the app from raw.githubusercontent.com (src/config.js).
+name: Airspaces (openAIP export)
+
+on:
+  schedule:
+    - cron: '17 3 * * *'         # 03:17 UTC, after openAIP's nightly export
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "Region bbox w,s,e,n (default 5.5,45.3,11.0,48.2)"
+        default: ''
+      countries:
+        description: "Country codes (default ch,li,de,at,fr,it)"
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Download exports and build the regional file
+        env:
+          REGION: ${{ inputs.region }}
+          COUNTRIES: ${{ inputs.countries }}
+          OUT: ${{ runner.temp }}/airspaces-region.json
+        run: node tools/build-airspaces.mjs
+      - name: Publish on the data branch (single commit, force-pushed)
+        env:
+          OUT: ${{ runner.temp }}/airspaces-region.json
+        run: |
+          set -e
+          d=$(mktemp -d)
+          cp "$OUT" "$d/airspaces-region.json"
+          cd "$d"
+          git init -q -b data
+          git config user.name "s2ground-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add airspaces-region.json
+          git commit -q -m "Lufträume: openAIP-Export $(date -u +%Y-%m-%d)"
+          git push --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/data
