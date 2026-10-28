@@ -360,3 +360,8 @@ main.page.q-page{max-width:1000px;width:100%;margin:0 auto;gap:16px;font-size:17
   .q-stepper .v{padding:0 14px;font-size:28px}
   .q-qr{border-left:0;padding-left:0}
 }
+
+/* Secrets (API keys) are plain text inputs masked by CSS, not type=password: browsers auto-fill saved
+   passwords into password fields and the saved "key" would silently be the login password. */
+.in.secret { -webkit-text-security: disc; }
+.in.secret:focus { -webkit-text-security: none; }

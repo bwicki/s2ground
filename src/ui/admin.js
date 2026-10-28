@@ -57,11 +57,11 @@ export function mountAdmin(root, ctx) {
       + f(t('admin.s.autoLogout'), 'autoLogoutH', `${s.autoLogoutH} h`)
       + f(t('admin.s.windFallback'), 'windFallback', `${s.windFallbackDir}° / ${s.windFallbackSpd} m/s`)
       + f(t('admin.s.cutAlt'), 'cutAltAgl', `${fmtInt(s.cutAltAgl || 3000)} m`)
-      + `<label class="f">${esc(t('admin.s.openaipKey'))}<input class="in mono" name="openaipKey" type="password" autocomplete="off" value="" placeholder="${esc(s.openaipKey === 'set' ? t('admin.s.keySet') : t('admin.s.keyMissing'))}"><span class="muted small">${esc(t('admin.s.openaipHint'))}</span></label>`
-      + `<div class="f"><span class="muted small">${esc(t('admin.s.testKeyHint'))}</span><span><button class="btn" type="button" data-act="testKey">${esc(t('admin.s.testKey'))}</button></span></div>`
+      + `<label class="f">${esc(t('admin.s.openaipKey'))}<input class="in mono secret" name="openaipKey" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore value="" placeholder="${esc(s.openaipKey === 'set' ? t('admin.s.keySet') : t('admin.s.keyMissing'))}"><span class="muted small">${esc(t('admin.s.openaipHint'))}</span></label>`
+      + `<div class="f"><span class="muted small">${esc(t('admin.s.testKeyHint'))}</span><span><button class="btn" type="button" data-act="testKey">${esc(t('admin.s.testKey'))}</button></span><span class="muted small keyfp"></span></div>`
       + f(t('admin.s.airspaceCats'), 'airspaceCats', s.airspaceCats || 'P,R,D,CTR,TMA', 'placeholder="P,R,D,CTR,TMA,CTA,TMZ,ATZ,GLD"')
-      + `<label class="f">${esc(t('admin.s.waPhoneNumberId'))}<input class="in mono" name="waPhoneNumberId" type="password" autocomplete="off" value="" placeholder="${esc(s.waPhoneNumberId === 'set' ? t('admin.s.keySet') : '')}"></label>`
-      + `<label class="f">${esc(t('admin.s.waToken'))}<input class="in mono" name="waToken" type="password" autocomplete="off" value="" placeholder="${esc(s.waToken === 'set' ? t('admin.s.keySet') : '')}"><span class="muted small">${esc(t('admin.s.waHint'))}</span></label>`
+      + `<label class="f">${esc(t('admin.s.waPhoneNumberId'))}<input class="in mono secret" name="waPhoneNumberId" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore value="" placeholder="${esc(s.waPhoneNumberId === 'set' ? t('admin.s.keySet') : '')}"></label>`
+      + `<label class="f">${esc(t('admin.s.waToken'))}<input class="in mono secret" name="waToken" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore value="" placeholder="${esc(s.waToken === 'set' ? t('admin.s.keySet') : '')}"><span class="muted small">${esc(t('admin.s.waHint'))}</span></label>`
       + `<button class="btn" type="submit">${esc(t('common.save'))}</button>`;
   };
   const renderQuick = () => {
@@ -98,9 +98,12 @@ export function mountAdmin(root, ctx) {
   async function testKey() {
     try {
       const r = await api.airspacesTest();
-      const report = (r.tried || []).map((a) => `${a.via}: ${a.status}${a.body ? ' – ' + a.body.slice(0, 80) : ''}`).join(' · ');
+      const report = (r.tried || []).map((a) => `${a.via}: ${a.status}${a.body ? ' – ' + a.body.slice(0, 60) : ''}`).join(' · ');
+      // fingerprint of the stored key (length, first 4 + last 2) so it can be compared with openaip.net; the key itself never leaves the Worker
+      const fp = r.keyLength ? t('admin.s.keyFp', { n: r.keyLength, hint: r.keyHint, src: r.source === 'secret' ? 'GitHub-Secret' : t('admin.s.keySrcSettings') }) + (r.keyFormatOk ? '' : ' ' + t('admin.s.keyFormatBad')) : '';
+      qs(el, '.keyfp').textContent = fp;
       if (r.ok) toast(t('admin.s.testOk', { n: r.count, via: r.via }));
-      else toast((r.message === 'E_NO_OPENAIP_KEY' ? t('admin.s.keyMissing') : t('admin.s.testFail') + ' ' + (report || r.message || r.status)), true);
+      else toast((r.message === 'E_NO_OPENAIP_KEY' ? t('admin.s.keyMissing') : t('admin.s.testFail') + ' ' + fp + ' ' + (report || r.message || r.status)), true);
     } catch (ex) { toast(t('admin.s.testFail') + ' ' + ex.message, true); }
   }
   onAct(el, {

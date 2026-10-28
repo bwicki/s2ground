@@ -104,7 +104,7 @@ async function mockHandle(method, path, body, token) {
     case 'GET log': need('master'); return mock.log.slice(0, 200);
     case 'GET airspaces': {
       need();
-      if (arg === 'test') { need('master'); return { ok: true, via: 'header', status: 200, count: 3, keyLength: 40, tried: [{ via: 'header', ok: true, status: 200, ms: 120, body: '' }] }; }   // demo: key test passes
+      if (arg === 'test') { need('master'); return { ok: true, via: 'header+ua', status: 200, count: 3, source: 'settings', keyLength: 32, keyHint: '0123…ef', keyFormatOk: true, tried: [{ via: 'header+ua', ok: true, status: 200, ms: 120, body: '' }] }; }   // demo: key test passes
       const r = await fetch('./src/data/airspaces.json'); return r.json();                                  // sample data for the demo
     }
     case 'POST log': need(); mock.log.unshift({ t: Date.now(), user: who.name, action: body.action, detail: body.detail || '' }); return { ok: true };

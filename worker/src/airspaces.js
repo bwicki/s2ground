@@ -16,11 +16,11 @@ const UPSTREAM = 'https://api.core.openaip.net/api/airspaces';
  * User-Agent at all or the app's own name) and every attempt is recorded so the admin's key test shows
  * exactly what openAIP answered. The variant that works is used for the real request.
  */
-const UA_APP = 's2ground/1.0';
+const UA_APP = 's2ground/1.0 (+https://s2ground.wicki.aero)';
 export const VARIANTS = [
-  { via: 'header',       query: false, ua: null },      // documented header only, no User-Agent
-  { via: 'header+query', query: true,  ua: null },      // + apiKey query parameter (as s2planning sends it)
-  { via: 'header+query+ua', query: true, ua: UA_APP },  // + the app's own User-Agent
+  { via: 'header+ua',    query: false, ua: UA_APP },  // exactly what the ops.wicki.aero Worker sends (works there)
+  { via: 'header',       query: false, ua: null },    // documented header only, no User-Agent
+  { via: 'header+query+ua', query: true, ua: UA_APP },// + apiKey query parameter (as s2planning sends it)
 ];
 const TIMEOUT_MS = 9000;
 
@@ -35,11 +35,11 @@ function upstreamUrl(key, params, withQuery) {
 async function fetchVariant(v, key, params) {
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
-  const headers = { Accept: 'application/json', 'x-openaip-api-key': key };
+  const headers = { Accept: 'application/json, text/plain, */*', 'x-openaip-api-key': key };
   if (v.ua) headers['User-Agent'] = v.ua;
   const t0 = Date.now();
   try {
-    const res = await fetch(upstreamUrl(key, params, v.query), { headers, signal: ctl.signal });
+    const res = await fetch(upstreamUrl(key, params, v.query), { headers, signal: ctl.signal, redirect: 'follow' });
     const text = await res.text();
     let data = null;
     try { data = JSON.parse(text); } catch { data = null; }
@@ -71,15 +71,37 @@ function describe(tried) {
   return { code, status: keyRejected ? 409 : 502, message: `${code} (${parts.join('; ')})` };
 }
 
+/**
+ * Where the key comes from: the master's App-Einstellungen (D1, masked towards the browser) or – if that is
+ * empty – the Worker secret OPENAIP_KEY (set from the GitHub secret of the same name by the deploy workflow).
+ */
+export async function openAipKey(env) {
+  const settings = await getSettings(env);
+  const fromSettings = String(settings.openaipKey || '').trim();
+  if (fromSettings) return { key: fromSettings, source: 'settings' };
+  const fromSecret = String(env.OPENAIP_KEY || '').trim();
+  return fromSecret ? { key: fromSecret, source: 'secret' } : { key: '', source: null };
+}
+
+/**
+ * Fingerprint of the stored key so the master can compare it with openaip.net without the key ever leaving
+ * the Worker: length, first 4 + last 2 characters, and whether it looks like an openAIP key (32 hex characters;
+ * a browser that auto-filled a saved password into the field produces something quite different).
+ */
+export function keyFingerprint(key) {
+  const k = String(key || '');
+  return { keyLength: k.length, keyHint: k.length >= 8 ? `${k.slice(0, 4)}…${k.slice(-2)}` : '', keyFormatOk: /^[a-f0-9]{32}$/i.test(k) };
+}
+
 /** Master-only key test: a tiny request; returns a report with every attempt, never throws. */
 export async function testOpenAipKey(env) {
-  const settings = await getSettings(env);
-  const key = (settings.openaipKey || '').trim();
-  if (!key) return { ok: false, status: 0, message: 'E_NO_OPENAIP_KEY', tried: [] };
+  const { key, source } = await openAipKey(env);
+  if (!key) return { ok: false, status: 0, message: 'E_NO_OPENAIP_KEY', source, tried: [], ...keyFingerprint('') };
+  const fp = { source, ...keyFingerprint(key) };
   const r = await fetchAny(key, { bbox: '8.4,47.3,8.6,47.5', limit: '1' });
-  if (r.ok) return { ok: true, via: r.via, status: r.status, count: r.data.items.length, keyLength: key.length, tried: r.tried };
+  if (r.ok) return { ok: true, via: r.via, status: r.status, count: r.data.items.length, tried: r.tried, ...fp };
   const d = describe(r.tried);
-  return { ok: false, status: d.status, message: d.message, tried: r.tried };
+  return { ok: false, status: d.status, message: d.message, tried: r.tried, ...fp };
 }
 
 export async function airspaces(env, url, ctx) {
@@ -89,8 +111,7 @@ export async function airspaces(env, url, ctx) {
   if (e - w > 4 || n - s > 3) throw new HttpError(400, 'bbox too large');
   const bbox = [Math.floor(w / Q) * Q, Math.floor(s / Q) * Q, Math.ceil(e / Q) * Q, Math.ceil(n / Q) * Q].map((v) => v.toFixed(1));
 
-  const settings = await getSettings(env);
-  const key = (settings.openaipKey || '').trim();
+  const { key } = await openAipKey(env);
   if (!key) throw new HttpError(409, 'E_NO_OPENAIP_KEY');            // the admin page explains what to do
 
   const cacheKey = new Request(`https://cache.s2ground.local/airspaces?bbox=${bbox.join(',')}`);

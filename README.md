@@ -140,14 +140,16 @@ Die Planung holt die Lufträume selbständig von openAIP. Dazu braucht der Worke
    s2planning hinterlegt ist, kann wiederverwendet werden).
 2. In S2 Ground: Menü ☰ → **Masteruser · App-Einstellungen** → Feld **openAIP API-Schlüssel** → einfügen → Speichern.
    Die App prüft den Schlüssel sofort mit einer kleinen Anfrage an openAIP und meldet das Ergebnis als Hinweis
-   («openAIP antwortet – Schlüssel in Ordnung» oder «openAIP-Test fehlgeschlagen: … (openAIP 401: …)» mit der
-   Originalantwort von openAIP). Später jederzeit mit dem Knopf **openAIP-Schlüssel testen** wiederholbar.
-   Wird der Schlüssel abgelehnt: auf openaip.net muss es ein Eintrag unter **API Keys** sein (nicht die Client-ID
-   oder das Passwort), vollständig kopiert, ohne Leerzeichen.
-   Meldet der Test «403 … <!doctype html> … 403 Forbidden» für alle drei Varianten, ist nicht der Schlüssel
-   das Problem, sondern der Gateway vor openAIP blockt Anfragen aus Cloudflare Workers (Stand 28.10.2026).
-   Dann hilft nur eine Rückfrage bei openAIP (Forum/Support: Worker-Zugriff mit gültigem API-Key freigeben)
-   oder ein anderer Weg für die Luftraumdaten – siehe Abschnitt 11, offene Punkte.
+   («openAIP antwortet – Schlüssel in Ordnung» oder «openAIP-Test fehlgeschlagen: …» mit der Originalantwort von
+   openAIP je Anfrage-Variante). Später jederzeit mit dem Knopf **openAIP-Schlüssel testen** wiederholbar. Unter dem
+   Knopf steht der Fingerabdruck des gespeicherten Schlüssels (Länge, erste 4 und letzte 2 Zeichen) zum Vergleich
+   mit openaip.net – der Schlüssel selbst verlässt den Server nie. Ein openAIP-Schlüssel hat 32 Zeichen (0–9, a–f);
+   sieht der gespeicherte Wert anders aus, hat meist der Browser ein gespeichertes Passwort ins Feld gefüllt –
+   Schlüssel neu einfügen und speichern.
+   **Alternative ohne Eingabe in der App:** den Schlüssel als GitHub-Secret `OPENAIP_KEY` hinterlegen (Repo →
+   Settings → Secrets and variables → Actions → New repository secret). Beim nächsten Worker-Deploy wird er als
+   Worker-Secret gesetzt und verwendet, solange in den App-Einstellungen kein Schlüssel steht. Dazu einmal
+   Actions → **Deploy worker** → Run workflow (ohne «migrate»).
 
 Der Schlüssel bleibt auf dem Server (Cloudflare D1) und wird nie an den Browser geschickt. Die Antworten werden
 pro Kartenausschnitt 24 h zwischengespeichert. Welche Kategorien als Konflikt zählen, steht im Feld
@@ -274,12 +276,10 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 * **Luftraumdaten** kommen live von openAIP (Abschnitt 6a); Untergrenzen «GND» werden mit der Startplatzhöhe angenähert,
   Lufträume sind nicht tagesaktuell aktiviert/deaktiviert – deshalb immer DABS/NOTAM prüfen. Ohne Schlüssel (und in der
   Simulation) werden Beispiel-Lufträume aus `src/data/airspaces.json` gezeigt.
-* **openAIP blockt den Worker** (28.10.2026): api.core.openaip.net antwortet auf Anfragen aus dem Cloudflare Worker mit
-  einer HTML-Seite «403 Forbidden», unabhängig vom Schlüssel (Schlüsseltest in den App-Einstellungen zeigt alle drei
-  Anfrage-Varianten). Mögliche Wege: (a) bei openAIP nachfragen, ob Zugriffe aus Cloudflare Workers mit gültigem API-Key
-  freigegeben werden; (b) Luftraumdaten über die öffentlichen CORS-Relays holen wie s2planning – dann läuft der Schlüssel
-  durch fremde Relays (bewusster Entscheid des Masterusers nötig); (c) den Proxy auf einer anderen Plattform betreiben.
-  Bis dahin bleibt Schritt 1 gelb («Lufträume von Hand prüfen»), alles Übrige funktioniert.
+* **openAIP «403 Forbidden»** (28.10.2026): Der Worker ruft openAIP genau so auf wie der Worker von ops.wicki.aero
+  (Header `x-openaip-api-key`, eigene Kennung), der dort funktioniert. Antwortet openAIP trotzdem mit der HTML-Seite
+  «403 Forbidden» für alle Varianten, stimmt sehr wahrscheinlich der gespeicherte Schlüssel nicht (Fingerabdruck in den
+  App-Einstellungen prüfen, Abschnitt 6a). Bis dahin bleibt Schritt 1 gelb («Lufträume von Hand prüfen»).
 * **Trajektorie** ist ein einfaches Modell (Open-Meteo-Windprofil, konstante Steig-/Sinkrate, flaches Gelände am Landepunkt).
 * **Protokollmodul** (`src/protocol/`) ist aus der Windsond-Software abgeleitet, aber noch **nicht an echter Hardware geprüft** – die offenen Punkte stehen in `docs/protocol/ssp-windsond-protocol.md`, Abschnitt 8. Erster Test mit RR4 am Laptop: Menü ☰ → Protokoll anzeigen, Rohzeilen mitschneiden.
 * **Dropsonde/Abwurf** ist vorbereitet, aber nicht getestet.
