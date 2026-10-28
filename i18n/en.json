@@ -533,7 +533,7 @@
   "admin.s.openaipKey": "openAIP API key (airspaces)",
   "admin.s.keySet": "key is stored – leave empty to keep it",
   "admin.s.keyMissing": "no key yet – paste it here",
-  "admin.s.openaipHint": "Free at openaip.net → account → API key. Stored on the server only, never sent to the browser.",
+  "admin.s.openaipHint": "Free at openaip.net → account → API key. Stored on the server; it is handed to the browser only for the direct fetch (tick below) and only to logged-in users.",
   "admin.s.testKey": "Test openAIP key",
   "admin.s.testKeyHint": "Checks the stored key with one small request to openAIP (runs automatically after saving).",
   "admin.s.keyFp": "Stored key ({src}): {n} characters, “{hint}”.",

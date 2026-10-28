@@ -533,7 +533,7 @@
   "admin.s.openaipKey": "openAIP API-Schlüssel (Lufträume)",
   "admin.s.keySet": "Schlüssel ist hinterlegt – leer lassen, um ihn zu behalten",
   "admin.s.keyMissing": "noch kein Schlüssel – hier einfügen",
-  "admin.s.openaipHint": "Kostenlos unter openaip.net → Konto → API-Schlüssel. Wird nur auf dem Server gespeichert und nie an den Browser gesendet.",
+  "admin.s.openaipHint": "Kostenlos unter openaip.net → Konto → API-Schlüssel. Wird auf dem Server gespeichert; an den Browser geht er nur für den Direktabruf (Haken unten) und nur an angemeldete Benutzer.",
   "admin.s.testKey": "openAIP-Schlüssel testen",
   "admin.s.testKeyHint": "Prüft den gespeicherten Schlüssel mit einer kleinen Anfrage an openAIP (läuft nach dem Speichern automatisch).",
   "admin.s.keyFp": "Gespeicherter Schlüssel ({src}): {n} Zeichen, «{hint}».",
