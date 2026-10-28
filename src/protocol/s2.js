@@ -8,7 +8,9 @@ import { SYM, typedNet } from './ssp-session.js';
 import { plain, REF } from './ssp-bin.js';
 import { decodeWireTest } from './telemetry.js';
 
-const SUB_SYMS = [SYM.gnssEnabled, SYM.md, SYM.mac, SYM.bat, SYM.net, SYM.condition, SYM.pr, SYM.txCriterion, SYM.power_dBm, SYM.powerBeforeLaunch_dBm];
+const SUB_SYMS = [SYM.gnssEnabled, SYM.md, SYM.mac, SYM.bat, SYM.net, SYM.condition, SYM.pr, SYM.txCriterion, SYM.power_dBm, SYM.powerBeforeLaunch_dBm, SYM.role];   // + role (3.11.8)
+export const ROLES = { 1: 'reusable radiosonde', 2: 'one-time radiosonde', 3: 'dropsonde', 4: 'tethersonde', 6: 'receiver' };   // spec §4.3 (4 = 3.11.8)
+export const LANDED_BEHAVIOUR = { 0: 'power-save', 1: 'beacon at once', 2: 'continue sounding' };   // behlan / findme=<n> (2 = 3.11.8)
 const ERR_BITS = ['hardware error', 'missing GPS or comm', 'temp/RH sensor error', 'external sensor error', 'radio hardware error', 'missing/broken flash', 'pressure sensor error', 'battery error', 'cut-down test failed', 'corrupt/full memory', 'light sensor error'];
 const WARN_BITS = ['missing sensor calibration', 'no time source', 'no GPS fix', 'low memory', 'low battery', 'sensors not ready', 'no radio contact', 'initialising'];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -43,7 +45,8 @@ export async function attach(link, oid, name) {
     const p = waitAny(ssp, oid, tm.sspReplyMs); p.catch(() => {});      // handled below (await), never unhandled
     try { await ssp.sub(oid, SUB_SYMS); await p; break; } catch { /* retry */ }
   }
-  if (link.opts.pushNetToS2) { try { await pushNet(link); } catch (e) { link.warn(`push net to S2: ${e.message}`); } }
+  // 3.11.8: when the RR4 holds `sspDefaultSet` it pushes net/txCriterion/power itself (spec §5.5a) – do not race it
+  if (link.opts.pushNetToS2 && !link.ls.autoSync) { try { await pushNet(link); } catch (e) { link.warn(`push net to S2: ${e.message}`); } }
   link.emitState();
 }
 export function detach(link) { link.ls.s2Oid = null; if (link.ls.sonde) { link.ls.sonde.componentId = null; } }
@@ -61,6 +64,7 @@ export function onReport(link, values) {
   const set = (key, sym, f = (x) => x) => { const x = v(sym); if (x !== undefined && x !== null) s[key] = f(x); };
   set('md', SYM.md); set('id', SYM.mac); set('batV', SYM.bat); set('pr', SYM.pr); set('txCriterion', SYM.txCriterion);
   set('powerDbm', SYM.power_dBm); set('powerBeforeLaunchDbm', SYM.powerBeforeLaunch_dBm); set('gnssEnabled', SYM.gnssEnabled, (x) => !!x);
+  set('role', SYM.role, (x) => Number(x));
   if (values.has(SYM.condition)) { s.condition = plain(values.get(SYM.condition)); s.conditionText = conditionText(s.condition); }
   if (values.has(SYM.net)) s.net = plain(values.get(SYM.net));
 }
@@ -98,7 +102,7 @@ export async function readSonde(link) {
     } catch (e) { link.warn(`uget S2: ${e.message}`); }
     if (link.opts.readFwVerStr) { try { const [v] = await link.ssp.uget(link.ls.s2Oid, [SYM.fwVerStr], tm.nameReplyMs); s.fwver = String(v); } catch { /* [I] symbol, TODO spec §8 Q8 */ } }
   }
-  if (s.id !== null) {
+  if (s.id !== null && link.hasTextChannel()) {
     try {
       // the sonde answers `params=` by adding the parameters to its next packets (spec §5.8)
       const seen = s.paramsSeen || 0;
@@ -152,7 +156,11 @@ function waitEvent(link, type, ms) {
     link.addEventListener('event', h);
   });
 }
-/** Manual cut-down: `relBal` in flight (md 2/3/7/'A'), `relBal=150` on the ground (init/ready/resting/find-me). */
+/**
+ * Manual cut-down (spec §5.8): `relBal=150` on the ground (init/ready/resting/find-me); in flight
+ * **`mode=7`** for an S2 (what Windsond 3.11.8 sends – the 3.9.0 "cut-down now delay" fix) or
+ * `relBal` (3.8.0 behaviour, option s2CutdownViaMode7=false).
+ */
 export async function cutdown(link) {
   const id = requireId(link), s = sonde(link);
   // In flight by the sonde's own mode – or by our telemetry (> 35 m AGL = the PC-side launch
@@ -160,10 +168,40 @@ export async function cutdown(link) {
   // ground burn to an airborne sonde.
   const inFlight = s.md === 2 || s.md === 3 || s.md === 7 || s.md === 'A' || (typeof s.agl === 'number' && s.agl > 35);
   link.tele.lastManualCutT = Date.now();
-  const res = await link.text.exe(id, inFlight ? 'relBal' : `relBal=${link.opts.relBalGroundMs}`, { timeoutMs: link.opts.timing.exeTimeoutMs });
+  const cmd = !inFlight ? `relBal=${link.opts.relBalGroundMs}` : (link.opts.s2CutdownViaMode7 ? 'mode=7' : 'relBal');
+  const res = await link.text.exe(id, cmd, { timeoutMs: link.opts.timing.exeTimeoutMs });
   return res;
 }
-export async function cutdownSecondary(link) { return link.text.exe(requireId(link), 'relGnd', { timeoutMs: link.opts.timing.exeTimeoutMs }); }
+/**
+ * Secondary cut-down `relGnd`. 3.11.8 (3.11.7 "error check for secondary cut-down"): the action is
+ * confirmed only when the RES text starts with `C` (the sonde's cut-down report); anything else is
+ * rejected with E_CUTDOWN2_UNCONFIRMED (option strictRelGnd=false → return the RES as in 3.8.0).
+ */
+export async function cutdownSecondary(link) {
+  const res = await link.text.exe(requireId(link), 'relGnd', { timeoutMs: link.opts.timing.exeTimeoutMs });
+  if (link.opts.strictRelGnd && !/^\s*C/.test(res || '')) throw Object.assign(new Error(`E_CUTDOWN2_UNCONFIRMED: ${res || '(empty)'}`), { res });
+  return res;
+}
+/** 3.11.8: change the role of a connected S2 over SSP (`set role`, 3 attempts × 1 s). 1 reusable, 2 one-time, 3 dropsonde, 4 tethersonde. */
+export async function setRole(link, role) {
+  const n = Number(role);
+  if (!ROLES[n] || n === 6) throw new Error(`E_ARG: role ${role}`);
+  if (!link.ls.s2Oid || !link.ssp || !link.ssp.joined) throw new Error('E_NO_SONDE: S2 not reachable over SSP');
+  let err = null;
+  for (let i = 0; i < 3; i++) {
+    try { await link.ssp.set(link.ls.s2Oid, new Map([[SYM.role, n]]), 1000); sonde(link).role = n; link.emitState(); return n; }
+    catch (e) { err = e; if (e.code === 5) throw new Error('E_NO_ROLE: S2 does not have role'); }
+  }
+  throw new Error(`E_SET_FAILED: role: ${err && err.message}`);
+}
+/** Behaviour after landing: `findme=<0|1|2>` (0 power-save, 1 beacon at once, 2 continue sounding – 3.11.8). */
+export async function setLandedBehaviour(link, n) {
+  const v = Number(n);
+  if (!LANDED_BEHAVIOUR[v]) throw new Error(`E_ARG: behaviour ${n}`);
+  const res = await link.text.exe(requireId(link), `findme=${v}`, { timeoutMs: link.opts.timing.exeTimeoutMs });
+  sonde(link).behlan = v;
+  return res;
+}
 export async function beep(link) { return link.text.exe(requireId(link), `beep=${link.opts.beepHz}`, { timeoutMs: link.opts.timing.exeTimeoutMs }); }
 export async function sendExe(link, text, { timeoutMs = link.opts.timing.exeTimeoutMs } = {}) { return link.text.exe(requireId(link), text, { timeoutMs }); }
 
@@ -180,7 +218,7 @@ export function splitUbx(data) {
   }
   return frames;
 }
-/** Prefix 0xFF, cut into ≤ chunkBytes, `call gnssCmd(Blob)` with 1 retry per chunk (TODO spec §8 Q13). */
+/** Prefix 0xFF, cut into ≤ chunkBytes, `call gnssCmd(Blob)` with up to `aidChunkRetries` attempts per chunk (5 in 3.11.8, 2 in 3.8.0; TODO spec §8 Q13). */
 export async function gnssAidToSonde(link, data) {
   if (!link.ls.s2Oid || !link.ssp.joined) throw new Error('E_NO_SONDE: S2 not reachable over SSP');
   const s = sonde(link);
@@ -195,9 +233,10 @@ export async function gnssAidToSonde(link, data) {
   }
   for (let i = 0; i < chunks.length; i++) {
     let ok = false;
-    for (let attempt = 0; attempt < 2 && !ok; attempt++) {
+    const tries = Math.max(1, link.opts.aidChunkRetries || 5);
+    for (let attempt = 0; attempt < tries && !ok; attempt++) {
       try { await link.ssp.call(link.ls.s2Oid, SYM.gnssCmd, chunks[i], link.opts.timing.sspReplyMs); ok = true; }
-      catch (e) { if (attempt === 1) throw new Error(`E_AID_UPLOAD: chunk ${i + 1}/${chunks.length}: ${e.message}`); }
+      catch (e) { if (attempt === tries - 1) throw new Error(`E_AID_UPLOAD: chunk ${i + 1}/${chunks.length}: ${e.message}`); }
     }
     link.progress({ phase: 'upload', done: i + 1, total: chunks.length });
   }

@@ -69,6 +69,10 @@ export class GroundLink extends EventTarget {
   static isSupported()                     // !!navigator.serial
   async connect({port} = {})               // requestPort() if none; open 38400 8N1; handshake (echo=0, mac, about); join SSP net;
                                            //   discover components; subscribe. Resolves with ReceiverInfo. Emits 'state'.
+  async connect({wifi:{host, port, path, url}}) // 3.11.8 additive: transport 'wifi' = SSP over a WebSocket (spec §1.8). Binary frames
+                                           //   only; the text channel is probed once (echo=0) and otherwise reported absent
+                                           //   (state.textChannel=false → cutdown/exe/pairSonde reject E_NO_TEXT_CHANNEL).
+                                           //   Also via options {transport:'usb'|'wifi', wifi:{…}}. Endpoint of the RR4 = open question 19.
   async disconnect()                       // unsub, close
   get state()                              // LinkState (below), always a fresh snapshot
 
@@ -77,14 +81,20 @@ export class GroundLink extends EventTarget {
   async writeNet(patch)                    // text cmds + SSP set; pushes net to the S2 when reachable; read-back verify; → NetSettings
   async pairSonde()                        // "annNet"
   async gnssAidToSonde()                   // ephemeris RR4 → S2 (spec §5.7); emits 'progress'
+  async readWifi()                         // 3.11.8: {enabled, ap, apSsid, apPwd, clientSsid, clientPwd, ipAddr} over SSP (E_NO_WIFI when absent)
+  async writeWifi(patch)                   // 3.11.8: {mode:'off'|'client'|'ap', apSsid, apPwd, clientSsid, clientPwd} → set + wifiApply → re-read
+  async syncDefaultSet()                   // 3.11.8: (re)write `sspDefaultSet` on the RR4 → true when the RR4 auto-syncs the S2 (spec §5.5a)
 
   // ---- sonde (S2)
   async readSonde()                        // SSP gets: name, md, mac, bat, pr, condition, power, txCriterion, net (+ params=06,13,15,17 via text) → SondeInfo
   async setCutdownAltitude(mAgl, groundPa) // relAP (text) [+ try SSP relAlt]; read-back via params=15 → number|null
   async setMode(n)                         // mode=<n>
   async ledAndWireTest()                   // wires → waits TXT R(...) ≤ 8 s → {primaryOk, secondaryOk, ledOk, battOk, raw}
-  async cutdown()                          // relBal (in flight) / relBal=150 (on ground) → RES text; later TXT C(...) emitted as 'event'
-  async cutdownSecondary()                 // relGnd
+  async cutdown()                          // mode=7 (S2 in flight, 3.11.8; option s2CutdownViaMode7=false → relBal) / relBal=150 (on ground)
+                                           //   → RES text; later TXT C(...) emitted as 'event'
+  async cutdownSecondary()                 // relGnd; 3.11.8: rejects E_CUTDOWN2_UNCONFIRMED unless the RES starts with 'C' (strictRelGnd)
+  async setRole(n)                         // 3.11.8: SSP `set role` 1 reusable | 2 one-time | 3 dropsonde | 4 tethersonde
+  async setLandedBehaviour(n)              // findme=<0|1|2> (2 = continue sounding, 3.11.8)
   async beep()                             // beep=2900
   async sendExe(text, {timeoutMs=8000})    // generic <id>.exe=…  → RES text (one at a time, queued, ≥1 s spacing)
 
@@ -95,20 +105,25 @@ export class GroundLink extends EventTarget {
   //   'state'      LinkState
   //   'telemetry'  TelemetryRecord
   //   'packet'     {rssi, rs, snr, rec, t}            (PK)
-  //   'event'      {type:'cutdown'|'wireHeated'|'wireTest'|'announce'|'timeout', data, raw}
+  //   'event'      {type:'cutdown'|'wireHeated'|'wireTest'|'announce'|'timeout'|'gnssIntegrity', data, raw}
+  //                gnssIntegrity (3.11.8, flag gnssIntegrityEvents): data {jam, spoof (0/1/2), jamming, spoofing:'none'|'suspected'|'detected'}
   //   'line'       {dir:'rx'|'tx', text, t}           (raw protocol log for the expert view / .sounding)
   //   'error'      Error
 }
 
 /** LinkState: {
  *   port: 'closed'|'opening'|'open'|'lost',
+ *   transport: 'usb'|'wifi', textChannel: boolean|null,          // 3.11.8: text channel usable? (null while closed)
+ *   wifi: null | WifiSettings, autoSync: null|false|{schema, written},  // 3.11.8: last readWifi(); RR4 sspDefaultSet support
  *   receiver: null | {hw, fw, prot, mac, componentId, gnssFix:boolean|null, batV:number|null, tempC:number|null, utcSyncSource},
  *   sonde:    null | SondeInfo,
  *   net:      null | NetSettings,
  *   lastRxT:  number|null, rxLines:number, txLines:number
  * }
  *  SondeInfo: {id (number), name, componentId, type:string|null ('S2H3-R-B20'…; null if not readable), md, batV, pr, condition (bitmap),
- *              conditionText:string[], powerDbm, powerBeforeLaunchDbm, txCriterion, fwver, cutAltAgl, role}
+ *              conditionText:string[], powerDbm, powerBeforeLaunchDbm, txCriterion, fwver, cutAltAgl, role, jam, spoof}
+ *  TelemetryRecord additionally carries jam, spoof (3.11.8; null when the sonde does not send them).
+ *  writeNet rejects E_FREQ_RANGE when frequencyHz lies outside options.freqRange ('default' 400–440 MHz, 'extended' 390–440 MHz, {minHz,maxHz}).
  */
 export class SimGroundLink extends GroundLink { /* same API, scripted ascent, no serial; options {speed} */ }
 export { parseBracketLine, encodeFrame, decodeFrame } // for tests

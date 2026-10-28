@@ -87,6 +87,7 @@ export class TelemetryBuilder {
       alt: alt === null ? null : +alt.toFixed(1), altAgl, te: x.te, hu: x.hu, td: x.te !== null && x.hu !== null ? dewPoint(x.te, x.hu) : null,
       spd: x.spd, ang: x.ang, rise, su: x.su, rssi: x.link.rssi ?? null, rs: x.link.rs ?? null, snr: x.link.snr ?? null, rec: x.link.rec ?? null,
       sats: x.sats, tei: num(x.params.tei), raw: x.raw, params: x.params,
+      jam: num(x.params.jam), spoof: num(x.params.spoof),      // 3.11.8 GNSS integrity flags (0 none, 1 suspected, 2 detected) [C levels, I wording]
     };
     if (rec.td !== null) rec.td = +rec.td.toFixed(2);
     return rec;
@@ -129,6 +130,22 @@ export class TelemetryBuilder {
     const rssi = rssiFromParams(p);
     if (rssi === null && p.rs === undefined) return null;
     return { rssi, rs: num(p.rs), snr: num(p.snr), rec: num(p.rec), t };
+  }
+  /**
+   * 3.11.8 GNSS integrity (`jam`/`spoof` in DAT/MET): 'gnssIntegrity' event when a flag is raised
+   * and when it clears again (feature flag gnssIntegrityEvents; the key semantics are [C], the
+   * wording suspected/detected is [I] – spec §5.10).
+   */
+  integrityEvent(msg, t = msg.t ?? Date.now()) {
+    if (this.opts.gnssIntegrityEvents === false) return null;
+    const p = msg.params;
+    if (p.jam === undefined && p.spoof === undefined) return null;
+    const jam = num(p.jam) ?? 0, spoof = num(p.spoof) ?? 0;
+    const prev = this._integrity || { jam: 0, spoof: 0 };
+    if (jam === prev.jam && spoof === prev.spoof) return null;
+    this._integrity = { jam, spoof };
+    const level = (v) => (v >= 2 ? 'detected' : v >= 1 ? 'suspected' : 'none');
+    return { type: 'gnssIntegrity', data: { id: msg.id, jam, spoof, jamming: level(jam), spoofing: level(spoof), t }, raw: msg.raw };
   }
   /** TXT / ANN / ANET / TIM → 'event' detail {type, data, raw} or null. */
   event(msg, t = msg.t ?? Date.now()) {

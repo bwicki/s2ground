@@ -8,11 +8,14 @@ const enc = (s) => Uint8Array.from(s, (c) => c.charCodeAt(0) & 0xff);
 export const NET = { freq: 433900000, loraSpreadingFactor: 9, loraBandwidth: 0, loraCodingRate: 1, radioTimeslots: 6, radioSlotMs: 500, radioMaxData: 60, samplingInterval: 1000, radioGroundSlotMs: 500 };
 
 export class MockSerial {
-  /** @param {{withS2?:boolean, ssp?:boolean, pcId?:number, s2Oid?:number, withRev?:boolean, mapStyle?:'namemap'|'map', sondeId?:number}} o */
+  /** @param {{withS2?:boolean, ssp?:boolean, pcId?:number, s2Oid?:number, withRev?:boolean, mapStyle?:'namemap'|'map', sondeId?:number, defaultSet?:boolean, wifi?:boolean}} o
+   *   defaultSet: RR4 firmware with `sspDefaultSet` (3.11.8 auto-sync, spec §5.5a); wifi: RR4 with the WiFi variables (spec §1.8) */
   constructor(o = {}) {
     this.o = { withS2: true, ssp: true, pcId: 3, s2Oid: 2, withRev: true, mapStyle: 'namemap', sondeId: 12345, delayMs: 2, ...o };
     this.opened = false; this.rxText = []; this.rxFrames = []; this.net = { ...NET }; this.s2 = { md: 1, bat: 4.05, pr: 96240, mac: this.o.sondeId, condition: 0, txCriterion: 3, power: 13, powerBefore: 0, gnssEnabled: true, net: null, relAlt: null };
     this.cutalt = 65535; this.exeLog = []; this.sets = []; this.calls = [];
+    this.defaultSet = null;                              // [opt, Map] once the PC wrote it (o.defaultSet)
+    this.wifi = { 1507: false, 1504: true, 1502: 'RR4-1F3A', 1503: 'sparv1234', 1500: '', 1501: '', 1505: 0 }; this.wifiApplied = 0;
     this.inbuf = '';
     this.readable = new ReadableStream({ start: (c) => { this._ctrl = c; } });
     this.writable = new WritableStream({ write: (chunk) => this._write(chunk) });
@@ -72,9 +75,9 @@ export class MockSerial {
       return;
     }
     if (cmd === 'relBal' || /^relBal=/.test(cmd)) { this.push('[#RES:q=70,part=1:Burn]'); res('ing'); setTimeout(() => this.push(`[#TXT:id=${id}:C(A1234T56)]`), 120); return; }
-    if (cmd === 'relGnd') { res('OK relGnd'); return; }
+    if (cmd === 'relGnd') { res(this.relGndReply || 'C(A1234T56)'); return; }
     if (/^beep=/.test(cmd)) { res('OK'); return; }
-    if ((m = /^mode=(\d)$/.exec(cmd))) { this.s2.md = Number(m[1]); res(`mode=${m[1]}`); return; }
+    if ((m = /^mode=(\d)$/.exec(cmd))) { this.s2.md = Number(m[1]); res(`mode=${m[1]}`); if (m[1] === '7') setTimeout(() => this.push(`[#TXT:id=${id}:C(A1234T56)]`), 120); return; }
     if (cmd === 'busy') { res('Busy'); return; }
     if (cmd === 'fail') { res('Error: nope'); return; }
     if (cmd === 'silent') return;                       // never answers → E_TIMEOUT_RADIO
@@ -111,15 +114,19 @@ export class MockSerial {
       const syms = plain(b.var);
       const val = (s) => {
         if (s === 5) return f.to === 1 ? 'RR4' : f.to === this.o.s2Oid ? 'S2_H3-R-B20' : 'other';
+        if (s === 477 && f.to === 1 && this.o.defaultSet) return this.defaultSet ? new Typed(REF.DEFAULT_SET, this.defaultSet) : null;
+        if (f.to === 1 && this.o.wifi && this.wifi[s] !== undefined) return s === 1505 ? new Typed(6, this.wifi[s]) : this.wifi[s];
         const p = new Map(this._s2Pairs()); if (p.has(s)) return p.get(s);
         return null;
       };
       if (f.to !== 1 && f.to !== this.o.s2Oid) return;             // unknown object never answers
+      const rr4Known = new Set([5, 1201, 774, 599, 1235, ...(this.o.defaultSet ? [477] : []), ...(this.o.wifi ? Object.keys(this.wifi).map(Number) : [])]);
+      if (f.to === 1 && syms.some((x) => !rr4Known.has(x))) { nack(5); return; }   // unknown variable
       reply(syms.map(val)); return;
     }
     if (f.name === 'getVarType') {
       const syms = plain(b.sym);
-      const schemaOf = (s) => ({ 1201: REF.NET_V6, 774: 2, 599: 1, 1235: REF.ENCKEY, 1100: 2, 1200: 6, 314: 7, 890: 6, 336: 6, 1226: 2, 1203: 4, 1239: 4, 587: 1 })[s] ?? 21;
+      const schemaOf = (s) => ({ 1201: REF.NET_V6, 774: 2, 599: 1, 1235: REF.ENCKEY, 1100: 2, 1200: 6, 314: 7, 890: 6, 336: 6, 1226: 2, 1203: 4, 1239: 4, 587: 1, 1109: 2, ...(this.o.defaultSet ? { 477: REF.DEFAULT_SET } : {}) })[s] ?? 21;
       reply(new Typed(REF.SCHEMALIST, syms.map((s) => [schemaOf(s), s === 1226 || s === 1203 || s === 1201 ? 1 : 0]))); return;
     }
     if (f.name === 'set') {
@@ -127,12 +134,21 @@ export class MockSerial {
       this.sets.push({ to: f.to, map });
       if (map.has(1201)) { const v = map.get(1201); if (f.to === 1) { this.net = { ...v }; reply(null); this._reportNet(); } else { this.s2.net = { ...v }; reply(null); } return; }
       if (map.has(1105)) { if (this.o.s2RelAlt) { this.s2.relAlt = map.get(1105); reply(null); } else nack(5); return; }
+      if (map.has(477) && f.to === 1) {
+        if (!this.o.defaultSet) { nack(5); return; }
+        const v = map.get(477); this.defaultSet = [v[0], v[1]]; reply(null);
+        const net = v[1].get(1201); if (net && this.o.withS2) this.s2.net = { ...net };   // the RR4 auto-syncs the S2
+        return;
+      }
+      if (map.has(1109) && f.to === this.o.s2Oid) { this.s2.role = map.get(1109); reply(null); return; }
+      if (f.to === 1 && this.o.wifi) { let any = false; for (const [k, v] of map) if (this.wifi[k] !== undefined) { this.wifi[k] = v; any = true; } if (any) { reply(null); return; } }
       nack(5); return;
     }
     if (f.name === 'call') {
       const arg = plain(b.arg);
       this.calls.push({ to: f.to, sym: b.sym, arg });
       if (b.sym === 24) { reply(me); return; }
+      if (b.sym === 1506 && f.to === 1 && this.o.wifi) { this.wifiApplied++; this.wifi[1505] = this.wifi[1507] && !this.wifi[1504] ? 0xc0a80142 : 0; reply(null); this._report(1, [[1505, new Typed(6, this.wifi[1505])]]); return; }
       if (b.sym === 598) { this.aidCalls = (this.aidCalls || 0) + 1; reply(this.aidCalls <= 2 ? this._ubx(this.aidCalls) : new Uint8Array(0)); return; }
       if (b.sym === 594) { if (!(arg instanceof Uint8Array) || arg.length > 50 || (this.aidChunks === undefined && arg[0] !== 0xff)) { nack(6); return; } this.aidChunks = (this.aidChunks || 0) + 1; reply(null); return; }
       nack(14); return;
@@ -140,7 +156,7 @@ export class MockSerial {
   }
   _s2Pairs() {
     const s = this.s2;
-    return [[587, s.gnssEnabled], [1100, new Typed(2, s.md)], [1200, new Typed(6, s.mac)], [314, s.bat], [336, new Typed(6, s.condition)], [890, new Typed(6, s.pr)], [1226, new Typed(2, s.txCriterion)], [1203, new Typed(4, s.power)], [1239, new Typed(4, s.powerBefore)]];
+    return [[587, s.gnssEnabled], [1100, new Typed(2, s.md)], [1200, new Typed(6, s.mac)], [314, s.bat], [336, new Typed(6, s.condition)], [890, new Typed(6, s.pr)], [1226, new Typed(2, s.txCriterion)], [1203, new Typed(4, s.power)], [1239, new Typed(4, s.powerBefore)], [1109, new Typed(2, s.role ?? 1)]];
   }
   /** A fake UBX-MGA frame (payload n·30 bytes) so the upload has to chunk it. */
   _ubx(n) { const len = 30 * n; const f = new Uint8Array(8 + len); f[0] = 0xb5; f[1] = 0x62; f[2] = 0x13; f[3] = 0x00; f[4] = len & 0xff; f[5] = len >> 8; for (let i = 0; i < len; i++) f[6 + i] = i; return f; }

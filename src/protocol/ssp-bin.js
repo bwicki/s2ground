@@ -48,8 +48,10 @@ export const REGISTRY = {
   106: S.struct([['samplingInterval', T.FLOAT], ['payload', 42]]),
   107: S.list(T.U32), 108: S.tuple([T.U16, 107]), 109: S.list(75), 112: S.tuple([T.U8, T.U16, T.STRING]),
   113: S.struct([['gnssId', T.U8], ['satId', T.U8], ['cno', T.U8], ['flags', T.U8]]), 114: S.list(113),
+  // 3.11.8 additions (spec §3.3): Int32Fix1e6, Uint64AndNameMap (= sspDefaultSet), Uint32AndString, ListOfStrings
+  115: S.fix(1, 32, 6), 116: S.tuple([T.U64, 31]), 117: S.tuple([T.U32, T.STRING]), 118: S.list(T.STRING),
 };
-export const REF = { NAMEMAP: 31, U8LIST: 42, SYMLIST: 43, OID: 75, OIDMAP: 86, SCHEMALIST: 96, NET_V5: 102, ENCKEY: 104, NET_V6: 105, GNSSSAT: 113, GNSSSATS: 114 };
+export const REF = { NAMEMAP: 31, U8LIST: 42, SYMLIST: 43, OID: 75, OIDMAP: 86, SCHEMALIST: 96, NET_V5: 102, ENCKEY: 104, NET_V6: 105, GNSSSAT: 113, GNSSSATS: 114, DEFAULT_SET: 116 };
 
 // ---- message table (§2.1): base code → field lists for the plain and the ticketed (0x80) form --
 const F = (...pairs) => pairs;

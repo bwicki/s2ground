@@ -41,3 +41,30 @@ function names are listed here; no source text was copied into the deliverables.
 | feature history | `releasenotes.txt` |
 
 Not used: `windsond/lic.py` (license check — PC only, not needed by the hardware; keys not reproduced), the AssistNow token in `sparvio/assistnow.py`.
+
+## Revision 2 — Windsond 3.11.8 (2026-10-28)
+
+Material: Windsond Desktop 3.11.8 — `releasenotes.txt` (3.8.1 … 3.11.8), decompiled modules (pycdc, partly
+incomplete) and the Python 3.11 bytecode (constants / disassembly), compared constant-by-constant with the
+3.8.0 bytecode. The ontology is now the Python package `ssp_ontology` (class bodies `SspSymbol`, `SspTypeId`,
+`SspMessageId`, `SspErrorCode`, the dictionaries `SspSymIxToAscii` / `SspSymIxToData`, the `*Serializer`
+classes). Still not used: `windsond/lic.py` (licence mechanism, only the *existence* of a licence-defined
+frequency span is mentioned), the AssistNow token.
+
+| Topic (CHANGES-3.11.8.md / spec section) | Derived from (module → class/function) |
+|---|---|
+| USB ids, baud table (§1.1) | `sspobj/links/serial.py`: `PortData`, `ALL_DEVICES`, `dynamic_baudrate`; `sparvio/rr4_wifi.py`: `main` (vidpid rules); `windsond/dongle.py`: `SspObjDongle.__init__` (38400) |
+| `about` parsing (§5.1) | `windsond/receiver_version.py`: `ReceiverVersion.from_string` |
+| CInfo compatibility, constants (§2.2) | `ssp_ontology/ssp.py` module constants (`SSP_COMPATIBILITY`, `SSP_WORKING_GET_VALUES`); `sspobj/network.py`: `Network.get_our_cinfo`, `Network.__init__` (default name) |
+| message codes, registry 115–118, symbols (§2.1, §3.3, §4) | `ssp_ontology/ssp.py`: `SspMessageId`, `SspTypeId`, `SspSymbol`, `SspSymIxToAscii`, `SspSymIxToData`, `Int32Fix1000000Serializer`, `Uint64AndNameMapSerializer`, `Uint32AndStringSerializer`, `ListOfStringsSerializer` (`get_shape`) |
+| `sspDefaultSet` auto-sync (§5.5a) | `windsond/dongle.py`: `RR4Obj`, `S2Obj`, `S2WithEncObj`, `SspConnection.__init__`, `_on_rr4_source_change` (+ `_success`), `_get_defaultset`, `_sync_s2`, `_set_net`, `_set_txCriterion`, `_set_power`, `_set_powerBeforeLaunch`, `_set_enc_key`, `_get_remote_var`, `_set_remote_var`; `windsond/receiver_version.py`: `LeaveUnchanged` |
+| S2 role change | `windsond/connection_panel.py`: `S2SettingsPanel.__init__._set_role`, `sonde_roles`; `windsond/dongle.py`: `S2Obj` |
+| cut-down via `mode=7`, `relGnd` check (§5.8) | `windsond/firmware.py`: `ReleaseBalloonAction.get_performcmd`, `ReleaseGroundAction.is_set_result_ok`; `windsond/firmware_fields.py`: `SmartAction.OnResponse` |
+| behaviour after landing | `windsond/parameter.py`: `ParameterSet.__init__` (`behlan` options, `findme` set command) |
+| radio quality decimals, `jam`/`spoof` (§5.10) | `windsond/radio.py`: `Message.from_text` (int/float key tuples); `windsond/sond.py`: `_find_spoofing_msgs`, `_check_for_gps_spoofing`, `get_gps_spoofing`, `update_role`, `is_role_dropsonde`; `windsond/utils/sond.py`: `get_status_text`, `get_packet_delay_ms`; `windsond/sond_status_panel.py`: `OnDataUpdated` |
+| frequency limits (§5.4) | `windsond/dongle.py`: `SspObjDongle.get_frequency_span`, `__init__` (`allowed_freq_range`); `windsond/donglepanel.py`: dongle construction (default/extended span, field labels); `windsond/firmware.py`: `SyncedFreqSetting.to_value` (range check), `_to_machine_format` |
+| ephemeris (§5.7) | `windsond/ephemeris_sync.py`: `EphemerisSync._download_ephemeris`, `_upload_ephemeris` (+ `chunked`), `check_eph_status`, `on_s2_source_change` |
+| SA1 link removal | `windsond/dongle.py`: `enable_sa1_connection`, `_enable_sa1_connection`; `windsond/config.py`: `get_sa1_allowed` |
+| WiFi settings (§1.8) | `sparvio/rr4_wifi.py`: `WiFiTypes`, `WifiSettingsDialog` (`_query_values`, `_add_pending`, `_on_ip` (+ `_callback`), `_on_apply`, `_on_get_success`, `_on_get_error`, `_update_status`, `_on_wifi_mode`, `_scan_wifi`), `main`; `windsond/connection_panel.py`: `NetPanel.__init__` ("WiFi Settings" button) |
+| WebSocket SSP link (§1.8) | `sspobj/links/websocket.py`: `WebsocketDaemon` (`__init__`, `_connect`, `run`, `send`, `end_scope`), `WebsocketLink` (`__init__`, `on_message`, `_get_cinfo`, `on_connection_change`, `send_ssp_msg`); `sspobj/links/framing.py`: `msg_to_bin`, `hex_to_msg`; `sspobj/net_constants.py` |
+| CSV units (§7.2) | `windsond/formats/csv_formats.py`: `FlightHistoryCsvFormat.__init__/on_new_data`, `HistoryCsvFormat`, `CsvFormat`, `MultiSondCsvFormat._get_intro`; `windsond/units.py`: `DistanceUnit_m/ft`, `SpeedUnit_*`, `TemperatureUnit_C/F/K` (`unit`); `static/fileformat_template.csv.txt` |

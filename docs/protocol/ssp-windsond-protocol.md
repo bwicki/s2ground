@@ -1,4 +1,6 @@
-# Interface specification: Sparv RR4 receiver / S2 radiosonde as used by Windsond 3.8.0
+# Interface specification: Sparv RR4 receiver / S2 radiosonde as used by Windsond 3.8.0 / 3.11.8
+
+Revision 2 (2026-10-28): updated against Windsond Desktop **3.11.8**; the delta with the reasoning is in `CHANGES-3.11.8.md`. Statements that changed between 3.8.0 and 3.11.8 are marked *(3.11.8)*.
 
 Working document, derived for interoperability (Swiss URG Art. 21 / EU 2009/24/EC).
 Everything below is a description in our own words of *what goes over the wire* and *what files are written*; no program code of the original software is reproduced. Vendor secrets (license key material, the GNSS assistance service token) are deliberately **not** included.
@@ -32,7 +34,7 @@ What the software does **not** do over SSP in 3.8.0 (so it cannot be "confirmed"
 
 | Item | RR4 (receiver) | S2 via SA1 cable | Source/confidence |
 |---|---|---|---|
-| Baud rate | **38400** | **57600** | [C] (daemon created with baud=38400 for the receiver, 57600 for the SA1 link; 115200 is only the library default and is *not* used) |
+| Baud rate | **38400** | **57600** (legacy) | [C] (daemon created with baud=38400 for the receiver, 57600 for the SA1 link; 115200 is only the library default and is *not* used). *(3.11.8)* The RR4 is a native USB CDC device (USB VID `0x303a`, PID `0x1001`; the WiFi tool also accepts PID `0x80d3`), so the rate is nominal; 3.11.8 no longer opens the SA1 cable link at all (the S2 is reached only through the RR4's SSP network) [C]. |
 | Framing | 8N1 (library default) | 8N1 | [I] |
 | Read timeout / inter-byte timeout / write timeout | 0.25 s / 0.01 s / 1 s | same | [C] |
 | Exclusive open | yes (newer pyserial) | yes | [C] |
@@ -97,6 +99,30 @@ A bracket message may be preceded by junk; the receiver searches for the first `
 
 The RR4/S2 radio link can be AES-encrypted (`encKey` struct, 16-byte key + timestamp). Out of scope; only mentioned where it appears in the discovery sequence. With no key set the devices run unencrypted (`payload` empty) [C].
 
+### 1.8 WiFi / WebSocket transport (3.11.8)
+
+The RR4 contains a WiFi radio that is **configured through SSP variables of the RR4 object** (all over the USB link) [C]:
+
+| id | name | type (as handled by Windsond) | access | meaning |
+|---|---|---|---|---|
+| 1507 | `wifiEnabled` | Bool | get, set | WiFi radio on/off; absent (nack 5) on firmware without WiFi |
+| 1504 | `wifiAp` | Bool | get, set | true = access point (RR4 creates a network), false = client (RR4 joins a network) |
+| 1502 / 1503 | `wifiApSsid` / `wifiApPwd` | String | get, set | AP SSID / password |
+| 1500 / 1501 | `wifiClientSsid` / `wifiClientPwd` | String | get, set | SSID / password of the network to join |
+| 1505 | `ipAddr` | String, or Uint32 with the first octet in the most significant byte (`a·2^24+b·2^16+c·2^8+d` → `a.b.c.d`); empty / 0 = no address | sub (report) | current IP address of the RR4 |
+| 1506 | `wifiApply` | function, `call` with null argument | call | commit the settings (reconfigures the radio); reply within 5 s |
+
+Procedure (the "RR4 WiFi Settings" dialog): `get` the six settings (1 s each; a nack "unknown variable" = no WiFi support), `sub ipAddr`; on apply `set` every changed value (1 s, 3 attempts), then `call wifiApply` (5 s, 3 attempts), re-read after 0.5 s. GUI modes: disabled = `wifiEnabled=false`; "connect to existing WiFi" = `wifiEnabled=true, wifiAp=false`; "create WiFi network" = `wifiEnabled=true, wifiAp=true` [C]. The only way the PC learns the RR4's address is `ipAddr` over USB; no discovery protocol exists in the material [C].
+
+**SSP over WebSocket** (Sparvio library class; *not used by Windsond 3.11.8 itself*, which always talks USB) [C]:
+
+* The client opens `ws://<host>[:port][/path]` with a 1 s open timeout (`wss://` would work identically).
+* **One binary WebSocket frame = `TO` (1 byte) + MSGTYPE (1 byte) + body** — exactly the bytes of the serial hex line without the `0x`/hex encoding and without the newline (section 1.4). Received binary frames are decoded the same way; **text frames are ignored**.
+* While not networked the client sends the CInfo probe (`TO = 255`, section 2.2) every 2 s as a binary frame; NewId/NewIdWithRev handshake, ids, tickets, keep-alive and reports are identical to the serial link (sections 2, 5.2).
+* Receive is polled with a 1 s timeout; after an error the client waits 1.5 s before reconnecting; a closed socket marks the link offline and forgets the network (new probe after reconnect).
+
+Not in the material [U]: the RR4's WebSocket port and path, its AP-mode address (ESP-IDF default would be 192.168.4.1), whether the bracket/text channel (telemetry, `<id>.exe=`) is available over WiFi at all (the library client would drop it as text frames), and whether USB and WiFi clients may be connected simultaneously. See `CHANGES-3.11.8.md` §3 and open questions 19–20.
+
 ---
 
 ## 2. SSP message types
@@ -148,7 +174,7 @@ Notes:
 | `parent` | 0 | — |
 | `prio` | 0 | the PC never wants to be central |
 | `component_type` | 0 | unknown type |
-| `compatibility` | 1 | flag "I understand newidWithRev" |
+| `compatibility` | 1 (3.8.0) / **3** (3.11.8) | bit 0 "I understand newidWithRev", bit 1 "working get values" (3.11.8; only relevant when the client acts as a server) [C] |
 | `name` | `"python"` | preferred name of the PC object; the central may rename it (empty string in NewId = keep requested name) |
 
 ### 2.3 Error codes (`nack.code`) [C]
@@ -323,6 +349,10 @@ A **Python/JS-side encoder** choosing types for "Any" values should mimic Windso
 | 107–109 | Uint32List, Uint16AndUint32List, OidList | — |
 | 112 | — | Tuple(Uint8, Uint16, String) "execute or command (isOneway, sender, command)" |
 | 113 / 114 | GnssSat / list | Struct{gnssId:U8, satId:U8, cno:U8, flags:U8} / TypedList(GnssSat) |
+| 115 | Int32Fix1e6 *(3.11.8)* | Fixpoint(1,32,6) |
+| 116 | Uint64AndNameMap *(3.11.8)* | Tuple(Uint64, NameMap) — value of `sspDefaultSet` (§5.5) |
+| 117 | Uint32AndString *(3.11.8)* | Tuple(Uint32, String) |
+| 118 | ListOfStrings *(3.11.8)* | TypedList(String) |
 
 **Which `net` struct a device uses is negotiated at run time**: Windsond asks the RR4 with `getVarType` for `net` and then encodes the `set` with exactly the schema returned (REF105 observed as "LoRa settings in net" for protocol 5/6) [C]. Do the same.
 
@@ -364,6 +394,12 @@ The RR4 and the S2 are Sparvio objects. Each object has variables (readable via 
 | 890 / 891 / 892 / 893 | pr / prCalOf / prCalRef / baroTemp | pascal | r / rw / w / r | barometer |
 | 700 / 701 | temp / rh | °C / % | r | ambient sensors (telemetry comes via the text channel, not subscribed over SSP in 3.8.0) |
 | 5203 | rbeep | Bool | w | receiver beeps on every received packet (RR4 also accepts the text command `rbeep=0/1`) |
+| 477 | sspDefaultSet *(3.11.8)* | REF116 Tuple(U64 opt, NameMap) | r/w | **RR4 only**: default settings the RR4 pushes to every S2 it sees (§5.5) |
+| 1500–1507 | wifiClientSsid, wifiClientPwd, wifiApSsid, wifiApPwd, wifiAp, ipAddr, wifiApply, wifiEnabled *(3.11.8)* | see §1.8 | rw / sub / call | WiFi configuration of the RR4 |
+| 630 / 631 | jammingDetection / spoofingDetection *(3.11.8)* | — | — | GNSS integrity (ontology only; the live flags arrive as bracket keys `jam`/`spoof`, §5.10) [I] |
+| 1242 | radioNoise *(3.11.8)* | dBm | r | radio noise floor (ontology only) [I] |
+| 856 | so2 *(3.11.8)* | ppb | r | SO2 sensor (ontology only) |
+| 1112 / 1113 | dropSpeedHMax / dropSpeedVMin *(3.11.8)* | — | rw | drop-detection thresholds (ontology only) [I] |
 | 5202 | echo | Bool | w | echo input characters (text command `echo=0` is used instead) |
 
 ### 4.2 RR4 object (component id 1 when connected via its own port) [C unless marked]
@@ -380,6 +416,8 @@ The RR4 and the S2 are Sparvio objects. Each object has variables (readable via 
 | 596 | gnssSignals | map/list | sub | per-satellite C/N0 for the GNSS panel (`gnssId`,`satId`,`cno`,`flags`) |
 | 628 | gnssEnabledConstellations | Uint8 bitmask | get, set | bit0 GPS, bit1 SBAS, bit2 Galileo, bit3 BeiDou, bit4 IMES, bit5 QZSS, bit6 GLONASS [I: bit order from the u-blox gnssId numbering used in the panel] |
 | 24 | ping | fn | call | keep-alive |
+| 477 | sspDefaultSet *(3.11.8)* | REF116 | get, set | present on auto-sync firmware (3.8.3+): the PC writes the desired S2 settings here once, the RR4 forwards them to each S2 (§5.5) |
+| 1500–1507 | wifi* / ipAddr *(3.11.8)* | §1.8 | get, set, sub, call | WiFi configuration |
 | — | own sensor data (`pa`, `alt`, `lat/lon`, `su`, `te`, `bat`) | — | — | **arrive as bracket messages with `role=6`** and via text commands `temp` / `bat` (5.4), not via SSP |
 
 ### 4.3 S2 object (component id as listed in `components`) 
@@ -408,8 +446,8 @@ The RR4 and the S2 are Sparvio objects. Each object has variables (readable via 
 | **1107** | ledTest | fn | call | [I] | blink the power LED. Text equivalent (legacy): `led` |
 | 1108 | burnShuntR | ohm | rw | [I] | shunt used for burn current measurement |
 | 1101 | gs | — | rw | [I] | "ground station ready" flag (handled by the RR4 itself for S2; text `gs=0/1`) |
-| 1106 | landedBehavior | enum | rw | [I] | silent after landing (text param `behlan`: 0 power-save, 1 beacon at once) |
-| 1109 | role | enum | rw | [I] | 1 reusable radiosonde, 2 one-time radiosonde, 3 dropsonde, 6 receiver |
+| 1106 | landedBehavior | enum | rw | [I] | behaviour after landing (text param `behlan`, set with `findme=<n>`: 0 power-save, 1 beacon at once, 2 continue sounding *(3.11.8)*) |
+| 1109 | role | Uint8 | sub, set | [C] *(3.11.8)* | 1 reusable radiosonde, 2 one-time radiosonde, 3 dropsonde, 4 tethersonde (3.11.8), 6 receiver (text only). Windsond 3.11.8 subscribes it and changes it with `set` (3 attempts, 1 s); nack 5 = "S2 does not have role" |
 | 1110 / 1111 | silentUntilReady / listenAfterReady | Bool | rw | [I] | behaviour flags |
 | 1215 / 1216 | radioEnabled / radioPaused | Bool | rw | [I] (the software treats them as untyped Any) | radio on/off |
 | 893 | baroTemp | °C | r | [I] | barometer IC temperature |
@@ -442,8 +480,8 @@ Variable types must be confirmed with `getVarType` (section 5.3); Windsond does 
 2. For each oid in the list that is not 0 and not our own id: `uget name` (code 0x8F) and wait ≤1.5 s (up to 3 attempts). `RR4`/`RR4_…` → receiver object; `S2`/`S2_…` → sonde object. (Other objects may exist; ignore them.)
 3. For the RR4 object: `getVarType` for `utcSyncSource, gnssHasAid, net, encKey` (≤2 s, 3 attempts), remember the schemas, then `sub` to the same symbols (≤2 s, 3 attempts). The first report delivers `net`.
 4. The `components` subscription stays active: when the S2 later appears/disappears the central sends a new report; the S2 object is created/dropped accordingly. The S2 is "connected" when it is listed and answers.
-5. For the S2 object: `getVarType` then `sub` for `gnssEnabled, md, mac, bat, net, condition, pr, txCriterion, power_dBm, powerBeforeLaunch_dBm` (3 attempts, 2 s). Retry the subscription if no report within the timeout. Then copy the RR4 `net` to the S2 with `set net` (5.5).
-6. Via SA1 cable the same sequence runs on the second port (57600 Bd) with the S2 itself as central (id 1): subscribe `components`, find the object named `S2…`, continue at step 5. When both exist, Windsond keeps using the object it saw first and switches sources only when that one disconnects (SA1 marked as "source used") [I].
+5. For the S2 object: `getVarType` then `sub` for `gnssEnabled, md, mac, bat, net, condition, pr, txCriterion, power_dBm, powerBeforeLaunch_dBm` (3 attempts, 2 s) — *(3.11.8)* plus `role`; `encUnlocked`/`encKey` are read on demand. Retry the subscription if no report within the timeout. Then copy the RR4 `net` to the S2 with `set net` (5.5) — *(3.11.8)* only when the RR4 has no `sspDefaultSet` (5.5a).
+6. Via SA1 cable the same sequence runs on the second port (57600 Bd) with the S2 itself as central (id 1): subscribe `components`, find the object named `S2…`, continue at step 5. When both exist, Windsond keeps using the object it saw first and switches sources only when that one disconnects (SA1 marked as "source used") [I]. *(3.11.8)* The direct SA1 link is no longer opened by the software; the S2 object is only looked for in the RR4's `components` [C].
 
 ### 5.4 Read and write receiver settings [C]
 
@@ -451,7 +489,7 @@ Reading: all values come from the `net` report (SSP) when SSP is supported. Mapp
 
 | Setting | `net` field (SSP) | Text get → reply | Text set | Range/validation in GUI | Written via |
 |---|---|---|---|---|---|
-| Radio frequency | `freq` (Hz, U32) | `frequency` → `[frequency=<Hz>]` (older RR4/RR2: `freq` → `[freq=<10 kHz units>]`) | `frequency=<Hz>` | 400–440 MHz (390–440 with "wide" option); software rejects outside 400–450 | **text** |
+| Radio frequency | `freq` (Hz, U32) | `frequency` → `[frequency=<Hz>]` (older RR4/RR2: `freq` → `[freq=<10 kHz units>]`) | `frequency=<Hz>` | 3.8.0: 400–440 MHz (390–440 with "wide" option), hard reject outside 400–450. *(3.11.8)* allowed span is a configuration: **default 400.000–440.000 MHz, extended 390.000–440.000 MHz**, optionally narrowed by a licence (mechanism not described); values outside the active span are rejected before sending [C] | **text** |
 | Number of timeslots (TDMA sondes) | `radioTimeslots` (U8) | `ts` → `[ts=<n>]` | `ts=<n>` | ≥0; defaults 6 (or 16 in "16-slot" builds) | **text** |
 | Sample period | `samplingInterval` (U16 ms) | `sample_ms` → `[sample_ms=<ms>]` | `sample_ms=<ms>` | ≥0; default 1000 (2000 in 16-slot builds) | **text** |
 | Sonde slot length | `radioSlotMs` (U16 ms) | `sonde_slot_length` → `[sonde_slot_length=<ms>]` | `sonde_slot_length=<ms>` | default 500 (375) | **text** |
@@ -469,7 +507,7 @@ Reading: all values come from the `net` report (SSP) when SSP is supported. Mapp
 Write-and-verify procedure used by the software:
 * Text settings: send `key=value`, accept the reply if it starts with `key=` and parses to the requested value (status "set confirmed"), otherwise "set failed"; on timeout keep the old value. Several settings in a row are spaced ≥0.2 s.
 * SSP `net` settings: take the last received `net` struct, replace the field, `set` the **complete struct** with reply (code 0x91), wait ≤2 s for `reply` (ok) or `nack`; the new value is confirmed when the next `net` report (subscription) matches ("set pending" until then).
-* After any change the S2 (if connected) is updated by `set net` with the RR4's struct.
+* After any change the S2 (if connected) is updated by `set net` with the RR4's struct — *(3.11.8)* or, on auto-sync firmware, by re-writing `sspDefaultSet` (5.5a).
 
 The session file `windsond_sessions.dat` stores a string identifying the settings (`freqMHz:ts:sample_ms:slot_ms:max_data:ground_slot:sf:bw:cr`, "-" for disabled fields) so a change can be detected across restarts.
 
@@ -480,6 +518,21 @@ The session file `windsond_sessions.dat` stores a string identifying the setting
 * `net`: `set` with the RR4's struct (see above).
 * `prCalOf` (pressure calibration): `uget prCalOf` (≤1 s), then `set prCalOf = old + round((reference_hPa − measured_hPa)·100)` (≤2 s); reference is either the RR4's own pressure or a user value.
 * GNSS constellations: `uget gnssEnabledConstellations` (0.5 s, 3 attempts) then `set` the bitmask after validation (see 4.3).
+* *(3.11.8)* `role`: `set role = 1|2|3|4` (3 attempts, 1 s) to change a connected S2's role.
+* *(3.11.8)* Retries for single-variable get/set on the S2: 0.5 s, 1 s, 1.5 s; after `set power_dBm` / `powerBeforeLaunch_dBm` the value is read back and a differing value is reported as "clamped".
+
+### 5.5a RR4 auto-sync of S2 settings — `sspDefaultSet` (3.11.8) [C]
+
+RR4 firmware from early 2026 exposes variable 477 `sspDefaultSet` (type REF116):
+
+```
+Tuple( opt : Uint64 ,  defaults : NameMap{ net: NetworkV6 (REF105), txCriterion: U8, power_dBm: I16,
+                                           powerBeforeLaunch_dBm: I16, encKey: EncryptionData (REF104) } )
+```
+
+* On RR4 connect, after the subscriptions: if `getVarType` listed `sspDefaultSet`, `uget` it (0.5/1/1.5 s retries) and compare: `net` against the RR4's current `net`, the other entries against the user's desired values ("leave unchanged" = entry omitted), `encKey` against the RR4's key when key sync is on. On any difference `set` the rebuilt tuple.
+* `opt` is a bit mask over the map entries in insertion order; bit *n* set = entry *n* is optional (the S2 need not support it). Windsond sets the bit for `encKey` with an empty payload (= clear the key) and always for `powerBeforeLaunch_dBm` [C for the bits, I for the firmware semantics].
+* When the RR4 has `sspDefaultSet` the PC **does not write any setting to the S2**; the RR4 pushes them to every S2 that appears (including after a sonde swap). Without the variable the 3.8.0 per-variable push (`set net`, `txCriterion`, `power_dBm`, `powerBeforeLaunch_dBm`, `encKey` when `encUnlocked`) remains.
 
 ### 5.6 Set frequency / timeslots
 
@@ -497,7 +550,7 @@ Upload to the S2 (requires S2 connected, `md` < 8 i.e. turned on, `gnssEnabled` 
 
 1. Split the data into UBX frames: each frame length = 6 + payload length (little-endian U16 at bytes 4–5) + 2.
 2. Prefix every frame with one byte `0xFF`.
-3. Cut every prefixed frame into chunks of **≤50 bytes** and send each chunk as `call gnssCmd(Blob chunk)` with reply (ticket), timeout 2 s, **one retry** per chunk; abort the whole upload on a second failure and retry the whole procedure not earlier than 60 s later.
+3. Cut every prefixed frame into chunks of **≤50 bytes** and send each chunk as `call gnssCmd(Blob chunk)` with reply (ticket), timeout 2 s, **one retry** per chunk (3.8.0) / **up to 5 attempts** per chunk *(3.11.8)*; abort the whole upload when a chunk still fails and retry the whole procedure not earlier than 60 s later; a successful upload is not repeated within 300 s *(3.11.8)*.
 4. Success is logged with a timestamp; "recent upload" prevents re-upload for a while.
 
 The S2 reassembles the chunks and feeds the UBX-MGA messages to its receiver [I].
@@ -518,17 +571,17 @@ Commands issued by Windsond 3.8.0 (S2 = "multisond" mode unless marked *S1 only*
 
 | Command | Purpose | Response/notes |
 |---|---|---|
-| `relBal` (or `relBal=150`, `relBal=<ms>`) | **manual cut-down** (fire primary hot-wire). `relBal=150` is sent while the sonde is in init/ready/resting/find-me; plain `relBal` for firmware ≥170 in flight | text in RES; later a `TXT` message `C(...)` "cut-down report" and `w(...)` "wire heated" events |
-| `relGnd` | second cut-down (secondary wire, "Cut-down 2nd now!") | — |
+| `relBal` (or `relBal=150`, `relBal=<ms>`) | **manual cut-down** (fire primary hot-wire). `relBal=150` is sent while the sonde is in init/ready/resting/find-me; plain `relBal` for firmware ≥170 in flight. *(3.11.8)* **For an S2 in flight (rising / falling / cutdown / rising-too-high) Windsond sends `mode=7` instead of `relBal`** (3.9.0 "cut-down now delay" fix); `relBal=150` on the ground is unchanged [C] | text in RES; later a `TXT` message `C(...)` "cut-down report" and `w(...)` "wire heated" events |
+| `relGnd` | second cut-down (secondary wire, "Cut-down 2nd now!") | *(3.11.8)* the action counts as confirmed only when the RES text starts with `C` (the sonde's cut-down report); any other RES = "received invalid response" (3.11.7) [C] |
 | `wires` | **test the cut-down wires and the LED** without cutting (burn test). Sent one-way; the sonde replies with a `TXT` message `R(S<n>B<n>C<n>L<n>…)` | letters: `S` primary wire, `C` secondary wire, `B` battery/voltage, `L` LED; values decoded as current/resistance (S: `I=n/100 A`), status words "OK"/"Doesn't work!"/"Not configured" are derived by thresholds in the GUI. *Automatic wire checks are not performed for S2.* |
 | `beep=2900` | make the sonde beep (2900 Hz) | — |
 | `mode=<n>` | set mode (0 init, 1 ready, 2 rising, 3 falling, 4 resting, 5 find-me, 6 find-me slow, 7 cutdown). Windsond sends `mode=5` to wake a sonde reporting mode 4 or 6 | — |
-| `findme=<n>` | find-me behaviour (parameter `behlan` 0/1) | — |
+| `findme=<n>` | behaviour after landing (parameter `behlan`: 0 power-save, 1 beacon at once, 2 continue sounding *(3.11.8)*) | — |
 | `params=<id>[,<id>…]` | **query parameters by numeric id**; ids are two digits (`04`, `06`, `13`, `15`, `17`); command length ≤21 chars; the sonde answers by including the parameters in its next packets (`role`, `fwver`, `behlan`, `cutalt`, `supmul`…) | ids: 4 behlan, 6 role, 13 fwver, 15 cutalt, 17 supmul |
 | `groundAlt=<m MSL>` | ground altitude for the sonde's AGL calculations (param `galt`) | *S1 only (removed for multisond)* |
 | `grPres=<Pa>` | ground pressure (param `gpa`), even number | *S1 only* |
 | `relAP=<pressure/2>:<alt AGL>` | **cut-down altitude**, sent as half the release pressure in Pa and the altitude AGL in m | *not sent automatically in multisond mode; it is the `set_cmd` of the `cutalt` parameter when the user edits it* [C for format, I for S2 acceptance] |
-| `power=<0..7>` | sonde TX power index (1.3/1.5/3/6/13/25/50/100 mW) | legacy (S1) |
+| `power=<0..7>` | sonde TX power index (1.3/1.5/3/6/13/25/50/100 mW) | legacy (S1); *(3.11.8)* no longer offered for an S2 (S2 power only via SSP `power_dBm`) |
 | `gs=0` / `gs=1` / `gs=1s<slot>` | ground-station handshake: "ready" (optionally assigning time slot) / "back to init" | *S1 only; for S2/RR4 the receiver does this itself* |
 | `led`, `ver`, `gpsQuality`, `releaseAlt`, `gndAP`, `iparam` | legacy S1 queries seen in demo logs; `<sid>.cmd=iparam` asks a sonde known only by session id for its number (*S1 only*) | — |
 | `updaterate=<ms>`, `supmul=<n>`, `tempB=<n>`, `tempR0=<n>`, `autolog=<0-2>`, `gpslog=<n>`, `log=c` / `log=s` / `log=p` | legacy S1 firmware settings | — |
@@ -584,12 +637,15 @@ Parameter keys and conversion rules [C]:
 | `rise` | float | rise rate m/s (from the sonde) |
 | `q`, `q0`, `q1` | hex byte | RSSI raw (0–255); `rssi = q/256` normalised 0..1; `q = max(q0,q1)` when both present |
 | `r` | int | RSSI raw (alternative key): `rssi = r/256` |
-| `rs`, `snr` | int | RR4 ("precise RSSI"): `rs` = RSSI dBm, `snr` = SNR dB; normalised `rssi = clamp((rs+snr+140)/90, 0, 1)` |
+| `rs`, `snr` | int (3.8.0) / **float** *(3.11.8, decimals allowed)* | RR4 ("precise RSSI"): `rs` = RSSI dBm, `snr` = SNR dB; normalised `rssi = clamp((rs+snr+140)/90, 0, 1)` |
 | `rec`, `rec0`, `rec1` | int | corrected (recovered) bits; quality `qu = max(0.01, rssi − 0.02·rec)` |
 | `hderr`, `bderr`, `crc` (`S` = body) | int/str | header/body error counts (PK) |
 | `afc`, `afc0`, `afc1` | int | AFC offset (Hz·1000 shown as kHz) |
 | `pwr`, `gpse`, `behlan`, `logst`, `clk`, `resq`, `evt`, `fwver`, `mcnt`, `cutalt`, `cutpr2`, `supmul`, `gpa`, `galt`, `hw`, `burn`, `ucnt`, `tim`, `ctmr`, `net`, `twire`, `blk`, `beep`, `gpss`, `lux`, `sats`, `hdop`, `ce`, `enc`, `loss` | int | sonde parameters/status: `pwr` TX power index, `behlan` landed behaviour, `fwver` firmware, `cutalt` release altitude AGL m (65535 = none), `cutpr2`, `gpa` ground pressure, `galt` ground altitude, `hw` hardware, `burn` burn status, `lux` light, `sats` satellites, `hdop`, `enc` encryption (`1` enabled), `loss` missed updates |
 | `evt` | int | event: 1 autorelease, 2 max-alt, 3 boot watchdog, 4 boot, 5 landed [I: order from GUI labels] |
+| `jam`, `spoof` *(3.11.8)* | int | GNSS integrity flags of the sonde: 0 none, 1 suspected (GUI: "Possible GNSS jamming/spoofing detected", remembered for 300 s), 2 detected (GUI: "Jamming / spoofing detected") [C for the levels, I for the wording] |
+
+*(3.11.8)* Typed key sets of the original parser: integers `pwr gpse behlan logst role clk resq evt fwver mcnt cutalt cutpr2 supmul gpa galt hw burn ucnt tim rssi ctmr net twire blk beep gpss id sid r rec rec0 rec1 pa lux afc afc0 afc1 jam spoof`; floats `su ang spd te tei hu alt rs snr`; hex `q q0 q1`; everything else text. A parser should accept decimals in any numeric key (3.11.3 "radio quality parameters with decimals").
 
 Example (S1, from the shipped demo): `[#DAT:q=73,afc=15310,seq=29,su=4.09,te=19.50,md=0,pa=98634,hu=62.89,tmp2=22.40]`. Exact key set emitted by the S2/RR4 pair is not present in the material (see open questions).
 
@@ -635,7 +691,8 @@ Per new data message (altitude `alt` = pressure altitude when a barometer is pre
    * if RISING and `alt` > ground + release altitude → **RISING_TOO_HIGH**;
    * dropsonde: FALLING after a sudden descent (`rise` ≤ −6 m/s) is found.
 4. Automatic actions (multisond): sonde in RESTING or FINDME_SLOW → send `mode=5` (wake up / beep). All other automatic commands (`gs=…`, `relAP`, `wires`, ground-altitude query) are S1-only.
-5. "No contact" is displayed after 2 × timeslot period (timeslots × slot ms) without a message.
+5. "No contact" is displayed after 2 × timeslot period (timeslots × slot ms) without a message. *(3.11.8)* S2: `radioTimeslots × radioSlotMs` (fallback 3000 ms); S1: the configured expected data rate.
+6. *(3.11.8)* Role is dynamic: the `role` parameter reported by the sonde (`params=06`) decides radiosonde vs dropsonde; 0/absent → capability letter `O` = one-time radiosonde, else the configured default. GNSS integrity: `jam`/`spoof` (5.10) plus a PC-side check of GNSS altitude against pressure altitude (`sw_spoof`).
 
 ### 6.3 S2 `condition` bitmap [C]
 
@@ -710,6 +767,8 @@ Row construction (separator is `, ` = comma + space; the row ends with `\n`, no 
 
 Example row: `2025-10-13 07:15:02, 1234, 812, 87651, 4.52, 213.40, 3.21, 54.20, 21.50, 47.123456, 8.654321, 4.8`
 
+*(3.11.8)* Header text and the altitude / speed / temperature values follow the configured display units: `Altitude ({m|ft} MSL)`, `Speed ({m/s|kt|km/h|mph})`, `Temperature ({°C|°F|K})`, `Rise speed ({m|ft}/s)`. With the default metric settings the only difference to the header above is **`Temperature (°C)` / `Internal temperature (°C)`** (UTF-8 degree sign) [C]. s2stueve matches `Altitude (m MSL)` and a column starting with `Temperature`, so metric 3.11.x files parse and imperial ones are rejected; S2 Ground keeps writing the 3.8.0 header.
+
 Sister formats: `.raw_history.csv` (same columns, header says `Temperature (uncorrected C)`, starts at message 0, only requires `pr`), `.raw.csv` (`Altitude (m MSL), Pressure (Pascal), Speed (m/s), Heading (degrees), Temperature (C), Relative humidity (%)`, only rows with increasing altitude, `%i, %i, %.2f, %.2f, %.2f, %.2f`), `.multi_sond_history.csv` (`time=<unix>, id=<n>, lat=, lon=, temp=, hum=, …` lines with a `# Log version=1` / `# Software version=` header; also streamable to UDP port 12345).
 
 ### 7.3 Template-driven sounding CSV (`fileformat_<name>.txt` → `<base>.<name>`) [C]
@@ -753,3 +812,13 @@ with rows every 20 m AGL (interpolated/filtered values from launch to peak). Ava
 16. **`gnssGetAid` blob boundaries**: are chunks cut at UBX frame boundaries or arbitrary (the PC concatenates everything, then splits by UBX length)?
 17. **SA1 cable**: confirm 57600 Bd and that the S2 is central (id 1) with the S2 object named `S2…` in its own `components` list.
 18. **`pr` and `bat` SSP types** (Float vs fixpoint) → getVarType.
+19. *(3.11.8)* **WebSocket endpoint** of the RR4: with `wifiEnabled=true, wifiAp=true` join the AP, read `ipAddr` over USB, probe `ws://<ip>/`, `ws://<ip>/ws`, `ws://<ip>:81/`, `ws://<ip>:8080/` (plus a TCP port scan); which one answers the binary CInfo probe with a NewId?
+20. *(3.11.8)* **Text channel over WiFi**: are bracket lines / `<id>.exe=` available over the WebSocket (text frames) or a raw TCP port? Windsond's library would ignore text frames.
+21. *(3.11.8)* **`sspDefaultSet`**: `getVarType` (expect REF116); set `(0, {net})`, read back, confirm a freshly powered S2 adopts the RR4's `net` without the PC pushing it; test an optional entry.
+22. *(3.11.8)* **`mode=7` as cut-down** on an S2 in mode 2/3 (ground test, no balloon): fires the wire? RES text? Compare with `relBal`.
+23. *(3.11.8)* **`relGnd` RES text**: exact RES of a successful secondary cut-down (expected `C(…)`) and of an unconfigured secondary wire.
+24. *(3.11.8)* **`role=4`** (tethersonde): accepted by the S2 firmware? Behaviour?
+25. *(3.11.8)* **`jam`/`spoof`**: value range and message types in which they appear.
+26. *(3.11.8)* **`findme=2`**: accepted? `behlan` read-back?
+27. *(3.11.8)* **390–400 MHz**: does the RR4 accept `frequency=395000000` (prot 6)?
+28. *(3.11.8)* **CSV header** of a metric 3.11.8 installation (`Temperature (°C)`, UTF-8) — confirm and check s2stueve.

@@ -6,20 +6,24 @@
 import { encodeFrame, decodeFrame, plain, asNameMap, Sym, Typed, NACK_TEXT, REF, T } from './ssp-bin.js';
 
 export const LINK_ID = 0xff, CENTRAL_ID = 1;
-export const SYM = { id: 4, name: 5, components: 13, utc: 17, ping: 24, fwVerStr: 345, bat: 314, condition: 336, samplingInterval: 503,
-  gnssEnabled: 587, gnssCmd: 594, gnssSignals: 596, gnssGetAid: 598, gnssHasAid: 599, gnssEnabledConstellations: 628, utcSyncSource: 774,
-  pr: 890, prCalOf: 891, md: 1100, burn: 1102, relPr: 1103, burnTest: 1104, relAlt: 1105, ledTest: 1107, role: 1109,
-  mac: 1200, net: 1201, power_dBm: 1203, txCriterion: 1226, encKey: 1235, powerBeforeLaunch_dBm: 1239 };
+export const SYM = { id: 4, name: 5, components: 13, utc: 17, ping: 24, fwVerStr: 345, bat: 314, condition: 336, sspDefaultSet: 477, samplingInterval: 503,
+  gnssEnabled: 587, gnssCmd: 594, gnssSignals: 596, gnssGetAid: 598, gnssHasAid: 599, gnssEnabledConstellations: 628, jammingDetection: 630, spoofingDetection: 631, utcSyncSource: 774,
+  pr: 890, prCalOf: 891, md: 1100, burn: 1102, relPr: 1103, burnTest: 1104, relAlt: 1105, landedBehavior: 1106, ledTest: 1107, role: 1109,
+  mac: 1200, net: 1201, power_dBm: 1203, txCriterion: 1226, encKey: 1235, powerBeforeLaunch_dBm: 1239, encUnlocked: 1241, radioNoise: 1242,
+  // 3.11.8 WiFi configuration of the RR4 (spec §1.8)
+  wifiClientSsid: 1500, wifiClientPwd: 1501, wifiApSsid: 1502, wifiApPwd: 1503, wifiAp: 1504, ipAddr: 1505, wifiApply: 1506, wifiEnabled: 1507 };
 
 export class SspSession extends EventTarget {
   /**
-   * @param {import('./serial.js').SerialLink} serial
-   * @param {{probeMs?:number, keepAliveMs?:number, pingReplyMs?:number, joinTimeoutMs?:number, name?:string, serial?:number, now?:()=>number}} opts
+   * @param {import('./serial.js').SerialLink|import('./websocket-link.js').WebSocketLink} serial  any object with writeSsp(hex) and 'line' events
+   * @param {{probeMs?:number, keepAliveMs?:number, pingReplyMs?:number, joinTimeoutMs?:number, name?:string, serial?:number, compat?:number, now?:()=>number}} opts
+   *   compat: CInfo compatibility byte – 3 as sent by Windsond 3.11.8 (bit0 newidWithRev, bit1 "working get values"), 1 = 3.8.0 (spec §2.2)
    */
   constructor(serial, opts = {}) {
     super();
     this.serial = serial;
-    this.opts = { probeMs: 3000, keepAliveMs: 3000, pingReplyMs: 1000, joinTimeoutMs: 10000, name: 'python', serial: 1, now: () => Date.now(), ...opts };
+    this.opts = { probeMs: 3000, keepAliveMs: 3000, pingReplyMs: 1000, joinTimeoutMs: 10000, name: 'python', serial: 1, compat: 3, now: () => Date.now(), ...opts };
+    if (typeof serial.probeMs === 'number') this.opts.probeMs = serial.probeMs;   // WebSocket link probes every 2 s (spec §1.8)
     this.id = 0; this.central = null; this.prio = 0;
     this.joined = false; this.running = false;
     this.pending = new Map();                 // tk → {resolve, reject, timer, name}
@@ -72,8 +76,8 @@ export class SspSession extends EventTarget {
     }
   }
   _probe() {
-    // CInfo constants per spec §2.2: ver 3, magic 0xA6, serial 1, prio 0, compat 1 ("I understand newidWithRev")
-    this._send({ to: LINK_ID, name: 'cinfo', body: { ver: 3, magicByte: 0xa6, tk: 0, serial: this.opts.serial, id: 0, parent: 0, prio: 0, componentType: 0, compatibility: 1, name: this.opts.name } });
+    // CInfo constants per spec §2.2: ver 3, magic 0xA6, serial 1, prio 0, compat 3 (3.11.8; 1 in 3.8.0)
+    this._send({ to: LINK_ID, name: 'cinfo', body: { ver: 3, magicByte: 0xa6, tk: 0, serial: this.opts.serial, id: 0, parent: 0, prio: 0, componentType: 0, compatibility: this.opts.compat, name: this.opts.name } });
   }
   _forget(reason, silent = false) {
     const was = this.joined && !silent;

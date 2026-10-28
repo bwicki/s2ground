@@ -41,7 +41,11 @@ export function extractBracket(s) {
 }
 
 // ---- typed conversions (spec §5.10) ---------------------------------------------------------------
-const FLOAT_KEYS = new Set(['lat', 'lon', 'alt', 'te', 'tei', 'tmp2', 'hu', 'spd', 'ang', 'su', 'rise']);
+// 3.11.8: `rs`/`snr` moved from the integer to the float set ("radio quality parameters with
+// decimals", 3.11.3); `jam`/`spoof` are new integer keys. Any numeric-looking value – integer or
+// decimal, in any key – is converted, so a firmware that adds decimals elsewhere keeps parsing.
+const FLOAT_KEYS = new Set(['lat', 'lon', 'alt', 'te', 'tei', 'tmp2', 'hu', 'spd', 'ang', 'su', 'rise', 'rs', 'snr']);
+export const INT_KEYS = new Set(['pwr', 'gpse', 'behlan', 'logst', 'role', 'clk', 'resq', 'evt', 'fwver', 'mcnt', 'cutalt', 'cutpr2', 'supmul', 'gpa', 'galt', 'hw', 'burn', 'ucnt', 'tim', 'rssi', 'ctmr', 'net', 'twire', 'blk', 'beep', 'gpss', 'id', 'sid', 'r', 'rec', 'rec0', 'rec1', 'pa', 'lux', 'afc', 'afc0', 'afc1', 'jam', 'spoof']);
 const HEX_KEYS = new Set(['q', 'q0', 'q1']);
 const STRING_KEYS = new Set(['crc', 'md', 'seq']);
 /** °C values above 400 wrap (the sonde sends an unsigned 16-bit hundredth): te − 655.36 */
@@ -65,8 +69,9 @@ export function convertParam(key, value) {
   if (/^ang\d+$/.test(key)) return [key, unwrapAng(num(value))];
   if (key === 'ang') return [key, unwrapAng(num(value))];
   if (FLOAT_KEYS.has(key) || /^(spd|hu)\d+$/.test(key)) return [key, num(value)];
-  if (/^-?\d+$/.test(value)) return [key, Number(value)];
-  if (/^-?\d*\.\d+$/.test(value)) return [key, num(value)];
+  if (INT_KEYS.has(key)) { const n = num(value); return [key, n === null ? value : (Number.isInteger(n) ? n : n)]; }   // decimals tolerated (3.11.3)
+  if (/^[+-]?\d+$/.test(value)) return [key, Number(value)];
+  if (/^[+-]?(\d+\.\d*|\.\d+)([eE][+-]?\d+)?$/.test(value)) return [key, num(value)];
   return [key, value];
 }
 

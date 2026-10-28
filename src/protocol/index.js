@@ -4,6 +4,7 @@
 // message starts with a code (E_TIMEOUT, E_NO_SONDE, …) that the UI translates.
 
 import { SerialLink } from './serial.js';
+import { WebSocketLink } from './websocket-link.js';
 import { TextProto } from './text-proto.js';
 import { SspSession, SYM } from './ssp-session.js';
 import { TelemetryBuilder } from './telemetry.js';
@@ -13,11 +14,25 @@ import * as s2 from './s2.js';
 export { parseBracketLine } from './lines.js';
 export { encodeFrame, decodeFrame } from './ssp-bin.js';
 export { SimGroundLink } from '../sim/sim-link.js';
+export { WebSocketLink, wsUrl } from './websocket-link.js';
+export { FREQ_RANGES, checkFrequency, ipAddrToString } from './rr4.js';
+export { ROLES, LANDED_BEHAVIOUR } from './s2.js';
 
 export const DEFAULT_OPTIONS = {
+  transport: 'usb',                // 'usb' (Web Serial) | 'wifi' (WebSocket SSP link, spec §1.8 – endpoint [U], open question 19)
+  wifi: null,                      // {host, port, path, url, secure} for transport 'wifi'; connect({wifi}) overrides
+  wifiTextProbe: true,             // wifi: try `echo=0` as a text frame once (2 s); no reply → text-channel features disabled
   baudRate: 38400,                 // [C] RR4; 57600 for the SA1 cable (spec §1.1)
   usb: null,                       // {usbVendorId, usbProductId}: re-find the remembered port
-  requireSsp: false,               // true → connect() fails when the SSP network is not joined in 10 s
+  requireSsp: false,               // true → connect() fails when the SSP network is not joined in 10 s (always true for wifi)
+  sspCompat: 3,                    // [C] CInfo compatibility byte: 3 = Windsond 3.11.8, 1 = 3.8.0 (spec §2.2)
+  rr4AutoSync: true,               // [C] 3.11.8: seed `sspDefaultSet` on the RR4 when it has it; the RR4 then syncs the S2 (spec §5.5a)
+  s2Defaults: {},                  // {txCriterion, powerDbm, powerBeforeLaunchDbm} to include in sspDefaultSet ("leave unchanged" = omitted)
+  freqRange: 'default',            // 'default' 400–440 MHz | 'extended' 390–440 MHz | {minHz, maxHz} (spec §5.4, 3.11.8) → E_FREQ_RANGE
+  s2CutdownViaMode7: true,         // [C] 3.11.8: in flight `mode=7` instead of `relBal` for an S2 (spec §5.8) – TODO verify (open question 22)
+  strictRelGnd: true,              // [C] 3.11.8: `relGnd` confirmed only when the RES starts with 'C' (open question 23)
+  gnssIntegrityEvents: true,       // [C] 3.11.8: 'event' {type:'gnssIntegrity'} from `jam`/`spoof` keys (open question 25)
+  aidChunkRetries: 5,              // [C] 3.11.8: attempts per gnssCmd chunk (2 in 3.8.0)
   pollReceiverSensors: true,       // [C] text `temp`/`bat` polling (spec §1.6)
   pollSensorsMs: 3000,
   pushNetToS2: true,               // [C] copy RR4 net to the S2 when it appears (spec §5.3 step 5)
@@ -46,14 +61,17 @@ export class GroundLink extends EventTarget {
     super();
     this.opts = { ...DEFAULT_OPTIONS, ...opts, timing: { ...DEFAULT_OPTIONS.timing, ...(opts.timing || {}) } };
     this.serial = null; this.text = null; this.ssp = null;
-    this.tele = new TelemetryBuilder({ altMethod: this.opts.altMethod, wireMinA: this.opts.wireMinA, battMinV: this.opts.battMinV });
+    this.tele = new TelemetryBuilder({ altMethod: this.opts.altMethod, wireMinA: this.opts.wireMinA, battMinV: this.opts.battMinV, gnssIntegrityEvents: this.opts.gnssIntegrityEvents });
     this.known = new Map();          // oid → name (SSP objects)
     this._discovery = null;          // serialised component classification (rr4.onComponents)
     this.session = null;
     this._timers = [];
     this._resetLs();
   }
-  _resetLs() { this.ls = { port: 'closed', receiver: null, sonde: null, net: null, netStruct: null, netSchema: null, rr4Oid: null, s2Oid: null, components: [], lastRxT: null, aid: null }; }
+  _resetLs() { this.ls = { port: 'closed', transport: this.opts.transport, textChannel: null, receiver: null, sonde: null, net: null, netStruct: null, netSchema: null, rr4Oid: null, s2Oid: null, components: [], lastRxT: null, aid: null, autoSync: null, wifi: null }; }
+  /** True when `<id>.exe=` / text settings can be used (USB always; WiFi only if the RR4 answered a text frame). */
+  hasTextChannel() { return !!this.text && this.ls.textChannel !== false; }
+  _needText() { if (!this.hasTextChannel()) throw new Error('E_NO_TEXT_CHANNEL: not available over this transport'); }
 
   // ---- lifecycle -----------------------------------------------------------------------------------
   /**
@@ -62,29 +80,46 @@ export class GroundLink extends EventTarget {
    */
   async connect(o) {
     if (this.ls.port === 'open' || this.ls.port === 'opening') throw new Error('E_PORT_OPEN');
+    const transport = (o && o.transport) || (o && o.wifi ? 'wifi' : null) || this.opts.transport || 'usb';
     this._resetLs(); this.known.clear();
+    this.ls.transport = transport;
     this.ls.port = 'opening'; this.emitState(true);
-    const serial = new SerialLink({ textSpacingMs: this.opts.timing.textSpacingMs });
+    let serial;
     try {
-      let port = o && o.port ? o.port : null;
-      if (!port && o === undefined) port = await SerialLink.rememberedPort(this.opts.usb);
-      await serial.open({ port, baudRate: this.opts.baudRate, filters: this.opts.usb && this.opts.usb.usbVendorId ? [this.opts.usb] : null });
-    } catch (e) { this.ls.port = 'closed'; this.emitState(); throw this._err(e.name === 'NotFoundError' ? new Error('E_NO_PORT: no port chosen') : e); }
+      if (transport === 'wifi') {
+        const w = { ...(this.opts.wifi || {}), ...((o && o.wifi) || {}) };
+        serial = new WebSocketLink({ textSpacingMs: this.opts.timing.textSpacingMs, openTimeoutMs: w.openTimeoutMs || 3000, ...(w.WebSocket ? { WebSocket: w.WebSocket } : {}) });
+        await serial.open(w);
+      } else {
+        serial = new SerialLink({ textSpacingMs: this.opts.timing.textSpacingMs });
+        let port = o && o.port ? o.port : null;
+        if (!port && o === undefined) port = await SerialLink.rememberedPort(this.opts.usb);
+        await serial.open({ port, baudRate: this.opts.baudRate, filters: this.opts.usb && this.opts.usb.usbVendorId ? [this.opts.usb] : null });
+      }
+    } catch (e) { this.ls.port = 'closed'; this.emitState(); throw this._err(e && e.name === 'NotFoundError' ? new Error('E_NO_PORT: no port chosen') : e); }
     this.serial = serial;
     this.text = new TextProto(serial, { ...this.opts.timing });
-    this.ssp = new SspSession(serial, { probeMs: this.opts.timing.probeMs, keepAliveMs: this.opts.timing.keepAliveMs, pingReplyMs: this.opts.timing.pingReplyMs, joinTimeoutMs: this.opts.timing.joinTimeoutMs });
+    this.ssp = new SspSession(serial, { probeMs: this.opts.timing.probeMs, keepAliveMs: this.opts.timing.keepAliveMs, pingReplyMs: this.opts.timing.pingReplyMs, joinTimeoutMs: this.opts.timing.joinTimeoutMs, compat: this.opts.sspCompat });
     this._wire();
     try {
-      const hs = await rr4.handshake(this);
-      this.ls.receiver = { hw: hs.hw, fw: hs.fw, prot: hs.prot, mac: hs.mac, about: hs.about, product: hs.product, componentId: null, gnssFix: null, batV: null, tempC: null, utcSyncSource: null, gnssHasAid: null, sats: null, pa: null, lat: null, lon: null, alt: null, usb: serial.info };
+      let hs;
+      if (transport === 'wifi') {
+        // Text channel over WiFi is [U] (open question 20): probe once, then live without it.
+        hs = { hw: null, fw: null, prot: null, mac: null, about: '', product: null, sspCapable: true };
+        this.ls.textChannel = false;
+        if (this.opts.wifiTextProbe) {
+          try { const r = await this.text.command('echo=0', { timeoutMs: 2000 }); if (typeof r === 'string') { this.ls.textChannel = true; hs = await rr4.handshake(this); } } catch { /* no text channel */ }
+        }
+      } else { hs = await rr4.handshake(this); this.ls.textChannel = true; }
+      this.ls.receiver = { hw: hs.hw, fw: hs.fw, prot: hs.prot, mac: hs.mac, about: hs.about, product: hs.product, componentId: null, gnssFix: null, batV: null, tempC: null, utcSyncSource: null, gnssHasAid: null, sats: null, pa: null, lat: null, lon: null, alt: null, usb: serial.info, transport };
       this.ls.port = 'open'; this.emitState(true);
       if (hs.sspCapable) {
         this._connectingSsp = true;                       // the 'joined' listener must not start a second discovery
         try { await this.ssp.start(); this._connectingSsp = false; await rr4.discover(this); }
-        catch (e) { this._connectingSsp = false; if (this.opts.requireSsp) throw e; this.warn(`SSP: ${e.message}`); this._err(e); }
+        catch (e) { this._connectingSsp = false; if (this.opts.requireSsp || transport === 'wifi') throw e; this.warn(`SSP: ${e.message}`); this._err(e); }
       }
       try { await rr4.readNet(this); } catch (e) { this.warn(e.message); }
-      if (this.opts.pollReceiverSensors) this._timers.push(setInterval(() => { if (this.ls.port === 'open' && !this.text._inflight && !this.text._q.length) rr4.pollSensors(this); }, this.opts.pollSensorsMs));
+      if (this.opts.pollReceiverSensors && this.hasTextChannel()) this._timers.push(setInterval(() => { if (this.ls.port === 'open' && this.text && !this.text._inflight && !this.text._q.length) rr4.pollSensors(this); }, this.opts.pollSensorsMs));
       this.emitState();
       return { ...this.ls.receiver };
     } catch (e) {
@@ -139,6 +174,8 @@ export class GroundLink extends EventTarget {
           if (this.ls.sonde && rec.altAgl !== null) this.ls.sonde.agl = rec.altAgl;
           this.dispatchEvent(new CustomEvent('telemetry', { detail: rec }));
         }
+        const gi = this.tele.integrityEvent(msg, t);
+        if (gi) { if (this.ls.sonde) { this.ls.sonde.jam = gi.data.jam; this.ls.sonde.spoof = gi.data.spoof; } this.dispatchEvent(new CustomEvent('event', { detail: gi })); }
         return;
       }
       if (msg.type === 'PK') { const pk = this.tele.packet(msg, t); if (pk) this.dispatchEvent(new CustomEvent('packet', { detail: pk })); return; }
@@ -155,7 +192,8 @@ export class GroundLink extends EventTarget {
   get state() {
     const l = this.ls;
     return {
-      port: l.port,
+      port: l.port, transport: l.transport, textChannel: l.port === 'open' ? this.hasTextChannel() : null,
+      wifi: l.wifi ? { ...l.wifi } : null, autoSync: l.autoSync,
       receiver: l.receiver ? { ...l.receiver } : null,
       sonde: l.sonde && l.sonde.id !== null ? { ...l.sonde, conditionText: [...(l.sonde.conditionText || [])] } : null,
       net: l.net ? { ...l.net } : null,
@@ -177,11 +215,18 @@ export class GroundLink extends EventTarget {
   _err(e) { const err = e instanceof Error ? e : new Error(String(e)); this.dispatchEvent(new CustomEvent('error', { detail: err })); return err; }
   _need() { if (this.ls.port !== 'open' || !this.text) throw new Error('E_PORT_CLOSED'); }
   async _run(fn) { this._need(); try { return await fn(); } catch (e) { throw this._err(e); } }
+  async _runText(fn) { this._need(); this._needText(); try { return await fn(); } catch (e) { throw this._err(e); } }
 
   // ---- receiver (RR4) ------------------------------------------------------------------------------
   readNet() { return this._run(() => rr4.readNet(this)); }
   writeNet(patch) { return this._run(() => rr4.writeNet(this, patch || {})); }
-  pairSonde() { return this._run(() => rr4.pairSonde(this)); }
+  pairSonde() { return this._runText(() => rr4.pairSonde(this)); }
+  /** 3.11.8 WiFi configuration of the RR4 over SSP (spec §1.8): {enabled, ap, apSsid, apPwd, clientSsid, clientPwd, ipAddr}. */
+  readWifi() { return this._run(() => rr4.readWifi(this)); }
+  /** patch {mode:'off'|'client'|'ap', apSsid, apPwd, clientSsid, clientPwd} → set + wifiApply → re-read. */
+  writeWifi(patch) { return this._run(() => rr4.writeWifi(this, patch || {})); }
+  /** 3.11.8: (re)write `sspDefaultSet` on the RR4 (spec §5.5a); resolves true when the RR4 supports it. */
+  syncDefaultSet() { return this._run(() => rr4.syncDefaultSet(this)); }
   /** Ephemeris RR4 → S2 (spec §5.7 A + upload); 'progress' events {phase, done, total}. */
   gnssAidToSonde() {
     return this._run(async () => {
@@ -193,13 +238,17 @@ export class GroundLink extends EventTarget {
 
   // ---- sonde (S2) ----------------------------------------------------------------------------------
   readSonde() { return this._run(() => s2.readSonde(this)); }
-  setCutdownAltitude(mAgl, groundPa) { return this._run(() => s2.setCutdownAltitude(this, mAgl, groundPa)); }
-  setMode(n) { return this._run(() => s2.setMode(this, n)); }
-  ledAndWireTest() { return this._run(() => s2.ledAndWireTest(this)); }
-  cutdown() { return this._run(() => s2.cutdown(this)); }
-  cutdownSecondary() { return this._run(() => s2.cutdownSecondary(this)); }
-  beep() { return this._run(() => s2.beep(this)); }
-  sendExe(text, o = {}) { return this._run(() => s2.sendExe(this, text, o)); }
+  setCutdownAltitude(mAgl, groundPa) { return this._runText(() => s2.setCutdownAltitude(this, mAgl, groundPa)); }
+  setMode(n) { return this._runText(() => s2.setMode(this, n)); }
+  ledAndWireTest() { return this._runText(() => s2.ledAndWireTest(this)); }
+  cutdown() { return this._runText(() => s2.cutdown(this)); }
+  cutdownSecondary() { return this._runText(() => s2.cutdownSecondary(this)); }
+  beep() { return this._runText(() => s2.beep(this)); }
+  sendExe(text, o = {}) { return this._runText(() => s2.sendExe(this, text, o)); }
+  /** 3.11.8: `set role` on the connected S2 over SSP (1 reusable, 2 one-time, 3 dropsonde, 4 tethersonde). */
+  setRole(n) { return this._run(() => s2.setRole(this, n)); }
+  /** Behaviour after landing `findme=<0|1|2>` (2 = continue sounding, 3.11.8). */
+  setLandedBehaviour(n) { return this._runText(() => s2.setLandedBehaviour(this, n)); }
 
   // ---- session -------------------------------------------------------------------------------------
   startSession({ groundAlt, groundPa, meta } = {}) { this.session = { groundAlt, groundPa, meta: meta || {} }; this.tele.startSession({ groundAlt, groundPa }); }
