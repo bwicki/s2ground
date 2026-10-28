@@ -61,11 +61,15 @@ export function now() { const l = state.link; return l && typeof l.now === 'func
 export function settings() { return (state.session && state.session.settings) || {}; }
 
 /** Set a phase's status (level ok|warn|bad|todo + short summary for the action bar). */
-export function setPhaseStatus(phase, level, summary) {
+/**
+ * acknowledged = the user already took a conscious decision about this state (e.g. «Warnung ignorieren»);
+ * the phase stays yellow in the bar, but «Weiter» does not ask a second time.
+ */
+export function setPhaseStatus(phase, level, summary, acknowledged = false) {
   const cur = state.phaseStatus[phase];
-  if (cur.level === level && cur.summary === summary) return;
-  state.phaseStatus[phase] = { level, summary };
-  bus.emit('phase', { phase, level, summary });
+  if (cur.level === level && cur.summary === summary && !!cur.acknowledged === acknowledged) return;
+  state.phaseStatus[phase] = { level, summary, acknowledged };
+  bus.emit('phase', { phase, level, summary, acknowledged });
 }
 
 export function addLine(line) {

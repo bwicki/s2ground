@@ -101,7 +101,7 @@ export function updatePlanStatus() {
   if (!r) { setPhaseStatus('plan', 'bad', t('plan.status.none')); return; }
   if (p.cutdownMode === 'none' && !p.noCutdownConfirmed) { setPhaseStatus('plan', 'bad', t('plan.status.confirmNeeded')); return; }
   if (r.conflicts.length && !p.ignoreAirspace) { setPhaseStatus('plan', 'warn', t('plan.status.airspace')); return; }
-  if (r.conflicts.length && p.ignoreAirspace) { setPhaseStatus('plan', 'warn', t('plan.status.ignored')); return; }
+  if (r.conflicts.length && p.ignoreAirspace) { setPhaseStatus('plan', 'warn', t('plan.status.ignored'), true); return; }   // decided once – no «Trotzdem weiter?» on top
   if (p.showAirspace && p.airspaceError) { setPhaseStatus('plan', 'warn', t('plan.status.noAirspace')); return; }
   setPhaseStatus('plan', 'ok', t('plan.status.ok'));
 }

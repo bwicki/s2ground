@@ -172,6 +172,13 @@ try {
   await page.click('.actionbar [data-act=next]');
   await page.waitForSelector('.confirm-strip');
   await shot('11-trotzdem-weiter.png');
+  step('warning consciously ignored → Weiter goes on without a second confirmation');
+  await page.click('.confirm-strip [data-act=stay]');
+  await page.click('[data-act=ignore]');
+  await page.waitForFunction(() => /ignoriert/.test(document.querySelector('.actionbar .status').textContent), null, { timeout: 5000 });
+  await page.click('.actionbar [data-act=next]');
+  await page.waitForURL(/#prepare/, { timeout: 5000 });
+  if (await page.$('.confirm-strip')) throw new Error('no confirm strip expected after an ignored warning');
 
   // ---------------------------------------------------------------------------------------------------------------
   // Schnellstart: login via the amber button → step 1/2 → stepper → PROGRAMMIEREN & FREIGEBEN → BEREIT → live → cutdown → landed

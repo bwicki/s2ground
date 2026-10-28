@@ -305,7 +305,7 @@ function weiter() {
   const st = state.phaseStatus[p];
   const blocked = p === 'plan' && state.plan.cutdownMode === 'none' && !state.plan.noCutdownConfirmed;
   if (blocked) { toast(t('plan.noCutLocked'), true); return; }
-  if (st.level === 'ok' || state.overridden[p]) { gotoPhase(nextPhase(p)); return; }
+  if (st.level === 'ok' || st.acknowledged || state.overridden[p]) { gotoPhase(nextPhase(p)); return; }   // acknowledged: the user already decided (e.g. airspace warning ignored)
   slots.confirm.replaceChildren(renderConfirmStrip({
     level: st.level, text: t('confirm.text', { n: PHASES.indexOf(p) + 1, status: esc(st.summary) }),
     onStay: () => slots.confirm.replaceChildren(),
