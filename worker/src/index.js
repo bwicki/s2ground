@@ -5,7 +5,7 @@
 import { authenticate, createToken, deleteToken, HttpError, requireRole } from './auth.js';
 import { countUsers, setupMaster, login, listUsers, saveUser, deleteUser, getSettings, putSettings, publicSettings } from './users.js';
 import { listObservers, createObserver, updateObserver, revokeObserver, reactivateObserver, observerLogins, observerLogin } from './observers.js';
-import { airspaces } from './airspaces.js';
+import { airspaces, testOpenAipKey } from './airspaces.js';
 import { listLog, addLog, logAction } from './log.js';
 import { createAscent, listAscents, closeAscent, kickObserver, handleLive } from './live.js';
 
@@ -90,6 +90,7 @@ async function api(request, env, url, ctx) {
   if (obsId && m === 'GET' && path.endsWith('/logins')) return json(await observerLogins(env, auth, obsId, url.searchParams.get('limit')));
 
   if (path === '/api/settings' && m === 'GET') { requireRole(auth, 'ground'); return json(publicSettings(await getSettings(env))); }
+  if (path === '/api/airspaces/test' && m === 'GET') { requireRole(auth, 'master'); return json(await testOpenAipKey(env)); }
   if (path === '/api/airspaces' && m === 'GET') { requireRole(auth, 'ground'); return airspaces(env, url, ctx); }
   if (path === '/api/settings' && m === 'PUT') return json(await putSettings(env, auth, await readJson(request)));
 

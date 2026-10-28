@@ -139,6 +139,11 @@ Die Planung holt die Lufträume selbständig von openAIP. Dazu braucht der Worke
 1. https://www.openaip.net → anmelden → Konto → **API Keys** → Schlüssel kopieren (derselbe Schlüssel, der in
    s2planning hinterlegt ist, kann wiederverwendet werden).
 2. In S2 Ground: Menü ☰ → **Masteruser · App-Einstellungen** → Feld **openAIP API-Schlüssel** → einfügen → Speichern.
+   Die App prüft den Schlüssel sofort mit einer kleinen Anfrage an openAIP und meldet das Ergebnis als Hinweis
+   («openAIP antwortet – Schlüssel in Ordnung» oder «openAIP-Test fehlgeschlagen: … (openAIP 401: …)» mit der
+   Originalantwort von openAIP). Später jederzeit mit dem Knopf **openAIP-Schlüssel testen** wiederholbar.
+   Wird der Schlüssel abgelehnt: auf openaip.net muss es ein Eintrag unter **API Keys** sein (nicht die Client-ID
+   oder das Passwort), vollständig kopiert, ohne Leerzeichen.
 
 Der Schlüssel bleibt auf dem Server (Cloudflare D1) und wird nie an den Browser geschickt. Die Antworten werden
 pro Kartenausschnitt 24 h zwischengespeichert. Welche Kategorien als Konflikt zählen, steht im Feld

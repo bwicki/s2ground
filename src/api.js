@@ -102,7 +102,11 @@ async function mockHandle(method, path, body, token) {
     case 'GET settings': need(); return mock.settings;
     case 'PUT settings': need('master'); Object.assign(mock.settings, body); return mock.settings;
     case 'GET log': need('master'); return mock.log.slice(0, 200);
-    case 'GET airspaces': { need(); const r = await fetch('./src/data/airspaces.json'); return r.json(); }   // sample data for the demo
+    case 'GET airspaces': {
+      need();
+      if (arg === 'test') { need('master'); return { ok: true, status: 200, count: 3, keyLength: 40 }; }   // key test in the demo always passes
+      const r = await fetch('./src/data/airspaces.json'); return r.json();                                  // sample data for the demo
+    }
     case 'POST log': need(); mock.log.unshift({ t: Date.now(), user: who.name, action: body.action, detail: body.detail || '' }); return { ok: true };
     case 'POST ascents': {
       need();
@@ -171,6 +175,8 @@ export const api = {
   },
   /** openAIP airspaces for a bbox [w,s,e,n] via the Worker proxy (sample data in mock mode). */
   airspaces: (bbox) => api.request('GET', `/api/airspaces?bbox=${bbox.map((v) => v.toFixed(3)).join(',')}`),
+  /** Master only: one tiny openAIP request with the stored key → {ok, status, count | message}. */
+  airspacesTest: () => api.request('GET', '/api/airspaces/test'),
   ascents: {
     create: (meta) => api.request('POST', '/api/ascents', meta),
     listActive: () => api.request('GET', '/api/ascents?active=1'),

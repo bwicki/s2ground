@@ -250,7 +250,10 @@ export function mountPlan(root, ctx) {
       return;
     }
     if (p.showAirspace && p.airspaceError) {
-      const why = p.airspaceError === 'E_NO_OPENAIP_KEY' ? t('plan.airspace.noKey') : p.airspaceError === 'E_OPENAIP_KEY_REJECTED' ? t('plan.airspace.badKey') : t('plan.airspace.unreachable');
+      // The Worker appends what openAIP answered, e.g. "E_OPENAIP_KEY_REJECTED (openAIP 401: …)" – shown so the master can see why.
+      const err = String(p.airspaceError || '');
+      const detail = (err.match(/\((.*)\)\s*$/) || [])[1];
+      const why = (err.startsWith('E_NO_OPENAIP_KEY') ? t('plan.airspace.noKey') : err.startsWith('E_OPENAIP_KEY_REJECTED') ? t('plan.airspace.badKey') : t('plan.airspace.unreachable')) + (detail ? ` [${detail}]` : '');
       box.innerHTML = banner({ level: 'warn', title: t('plan.banner.noAirspaceTitle'), intro: why, steps: [t('plan.airspace.step1'), t('plan.airspace.step2')], side: `<button class="btn" type="button" data-act="recompute">${esc(t('plan.airspace.retry'))}</button>` });
       return;
     }

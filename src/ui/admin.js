@@ -58,6 +58,7 @@ export function mountAdmin(root, ctx) {
       + f(t('admin.s.windFallback'), 'windFallback', `${s.windFallbackDir}° / ${s.windFallbackSpd} m/s`)
       + f(t('admin.s.cutAlt'), 'cutAltAgl', `${fmtInt(s.cutAltAgl || 3000)} m`)
       + `<label class="f">${esc(t('admin.s.openaipKey'))}<input class="in mono" name="openaipKey" type="password" autocomplete="off" value="" placeholder="${esc(s.openaipKey === 'set' ? t('admin.s.keySet') : t('admin.s.keyMissing'))}"><span class="muted small">${esc(t('admin.s.openaipHint'))}</span></label>`
+      + `<div class="f"><span class="muted small">${esc(t('admin.s.testKeyHint'))}</span><span><button class="btn" type="button" data-act="testKey">${esc(t('admin.s.testKey'))}</button></span></div>`
       + f(t('admin.s.airspaceCats'), 'airspaceCats', s.airspaceCats || 'P,R,D,CTR,TMA', 'placeholder="P,R,D,CTR,TMA,CTA,TMZ,ATZ,GLD"')
       + `<label class="f">${esc(t('admin.s.waPhoneNumberId'))}<input class="in mono" name="waPhoneNumberId" type="password" autocomplete="off" value="" placeholder="${esc(s.waPhoneNumberId === 'set' ? t('admin.s.keySet') : '')}"></label>`
       + `<label class="f">${esc(t('admin.s.waToken'))}<input class="in mono" name="waToken" type="password" autocomplete="off" value="" placeholder="${esc(s.waToken === 'set' ? t('admin.s.keySet') : '')}"><span class="muted small">${esc(t('admin.s.waHint'))}</span></label>`
@@ -90,9 +91,19 @@ export function mountAdmin(root, ctx) {
     const wf = String(fd.get('windFallback')).split('/');
     const patch = { frequencyHz: Math.round(num(fd.get('frequencyMHz')) * 1e6), riseRate: num(fd.get('riseRate')), descentRate: num(fd.get('descentRate')), sondeTypes: fd.get('sondeTypes'), cloudRh: num(fd.get('cloudRh')), defaultFolder: fd.get('defaultFolder'), autoLogoutH: num(fd.get('autoLogoutH')), windFallbackDir: num(wf[0]), windFallbackSpd: num(wf[1] || s.windFallbackSpd), cutAltAgl: Math.round(num(fd.get('cutAltAgl')) / 100) * 100, airspaceCats: String(fd.get('airspaceCats') || '').toUpperCase().replace(/\s/g, '') };
     for (const k of ['openaipKey', 'waPhoneNumberId', 'waToken']) { const v = String(fd.get(k) || '').trim(); if (v) patch[k] = v; }   // empty field = keep the stored secret
-    try { Object.assign(s, await api.settings.put(patch)); toast(t('admin.saved')); renderSettings(); bus.emit('settings'); } catch (ex) { toast(ex.message, true); }
+    try { Object.assign(s, await api.settings.put(patch)); toast(t('admin.saved')); renderSettings(); bus.emit('settings'); } catch (ex) { toast(ex.message, true); return; }
+    if (patch.openaipKey) testKey();   // a freshly pasted key is checked at once so a wrong one shows up here, not in Phase 1
   });
+  /** One request to openAIP with the stored key; the toast shows the result including what openAIP answered. */
+  async function testKey() {
+    try {
+      const r = await api.airspacesTest();
+      if (r.ok) toast(t('admin.s.testOk', { n: r.count }));
+      else toast((r.message === 'E_NO_OPENAIP_KEY' ? t('admin.s.keyMissing') : t('admin.s.testFail')) + ' ' + (r.message || r.status), true);
+    } catch (ex) { toast(t('admin.s.testFail') + ' ' + ex.message, true); }
+  }
   onAct(el, {
+    testKey,
     toggle: async (b) => { const u = users.find((x) => x.name === b.dataset.name); if (!u) return; try { await api.users.save({ name: u.name, active: u.active ? 0 : 1 }); load(); } catch (ex) { toast(ex.message, true); } },
     master: async (b) => { const u = users.find((x) => x.name === b.dataset.name); if (!u) return; try { await api.users.save({ name: u.name, master: u.master ? 0 : 1 }); load(); } catch (ex) { toast(ex.message, true); } },
     del: async (b) => { if (await confirmDialog({ title: t('admin.deleteUser'), text: `<p>${esc(b.dataset.name)}</p>`, okLabel: t('common.remove'), cancelLabel: t('common.cancel'), danger: true })) { try { await api.users.remove(b.dataset.name); load(); } catch (ex) { toast(ex.message, true); } } },

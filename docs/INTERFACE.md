@@ -166,7 +166,8 @@ Observer codes: 6 characters from `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (no 0/O/1/I
 | GET/PUT | /api/settings | ground / master writes | app settings (relay url, default frequency, rise rate, default cutdown AGL, cloud RH threshold, default folder, auto-logout h, RR4 usb ids, quick replies, airspace categories). Secrets `openaipKey`, `waPhoneNumberId`, `waToken` are returned masked as 'set' / '' and kept when echoed back |
 | GET  | /api/log?limit= | master | activity log |
 | POST | /api/log | any | {action, detail} – every login/phase step/command is logged client-side too |
-| GET  | /api/airspaces?bbox=w,s,e,n | ground | openAIP airspaces via the Worker (key from settings.openaipKey); 409 E_NO_OPENAIP_KEY / E_OPENAIP_KEY_REJECTED, 502 E_OPENAIP_UNREACHABLE |
+| GET  | /api/airspaces?bbox=w,s,e,n | ground | openAIP airspaces via the Worker (key from settings.openaipKey, sent as header `x-openaip-api-key` and query `apiKey`); 409 `E_NO_OPENAIP_KEY` / `E_OPENAIP_KEY_REJECTED (openAIP 401: …)`, 502 `E_OPENAIP_<status> (…)` / `E_OPENAIP_UNREACHABLE` – the bracket carries openAIP's own status and answer |
+| GET  | /api/airspaces/test | master | one tiny openAIP request with the stored key → `{ok:true,status,count,keyLength}` or `{ok:false,status,message}` (never throws); the admin page calls it after a key is saved and on «openAIP-Schlüssel testen» |
 | POST | /api/ascents | ground | {name, start:{name,lat,lon,alt}, plannedLaunch (ms), cutAltAgl, frequencyHz, sondeId} → {ascentId, notify:[{observerId, label, mobile, waUrl, sent, error}]} – one entry per active observer with mobile + whatsapp; `waUrl` = https://wa.me/<digits>?text=<standard message> (stage 1); `sent:true` when the Cloud API sent it (stage 2) |
 | GET  | /api/ascents?active=1 | any (observers too) | [{id, name, owner, createdAt, active, meta}] – s2stueve "Follow sonde ascent" picks the newest |
 | POST | /api/ascents/:id/close | ground | — |
