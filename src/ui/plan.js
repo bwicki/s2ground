@@ -10,6 +10,7 @@ import * as planning from '../planning.js';
 import { api } from '../api.js';
 import { createMap } from './map.js';
 import { openStartort } from './startort.js';
+import { placeFor } from '../geo.js';
 import { kmlText } from '../files.js';
 
 let airspaceCache = null;
@@ -276,8 +277,15 @@ export function mountPlan(root, ctx) {
     tz: (b) => { p.tz = b.dataset.tz; refreshForm(); runPlan(); },
     cutMode: (b) => { p.cutdownMode = b.dataset.m; refreshForm(); runPlan(); },
     opMode: (b) => { p.opMode = b.dataset.m; refreshForm(); },
-    startRr4: () => { const rx = state.linkState.receiver; if (rx && rx.lat) p.start = { lat: rx.lat, lon: rx.lon, alt: rx.alt ?? p.start.alt, name: p.start.name, source: 'rr4' }; else p.start.source = 'rr4'; refreshForm(); runPlan(); },
-    startMap: async () => { const r = await openStartort(p.start, state.device); if (r) { p.start = r; p.start.name = r.name || p.start.name; refreshForm(); runPlan(); } },
+    startRr4: () => {
+      const rx = state.linkState.receiver;
+      if (rx && rx.lat) {
+        p.start = { lat: rx.lat, lon: rx.lon, alt: rx.alt ?? p.start.alt, name: '', source: 'rr4' };
+        placeFor(rx.lat, rx.lon).then((n) => { if (n && p.start.source === 'rr4' && p.start.lat === rx.lat) { p.start.name = n; refreshForm(); bus.emit('start'); } });   // «CC-Ort» for the receiver's position
+      } else p.start.source = 'rr4';
+      refreshForm(); runPlan(); bus.emit('start');
+    },
+    startMap: async () => { const r = await openStartort(p.start, state.device); if (r) { p.start = r; p.start.name = r.name || p.start.name; refreshForm(); runPlan(); bus.emit('start'); } },
     suggest: () => { if (p.result && p.result.suggestAgl) { p.cutAltAgl = p.result.suggestAgl; p.cutTouched = true; p.cutdownMode = 'alt'; qs(el, '[name=cutAltAgl]').value = p.cutAltAgl; refreshForm(); runPlan(); ctx.log('plan.suggestApplied', `Cutdown ${p.cutAltAgl} m AGL`); } },
     ignore: () => { p.ignoreAirspace = true; updatePlanStatus(); renderBanner(); ctx.log('plan.airspaceIgnored', p.result.conflicts.map((c) => c.airspace.id).join(', ')); },
   });

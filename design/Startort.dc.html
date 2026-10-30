@@ -22,9 +22,9 @@ a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
 </style>
 </helmet>
 
-<div style="display:flex;flex-direction:column;min-height:980px;position:relative">
+<div style="display:flex;flex-direction:column;min-height:1120px;position:relative">
   <header style="display:grid;grid-template-columns:minmax(0, 1fr) auto;align-items:start;gap:6px 20px;padding:12px 28px;border-bottom:1px solid #d9dee6;background:#fff">
-    <div style="display:flex;flex-direction:column;min-width:120px"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Aufstieg 2026-10-13 · Rümlang</span></div>
+    <div style="display:flex;flex-direction:column;min-width:120px"><strong style="font-size:18px">S2 Ground</strong><span class="muted" style="font-size:13px">Aufstieg 2026-10-13 · CH-Rümlang</span></div>
     <span class="muted">Phase 1 · Aufstieg planen – Dialog «Startort aus Karte wählen»</span>
     <div style="grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:flex-end;gap:8px">
       <img src="/_blob/0e4c30272f96a31d708cd9be18800e0a" alt="Wicki Partners Ballonteam" style="height:46px;width:auto">
@@ -46,13 +46,19 @@ a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
         <a class="btn" href="Planen.dc.html" aria-label="Schliessen" style="min-width:44px;padding:0">×</a>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <input class="in" type="text" value="Katzenrüti, Rümlang" aria-label="Ort suchen" style="flex:1;min-width:260px">
+        <input class="in" type="text" value="Baden" aria-label="Ort suchen" style="flex:1;min-width:260px">
         <button class="btn" type="button">Suchen</button>
         <button class="btn" type="button">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg>
           Mein Standort
         </button>
       </div>
+      <div style="display:flex;flex-direction:column;border:1px solid #c7d0dc;border-radius:10px;background:#fff;margin-top:-4px" role="listbox" aria-label="Ort wählen – gleiche Namen gibt es in mehreren Ländern">
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid #e9edf2;background:#f0f3f7"><strong>CH-Baden</strong><span class="muted" style="font-size:13px">Aargau</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid #e9edf2"><strong>AT-Baden</strong><span class="muted" style="font-size:13px">Niederösterreich</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 14px"><strong>DE-Baden-Baden</strong><span class="muted" style="font-size:13px">Baden-Württemberg</span></div>
+      </div>
+      <div class="muted" style="font-size:13px;margin-top:-6px">Die Suche zeigt alle Orte mit diesem Namen (Land-Ort, Region) – Du wählst; die App wählt nie selbst. Der Ortsname folgt danach dem Fadenkreuz.</div>
       <svg viewBox="0 0 800 420" width="100%" height="420" role="img" aria-label="Karte um den Standort des Geräts; ein Fadenkreuz in der Mitte markiert den Startort und lässt sich durch Verschieben der Karte setzen">
         <rect x="0" y="0" width="800" height="420" fill="#eef3ea"/>
         <path d="M0 300 Q140 250 260 290 T520 240 T800 230 L800 420 L0 420Z" fill="#e3ebdc"/>
@@ -60,9 +66,9 @@ a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
         <path d="M60 420 L130 300 L220 250 L330 210 L470 160 L640 120 L800 70" fill="none" stroke="#fff" stroke-width="6"/>
         <path d="M60 420 L130 300 L220 250 L330 210 L470 160 L640 120 L800 70" fill="none" stroke="#d6a84e" stroke-width="2"/>
         <path d="M0 220 L190 205 L350 240 L430 340 L320 420 L0 420Z" fill="#dfe6ee"/>
-        <text x="70" y="390" fill="#5b6b7f" font-size="12">Rümlang</text>
-        <text x="330" y="190" fill="#5b6b7f" font-size="12">Katzenrüti</text>
-        <text x="560" y="330" fill="#5b6b7f" font-size="12">Oberglatt</text>
+        <text x="70" y="390" fill="#5b6b7f" font-size="12">Baden</text>
+        <text x="330" y="190" fill="#5b6b7f" font-size="12">Wettingen</text>
+        <text x="560" y="330" fill="#5b6b7f" font-size="12">Ennetbaden</text>
         <g><circle cx="300" cy="300" r="7" fill="#14202e" stroke="#fff" stroke-width="2"></circle><circle cx="300" cy="300" r="12" fill="none" stroke="#14202e" stroke-opacity=".35"></circle><text x="318" y="305" fill="#14202e" font-size="13" font-weight="600">Mein Gerät (Laptop/Pad-GPS)</text></g>
         <g stroke="#14202e" stroke-width="2" fill="none"><line x1="400" y1="150" x2="400" y2="270"/><line x1="340" y1="210" x2="460" y2="210"/><circle cx="400" cy="210" r="22"/></g><circle cx="400" cy="210" r="7" fill="#1f8a4c" stroke="#fff" stroke-width="2"></circle>
         <text x="430" y="238" fill="#14202e" font-size="13" font-weight="600">Startort = Fadenkreuz</text>
@@ -71,10 +77,11 @@ a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
         <g transform="translate(20,60)" aria-hidden="true"><rect width="34" height="34" rx="6" fill="#fff" stroke="#c7d0dc"/><text x="17" y="22" text-anchor="middle" font-size="16" fill="#14202e">−</text></g>
           <g transform="translate(656,20)" aria-label="Kartenart: Karte oder Satellit" role="group"><rect width="124" height="34" rx="6" fill="#fff" stroke="#c7d0dc"></rect><rect x="2" y="2" width="58" height="30" rx="5" fill="#14202e"></rect><text x="31" y="22" text-anchor="middle" font-size="13" font-weight="600" fill="#fff">Karte</text><text x="92" y="22" text-anchor="middle" font-size="13" fill="#14202e">Satellit</text></g>
       </svg>
-      <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:12px">
-        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Koordinaten (ICAO)</div><div class="val">4727N00834E</div></div>
-        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Genau (ICAO mit Sekunden)</div><div class="val">472636N0083342E</div></div>
-        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Bodenhöhe (Geländemodell)</div><div class="val">432 m AMSL</div></div>
+      <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:12px">
+        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Ort (Land-Ort)</div><div class="val">CH-Baden</div></div>
+        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Koordinaten (ICAO)</div><div class="val">4728N00818E</div></div>
+        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Genau (ICAO mit Sekunden)</div><div class="val">472823N0081818E</div></div>
+        <div><div class="muted" style="font-size:12px;text-transform:uppercase;letter-spacing:.04em">Bodenhöhe (Geländemodell)</div><div class="val">385 m AMSL</div></div>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap">
         <a class="btn" href="Planen.dc.html">Abbrechen</a>
@@ -84,7 +91,7 @@ a{color:#1f5fbf;text-decoration:none}a:hover{color:#174a95}
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":980}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1120}}'>
 class Component extends DCLogic {
   renderVals() { return {}; }
 }

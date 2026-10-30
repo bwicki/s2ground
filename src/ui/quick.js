@@ -4,6 +4,7 @@
 // files, relay, log): the quick start only decides less and says more. Once the launch is detected the page turns
 // into the live view (quick-live.js). The pure decisions live in ../quick.js.
 
+import { placeFor } from '../geo.js';
 import { t, tx } from '../i18n.js';
 import { esc, html, qs, onAct, confirmDialog } from '../util/dom.js';
 import { state, bus, settings, now } from '../state.js';
@@ -170,6 +171,7 @@ function mountPre(host, ctx, q) {
     const moved = startMoved(q.checkedStart, h, q.checkedSrc, h.source);
     p.start = { lat: h.lat, lon: h.lon, alt: h.alt, name: h.source === 'default' ? DEFAULT_START.name : '', source: h.source === 'rx' ? 'rr4' : 'map' };
     q.src = h.source;
+    if (!p.start.name && !state.sim) placeFor(h.lat, h.lon).then((n) => { if (n && p.start.lat === h.lat && p.start.lon === h.lon) { p.start.name = n; paintStart(); } });   // «CC-Ort» for files, WhatsApp, s2stueve
     paintStart();
     if (moved) { q.ignoreAir = false; schedulePlan(q.checkedStart ? 450 : 50); }
   }

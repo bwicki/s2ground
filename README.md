@@ -181,7 +181,7 @@ baut der Worker für jeden solchen Beobachter die Standardnachricht:
 ```
 Sondenaufstieg geplant (S2 Ground)
 Start: 17.10.2026 14:30 LT
-Startort: Rümlang · 4727N00834E
+Startort: CH-Rümlang · 4727N00834E
 Cutdown: 3'000 m AGL
 Frequenz: 433.900 MHz
 Sonde: 12345
@@ -239,6 +239,17 @@ Seite den Link «Command Center per WhatsApp benachrichtigen».
   (GPS-Fix nach 3 s statt 25 s), `&lost=1` (Funk geht im Abstieg verloren → Variante «Position geschätzt»),
   `&seed=7` (anderer Zufall).
 * Ohne RR4-Unterstützung des Browsers (z. B. Firefox, Safari, Android) startet die App ebenfalls in der Simulation.
+
+---
+
+## 7a. Ortsnamen und Startort
+
+Orte heissen in der ganzen App **«LL-Ort»** – zweistelliges Länderkürzel, Bindestrich, Ortsname (z. B. `CH-Baden`,
+`AT-Baden`, `DE-Baden-Baden`); so auch in den Dateinamen, der WhatsApp-Nachricht und in s2stueve. Im Dialog
+**Startort aus Karte wählen** zeigt die Suche nach einem Ortsnamen zuerst **alle** passenden Orte (mit Kanton/Region)
+zur Auswahl – die App wählt nie selbst. Wird das Fadenkreuz verschoben oder der Startort vom RR4-GPS übernommen,
+ermittelt die App den Ortsnamen zur Position (OpenStreetMap Nominatim) und zeigt ihn im Feld «Ort». Standard-Startort
+ist `CH-Rümlang`.
 
 ---
 
@@ -300,6 +311,8 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 
 Die Versionsnummer steht oben rechts unter den Knöpfen (`src/version.js`) und in den Aufstiegsdateien.
 
+* **0.3** (30.10.2026) – Ortsnamen durchgehend «LL-Ort» (z. B. CH-Baden); Startort-Suche zeigt alle gleichnamigen Orte zur
+  Auswahl; Ortsname folgt dem Fadenkreuz bzw. der RR4-Position; nach «Warnung ignorieren» keine zweite Rückfrage.
 * **0.2** (28.10.2026) – Lufträume aus dem nächtlichen openAIP-Export (ohne Schlüssel, Abschnitt 6a); Schlüsseltest mit
   Fingerabdruck und Live-Diagnose; Schlüssel optional als GitHub-Secret `OPENAIP_KEY`; Kopfzeile: Phasen immer auf einer
   Zeile, Version sichtbar, alle Knöpfe gleich hoch, «Sonde sofort hier starten» blau; Ballon-Bestätigung und

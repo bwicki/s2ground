@@ -399,6 +399,7 @@ async function boot() {
   await restoreSession();
   onLangChange(() => render());
   bus.on('phase', () => renderHeaderBar());
+  bus.on('start', () => { if (!state.ascent) renderHeaderBar(); });   // start place changed → subtitle «Aufstieg <Datum> · CC-Ort»
   window.addEventListener('hashchange', route);
   if (navigator.geolocation) navigator.geolocation.watchPosition((p) => { state.device = { lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy }; bus.emit('device', state.device); }, () => {}, { enableHighAccuracy: true, maximumAge: 10000 });
   if (!state.session) { location.hash = '#login'; }

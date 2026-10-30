@@ -18,7 +18,7 @@ export const state = {
   visited: { plan: true },
 
   plan: {
-    start: { lat: 47.4433, lon: 8.5617, alt: 432, name: 'Rümlang', source: 'rr4' },
+    start: { lat: 47.4433, lon: 8.5617, alt: 432, name: 'CH-Rümlang', source: 'rr4' },   // places are always «CC-Ort»
     date: null, time: null, tz: 'LT',     // filled by the plan view (now, rounded to 10 min)
     cutdownMode: 'alt', cutAltAgl: 3000, noCutdownConfirmed: false,   // default 3'000 m AGL (settings.cutAltAgl overrides); the demo's sample LS-R12 starts at 2'100 m → warning flow
     opMode: 'ascent',
