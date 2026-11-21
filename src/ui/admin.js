@@ -15,9 +15,9 @@ export function mountAdmin(root, ctx) {
     <div class="row-wrap" style="align-items:flex-start">
       <section class="card" style="flex:999 1 560px"><h2>${esc(t('admin.users'))}</h2><div class="scroll-x users"></div>
         <form class="form4 adduser">
-          <label class="f">${esc(t('login.user'))}<input class="in" name="name" type="text" placeholder="z. B. crew2" required pattern="[a-z0-9_.-]{2,32}"></label>
-          <label class="f">${esc(t('admin.fullName'))}<input class="in" name="fullName" type="text" placeholder="${esc(t('admin.fullNamePh'))}"></label>
-          <label class="f">${esc(t('login.password'))}<input class="in" name="password" type="text" placeholder="${esc(t('admin.pwShown'))}" required minlength="4"></label>
+          <label class="f"><span class="lbl">${esc(t('login.user'))}</span><input class="in" name="name" type="text" placeholder="z. B. crew2" required pattern="[a-z0-9_.-]{2,32}"></label>
+          <label class="f"><span class="lbl">${esc(t('admin.fullName'))}</span><input class="in" name="fullName" type="text" placeholder="${esc(t('admin.fullNamePh'))}"></label>
+          <label class="f"><span class="lbl">${esc(t('login.password'))}</span><input class="in" name="password" type="text" placeholder="${esc(t('admin.pwShown'))}" required minlength="4"></label>
           <label class="chk"><input type="checkbox" name="master"> ${esc(t('role.master'))}</label>
           <button class="btn primary" type="submit">${esc(t('admin.addUser'))}</button>
         </form>
