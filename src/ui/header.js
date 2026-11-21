@@ -2,6 +2,7 @@
 // ("Weiter" always at the top). Pure rendering; app.js wires the callbacks.
 
 import { VERSION } from '../version.js';
+import { openPasswordDialog } from './account.js';
 import { t, currentLang } from '../i18n.js';
 import { esc, html, icons, onAct } from '../util/dom.js';
 import { state, PHASES } from '../state.js';
@@ -44,11 +45,11 @@ export function renderHeader(o) {
   if (o.mode === 'detail') {
     tools = `${o.pill || ''}<button class="btn sm" type="button" data-act="close">${icons.close} ${esc(t('detail.close'))}</button>`;
   } else if (o.mode === 'quick') {
-    tools = `<span class="pill">${esc(user)}</span><button class="btn sm" type="button" data-act="logout">${esc(t('hdr.logout'))}</button>`;
+    tools = `<button class="pill act" type="button" data-act="account" title="${esc(t('pw.title'))}">${esc(user)} ${icons.key}</button><button class="btn sm" type="button" data-act="logout">${esc(t('hdr.logout'))}</button>`;
   } else {
     const menu = o.expert ? `<details class="menu"><summary aria-label="${esc(t('hdr.menu'))}" title="${esc(t('hdr.menu'))}">${icons.menu}</summary><div class="panel"><h3></h3><div class="body"></div><div class="foot">${state.session && state.session.master ? `<a href="#admin">${esc(t('hdr.adminLink'))}</a>` : ''}${o.mode === 'admin' ? '' : `<a href="#log" data-act="log">${esc(t('hdr.protocol'))}</a>`}</div></div></details>` : '';
     const adminBtn = o.mode === 'admin' ? `<a class="btn sm" href="#plan">${esc(t('admin.toAscents'))}</a>` : '';
-    tools = `<span class="pill">${esc(user)}${o.mode === 'admin' ? ` · ${esc(t('role.master'))}` : ''}</span>
+    tools = `<button class="pill act" type="button" data-act="account" title="${esc(t('pw.title'))}">${esc(user)}${o.mode === 'admin' ? ` · ${esc(t('role.master'))}` : ''} ${icons.key}</button>
       <div class="seg lang" aria-label="${esc(t('hdr.language'))}"><button type="button" data-act="lang" data-lang="de" class="${lang === 'de' ? 'on' : ''}">DE</button><button type="button" data-act="lang" data-lang="en" class="${lang === 'en' ? 'on' : ''}">EN</button></div>
       ${adminBtn}<button class="btn sm" type="button" data-act="logout">${esc(t('hdr.logout'))}</button>${menu}`;
   }
@@ -61,6 +62,7 @@ export function renderHeader(o) {
     goto: (b) => o.onGoto && o.onGoto(b.dataset.phase),
     lang: (b) => o.onLang && o.onLang(b.dataset.lang),
     logout: () => o.onLogout && o.onLogout(),
+    account: () => openPasswordDialog(user),
     tab: (b) => o.onTab && o.onTab(b.dataset.tab),
     close: () => o.onClose && o.onClose(),
     log: () => o.onLog && o.onLog(),

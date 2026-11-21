@@ -3,7 +3,7 @@
 // through src/config.js (apiBase) – see docs/INTERFACE.md §4 for the API table.
 
 import { authenticate, createToken, deleteToken, HttpError, requireRole } from './auth.js';
-import { countUsers, setupMaster, login, listUsers, saveUser, deleteUser, getSettings, putSettings, publicSettings } from './users.js';
+import { countUsers, setupMaster, login, listUsers, saveUser, deleteUser, getSettings, putSettings, publicSettings, changeOwnPassword } from './users.js';
 import { listObservers, createObserver, updateObserver, revokeObserver, reactivateObserver, observerLogins, observerLogin } from './observers.js';
 import { airspaces, testOpenAipKey, airspaceKeyForBrowser } from './airspaces.js';
 import { listLog, addLog, logAction } from './log.js';
@@ -75,6 +75,7 @@ async function api(request, env, url, ctx) {
     return json({ ...base, settings: { quickRepliesObserver: s.quickRepliesObserver || [] } });
   }
 
+  if (path === '/api/me/password' && m === 'POST') { if (rateLimited(ip)) throw new HttpError(429, 'too many attempts'); return json(await changeOwnPassword(env, auth, await readJson(request))); }
   if (path === '/api/users' && m === 'GET') return json(await listUsers(env, auth));
   if (path === '/api/users' && m === 'POST') return json(await saveUser(env, auth, await readJson(request)));
   const userDel = idOf(/^\/api\/users\/([^/]+)$/);

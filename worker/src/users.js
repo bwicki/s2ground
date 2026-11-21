@@ -126,3 +126,19 @@ export async function deleteUser(env, auth, name) {
   await logAction(env, auth.user, 'user.deleted', name);
   return { ok: true };
 }
+
+/**
+ * A logged-in ground user changes their own password: current password required, new one ≥ MIN_PW.
+ * Other sessions of the user are logged out (their tokens go), the current one stays.
+ */
+export async function changeOwnPassword(env, auth, body) {
+  requireRole(auth, 'ground');
+  const row = await env.DB.prepare('SELECT pw_hash FROM users WHERE name = ?1 AND active = 1').bind(auth.user).first();
+  if (!row || !(await verifyPassword(String(body.current || ''), row.pw_hash))) throw new HttpError(403, 'E_PW_CURRENT');
+  const next = String(body.next || '');
+  if (next.length < MIN_PW) throw new HttpError(400, 'password too short');
+  await env.DB.prepare('UPDATE users SET pw_hash = ?1 WHERE name = ?2').bind(await hashPassword(next), auth.user).run();
+  await env.DB.prepare('DELETE FROM tokens WHERE user = ?1 AND token <> ?2').bind(auth.user, auth.token || '').run();
+  await logAction(env, auth.user, 'password.changed', '');
+  return { ok: true };
+}

@@ -68,3 +68,22 @@ test('sendWhatsApp never throws without configuration', async () => {
   const bad = await sendWhatsApp({}, { waPhoneNumberId: '1', waToken: 't' }, '12', 'x');
   assert.equal(bad.error, 'E_WA_BAD_NUMBER');
 });
+
+test('own password: current must match, new ≥ 4, other sessions logged out', async () => {
+  const { changeOwnPassword, MIN_PW } = await import('../worker/src/users.js');
+  const { hashPassword } = await import('../worker/src/auth.js');
+  const stored = await hashPassword('alt1');
+  const sql = []; let pwHash = stored;
+  const env = { DB: { prepare: (q) => ({ bind: (...a) => ({
+    first: async () => (/SELECT pw_hash/.test(q) ? { pw_hash: pwHash } : null),
+    run: async () => { sql.push(q + ' ' + JSON.stringify(a)); if (/UPDATE users SET pw_hash/.test(q)) pwHash = a[0]; return {}; },
+  }) }) } };
+  const auth = { role: 'ground', user: 'bwicki', token: 'tok-current' };
+  assert.equal(MIN_PW, 4);
+  await assert.rejects(() => changeOwnPassword(env, auth, { current: 'falsch', next: 'neu1' }), (e) => e.status === 403 && e.message === 'E_PW_CURRENT');
+  await assert.rejects(() => changeOwnPassword(env, auth, { current: 'alt1', next: 'abc' }), (e) => e.status === 400 && /too short/.test(e.message));
+  assert.deepEqual(await changeOwnPassword(env, auth, { current: 'alt1', next: 'neu1' }), { ok: true });
+  assert.ok(sql.some((s) => /UPDATE users SET pw_hash/.test(s) && /"bwicki"/.test(s)));
+  assert.ok(sql.some((s) => /DELETE FROM tokens WHERE user = \?1 AND token <> \?2/.test(s) && /"tok-current"/.test(s)));
+  await assert.rejects(() => changeOwnPassword(env, { role: 'observer', user: 'x' }, { current: 'a', next: 'bbbb' }), (e) => e.status === 403);
+});

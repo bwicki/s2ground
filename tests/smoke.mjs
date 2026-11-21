@@ -141,6 +141,17 @@ try {
   const nav = await page.getAttribute('[data-act=nav]', 'href');
   if (!nav.startsWith('https://www.google.com/maps/dir/?api=1&destination=')) throw new Error(`nav url: ${nav}`);
 
+  step('own password: name pill → dialog → mismatch is refused, matching pair saved');
+  await page.click('header.top [data-act=account]');
+  await page.waitForSelector('form.pwform');
+  await page.fill('form.pwform [name=current]', 'alt'); await page.fill('form.pwform [name=next]', 'neu1'); await page.fill('form.pwform [name=repeat]', 'neu2');
+  await page.click('form.pwform button[type=submit]');
+  await page.waitForFunction(() => /nicht überein/.test(document.body.textContent), null, { timeout: 3000 });
+  await page.fill('form.pwform [name=repeat]', 'neu1');
+  await page.click('form.pwform button[type=submit]');
+  await page.waitForFunction(() => !document.querySelector('form.pwform'), null, { timeout: 5000 });
+  await shot('09b-passwort.png');
+
   step('admin: users (master switch) + observer codes');
   await page.goto(`${base}/?sim=1&speed=20&fast=1#admin`);
   await page.waitForSelector('.observers table');

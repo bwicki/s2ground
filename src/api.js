@@ -76,6 +76,7 @@ async function mockHandle(method, path, body, token) {
     }
     case 'POST logout': mock.tokens.delete(token); return { ok: true };
     case 'GET me': need(); return { user: who.name, role: 'ground', master: who.master, settings: mock.settings };
+    case 'POST me': { need(); if (arg !== 'password') throw new ApiError(404, 'not found'); if (String(body.next || '').length < 4) throw new ApiError(400, 'password too short'); return { ok: true }; }   // own password (demo: any current password)
     case 'GET users': need('master'); return mock.users.map(({ password, ...u }) => u);
     case 'POST users': {
       need('master');
@@ -156,6 +157,8 @@ export const api = {
   login: (user, password) => api.request('POST', '/api/login', { user, password }),
   logout: () => api.request('POST', '/api/logout').catch(() => null),
   me: () => api.request('GET', '/api/me'),
+  /** Own password: current + new (≥ 4). 403 E_PW_CURRENT when the current one is wrong. */
+  changePassword: (current, next) => api.request('POST', '/api/me/password', { current, next }),
   users: {
     list: () => api.request('GET', '/api/users'),
     save: (u) => api.request('POST', '/api/users', u),

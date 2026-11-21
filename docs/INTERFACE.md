@@ -157,6 +157,7 @@ Observer codes: 6 characters from `23456789ABCDEFGHJKLMNPQRSTUVWXYZ` (no 0/O/1/I
 | POST | /api/observer/login | – | {code, displayName} → {token, role:'observer', displayName, observerId, label}; 403 `E_CODE_UNKNOWN` / `E_CODE_REVOKED`, 400 `E_NAME_REQUIRED`; rate-limited; writes observer_logins (IP, UA, name, active ascent) |
 | POST | /api/logout | any | — |
 | GET  | /api/me | any | ground: {user, role, master, settings} · observer: {user, role, observerId} |
+| POST | /api/me/password | ground | `{current, next}` → `{ok:true}`; 403 `E_PW_CURRENT` when the current password is wrong, 400 when the new one is shorter than 4 (MIN_PW); other sessions of the user are logged out; rate-limited like login |
 | GET/POST/DELETE | /api/users[/:name] | master | users: {name, fullName, master, active, lastLogin, ascents}; POST {name, fullName, password?, master?, active?} (cannot deactivate yourself / drop your own master flag) |
 | GET  | /api/observers | master | [{id, code, label, displayName, mobile, whatsapp, createdBy, createdAt, revokedAt, lastLoginAt, loginCount}] |
 | POST | /api/observers | master | {label, mobile (E.164 or ''), whatsapp} → {id, code, label, mobile, whatsapp} – the code is created here and also listed later |

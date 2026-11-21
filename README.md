@@ -125,7 +125,11 @@ Es gibt nur **zwei Arten von Personen**:
 Beides verwaltest Du im Menü ☰ → **Masteruser · Benutzer & App-Einstellungen**:
 * **Benutzer**: Anmeldename, Name, Passwort (mind. 4 Zeichen – kurze PINs sind erlaubt; gegen Durchprobieren steht die
   Anmeldesperre von 10 Versuchen je 10 Minuten), Schalter *Masteruser* und *Aktiv*, letzte Anmeldung.
-* **Passwort vergessen** (Masteruser): Es gibt keine Selbsthilfe in der App. Der Hash lässt sich direkt in der D1-Datenbank
+* **Eigenes Passwort ändern** (jeder Bodenstations-Benutzer): Klick auf den eigenen Namen oben rechts (Pille mit
+  Schlüssel-Symbol) → aktuelles Passwort, neues Passwort zweimal → Speichern. Andere Geräte werden dabei abgemeldet.
+* **Passwort eines Benutzers setzen** (Masteruser): Masteruser · Benutzer → Knopf **Passwort** in der Zeile → neues
+  Passwort → Speichern (kein aktuelles Passwort nötig – so wird auch ein vergessenes Passwort ersetzt).
+* **Masterpasswort vergessen** und kein zweiter Masteruser vorhanden: Es gibt keine Selbsthilfe in der App. Der Hash lässt sich direkt in der D1-Datenbank
   ersetzen (Cloudflare → D1 → s2ground → Tabelle `users`); ein passender Hash entsteht mit `node --input-type=module -e
   "import {hashPassword} from './worker/src/auth.js'; console.log(await hashPassword('NEU'))"` im Repo.
 * **Beobachter · Zugangscodes**: Bezeichnung (z. B. «Command Center»), Mobile-Nummer, WhatsApp-Haken →
@@ -316,7 +320,8 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 Die Versionsnummer steht oben rechts unter den Knöpfen (`src/version.js`) und in den Aufstiegsdateien.
 
 * **0.4** (21.11.2026) – Passwörter ab 4 Zeichen (kurze PINs); Hinweis zum Zurücksetzen des Masterpassworts (Abschnitt 6);
-  «Benutzer hinzufügen» auf einer Zeile, unten ausgerichtet.
+  «Benutzer hinzufügen» auf einer Zeile, unten ausgerichtet; **Passwort ändern** (eigener Name oben rechts) und
+  **Passwort setzen** je Benutzer in der Benutzerliste.
 * **0.3** (30.10.2026) – Ortsnamen durchgehend «LL-Ort» (z. B. CH-Baden); Startort-Suche zeigt alle gleichnamigen Orte zur
   Auswahl; Ortsname folgt dem Fadenkreuz bzw. der RR4-Position; nach «Warnung ignorieren» keine zweite Rückfrage.
 * **0.2** (28.10.2026) – Lufträume aus dem nächtlichen openAIP-Export (ohne Schlüssel, Abschnitt 6a); Schlüsseltest mit

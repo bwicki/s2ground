@@ -3,6 +3,7 @@
 
 import { t } from '../i18n.js';
 import { esc, html, qs, qsa, onAct, toast, confirmDialog } from '../util/dom.js';
+import { openSetPasswordDialog } from './account.js';
 import { api } from '../api.js';
 import { state, bus } from '../state.js';
 import { fmtDateTimeUTC, fmtInt, fmtNum } from '../util/format.js';
@@ -42,7 +43,7 @@ export function mountAdmin(root, ctx) {
       ${users.map((u) => `<tr><td class="mono">${esc(u.name)}</td><td>${esc(u.fullName || '')}</td>
         <td><button type="button" class="sw ${u.master ? '' : 'off'}" data-act="master" data-name="${esc(u.name)}" role="switch" aria-checked="${!!u.master}" aria-label="${esc(t('role.master'))}" ${u.name === me ? 'disabled' : ''}></button></td>
         <td><button type="button" class="sw ${u.active ? '' : 'off'}" data-act="toggle" data-name="${esc(u.name)}" role="switch" aria-checked="${!!u.active}" aria-label="${esc(t('admin.active'))}" ${u.name === me ? 'disabled' : ''}></button></td>
-        <td class="mono">${u.lastLogin ? fmtDateTimeUTC(u.lastLogin).slice(0, 16) : '–'}</td><td class="mono">${u.ascents ?? '–'}</td><td><button class="btn xs" type="button" data-act="del" data-name="${esc(u.name)}" ${u.name === me ? 'disabled' : ''}>×</button></td></tr>`).join('')}
+        <td class="mono">${u.lastLogin ? fmtDateTimeUTC(u.lastLogin).slice(0, 16) : '–'}</td><td class="mono">${u.ascents ?? '–'}</td><td style="white-space:nowrap"><button class="btn xs" type="button" data-act="pw" data-name="${esc(u.name)}" title="${esc(t('pw.setTitle', { user: u.name }))}">${esc(t('pw.short'))}</button> <button class="btn xs" type="button" data-act="del" data-name="${esc(u.name)}" ${u.name === me ? 'disabled' : ''} aria-label="${esc(t('common.remove'))}">×</button></td></tr>`).join('')}
     </tbody></table>`;
   };
   const renderSettings = () => {
@@ -122,6 +123,7 @@ export function mountAdmin(root, ctx) {
     testKey,
     toggle: async (b) => { const u = users.find((x) => x.name === b.dataset.name); if (!u) return; try { await api.users.save({ name: u.name, active: u.active ? 0 : 1 }); load(); } catch (ex) { toast(ex.message, true); } },
     master: async (b) => { const u = users.find((x) => x.name === b.dataset.name); if (!u) return; try { await api.users.save({ name: u.name, master: u.master ? 0 : 1 }); load(); } catch (ex) { toast(ex.message, true); } },
+    pw: (b) => openSetPasswordDialog(b.dataset.name),
     del: async (b) => { if (await confirmDialog({ title: t('admin.deleteUser'), text: `<p>${esc(b.dataset.name)}</p>`, okLabel: t('common.remove'), cancelLabel: t('common.cancel'), danger: true })) { try { await api.users.remove(b.dataset.name); load(); } catch (ex) { toast(ex.message, true); } } },
     rm: (b) => b.closest('.line').remove(),
     addQ: (b) => { const box = b.closest('.qr-list'); if (box.querySelectorAll('.line').length >= 6) return; b.insertAdjacentHTML('beforebegin', `<div class="line"><input class="in" type="text" value="" maxlength="40"><button class="btn icon" type="button" data-act="rm" aria-label="${esc(t('common.remove'))}">×</button></div>`); },
