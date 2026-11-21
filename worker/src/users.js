@@ -2,6 +2,10 @@
 // Users have no roles any more – only the flag `master` (Superuser). Observers live in observers.js.
 
 import { hashPassword, verifyPassword, requireRole, HttpError } from './auth.js';
+
+// Minimum password length. WHY 4: the owner wants short PINs like in his other apps; the login
+// rate limit (10 attempts per IP and 10 minutes, index.js) is what stands against guessing.
+export const MIN_PW = 4;
 import { logAction } from './log.js';
 
 const NAME_RE = /^[a-z0-9_.-]{2,32}$/;
@@ -63,7 +67,7 @@ export async function setupMaster(env, body) {
   if ((await countUsers(env)) > 0) throw new HttpError(409, 'already set up');
   const name = String(body.user || '').trim().toLowerCase();
   if (!NAME_RE.test(name)) throw new HttpError(400, 'invalid user name');
-  if (String(body.password || '').length < 6) throw new HttpError(400, 'password too short');
+  if (String(body.password || '').length < MIN_PW) throw new HttpError(400, 'password too short');
   await env.DB.prepare('INSERT INTO users (name, full_name, pw_hash, master, active, created_at) VALUES (?1, ?2, ?3, 1, 1, ?4)')
     .bind(name, String(body.fullName || name).slice(0, 80), await hashPassword(body.password), Date.now()).run();
   await logAction(env, name, 'setup', 'master user created');
@@ -99,12 +103,12 @@ export async function saveUser(env, auth, body) {
     if (body.master !== undefined) { sets.push('master = ?'); vals.push(body.master ? 1 : 0); }
     if (body.active !== undefined) { sets.push('active = ?'); vals.push(body.active ? 1 : 0); }
     if (body.lang !== undefined) { sets.push('lang = ?'); vals.push(body.lang === 'en' ? 'en' : 'de'); }
-    if (body.password) { if (String(body.password).length < 6) throw new HttpError(400, 'password too short'); sets.push('pw_hash = ?'); vals.push(await hashPassword(body.password)); }
+    if (body.password) { if (String(body.password).length < MIN_PW) throw new HttpError(400, 'password too short'); sets.push('pw_hash = ?'); vals.push(await hashPassword(body.password)); }
     if (sets.length) await env.DB.prepare(`UPDATE users SET ${sets.join(', ')} WHERE name = ?`).bind(...vals, name).run();
     if (body.active === 0) await env.DB.prepare('DELETE FROM tokens WHERE user = ?1').bind(name).run();   // deactivation logs the user out
     await logAction(env, auth.user, 'user.updated', `${name} (${Object.keys(body).filter((k) => k !== 'password' && k !== 'name').join(', ')})`);
   } else {
-    if (String(body.password || '').length < 6) throw new HttpError(400, 'password too short');
+    if (String(body.password || '').length < MIN_PW) throw new HttpError(400, 'password too short');
     await env.DB.prepare('INSERT INTO users (name, full_name, pw_hash, master, active, created_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)')
       .bind(name, String(body.fullName || '').slice(0, 80), await hashPassword(body.password), body.master ? 1 : 0, body.active === 0 ? 0 : 1, Date.now()).run();
     await logAction(env, auth.user, 'user.created', `${name}${body.master ? ' · master' : ''}`);

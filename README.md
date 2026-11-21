@@ -112,7 +112,7 @@ Eine bestehende Datenbank mit der alten `users.role`-Spalte müsste gelöscht un
 ## 6. Erste Anmeldung (Masteruser) und Zugänge
 
 https://s2ground.wicki.aero öffnen. Solange noch kein Benutzer existiert, zeigt die Anmeldeseite
-**«Ersteinrichtung»**: Anmeldename (z. B. `bwicki`), Name, Passwort (mind. 6 Zeichen) → **Masteruser anlegen & anmelden**.
+**«Ersteinrichtung»**: Anmeldename (z. B. `bwicki`), Name, Passwort (mind. 4 Zeichen) → **Masteruser anlegen & anmelden**.
 Danach ist diese Funktion abgeschaltet.
 
 Es gibt nur **zwei Arten von Personen**:
@@ -123,7 +123,11 @@ Es gibt nur **zwei Arten von Personen**:
 | **Beobachter** | kein Passwort – persönlicher **6-stelliger Zugangscode** (z. B. `7K2M4Q`) in s2stueve → «Follow sonde ascent», dazu wählt er einen **Klarnamen**, der im Chat erscheint | alles sehen, im Chat schreiben und Anweisungen geben («Bitte jetzt auslösen»). Keine Hardware-Aktionen. |
 
 Beides verwaltest Du im Menü ☰ → **Masteruser · Benutzer & App-Einstellungen**:
-* **Benutzer**: Anmeldename, Name, Passwort, Schalter *Masteruser* und *Aktiv*, letzte Anmeldung.
+* **Benutzer**: Anmeldename, Name, Passwort (mind. 4 Zeichen – kurze PINs sind erlaubt; gegen Durchprobieren steht die
+  Anmeldesperre von 10 Versuchen je 10 Minuten), Schalter *Masteruser* und *Aktiv*, letzte Anmeldung.
+* **Passwort vergessen** (Masteruser): Es gibt keine Selbsthilfe in der App. Der Hash lässt sich direkt in der D1-Datenbank
+  ersetzen (Cloudflare → D1 → s2ground → Tabelle `users`); ein passender Hash entsteht mit `node --input-type=module -e
+  "import {hashPassword} from './worker/src/auth.js'; console.log(await hashPassword('NEU'))"` im Repo.
 * **Beobachter · Zugangscodes**: Bezeichnung (z. B. «Command Center»), Mobile-Nummer, WhatsApp-Haken →
   **Code erzeugen**. Der Code erscheint einmal gross im Dialog (Kopieren / «Code per WhatsApp senden») und
   bleibt auch in der Tabelle sichtbar. Codes sind unbegrenzt viele möglich, jederzeit **widerrufbar** (der
@@ -311,6 +315,7 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 
 Die Versionsnummer steht oben rechts unter den Knöpfen (`src/version.js`) und in den Aufstiegsdateien.
 
+* **0.4** (21.11.2026) – Passwörter ab 4 Zeichen (kurze PINs); Hinweis zum Zurücksetzen des Masterpassworts (Abschnitt 6).
 * **0.3** (30.10.2026) – Ortsnamen durchgehend «LL-Ort» (z. B. CH-Baden); Startort-Suche zeigt alle gleichnamigen Orte zur
   Auswahl; Ortsname folgt dem Fadenkreuz bzw. der RR4-Position; nach «Warnung ignorieren» keine zweite Rückfrage.
 * **0.2** (28.10.2026) – Lufträume aus dem nächtlichen openAIP-Export (ohne Schlüssel, Abschnitt 6a); Schlüsseltest mit
