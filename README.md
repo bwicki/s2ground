@@ -315,7 +315,8 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 
 Die Versionsnummer steht oben rechts unter den Knöpfen (`src/version.js`) und in den Aufstiegsdateien.
 
-* **0.4** (21.11.2026) – Passwörter ab 4 Zeichen (kurze PINs); Hinweis zum Zurücksetzen des Masterpassworts (Abschnitt 6).
+* **0.4** (21.11.2026) – Passwörter ab 4 Zeichen (kurze PINs); Hinweis zum Zurücksetzen des Masterpassworts (Abschnitt 6);
+  «Benutzer hinzufügen» auf einer Zeile, unten ausgerichtet.
 * **0.3** (30.10.2026) – Ortsnamen durchgehend «LL-Ort» (z. B. CH-Baden); Startort-Suche zeigt alle gleichnamigen Orte zur
   Auswahl; Ortsname folgt dem Fadenkreuz bzw. der RR4-Position; nach «Warnung ignorieren» keine zweite Rückfrage.
 * **0.2** (28.10.2026) – Lufträume aus dem nächtlichen openAIP-Export (ohne Schlüssel, Abschnitt 6a); Schlüsseltest mit

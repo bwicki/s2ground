@@ -17,7 +17,7 @@ export function mountAdmin(root, ctx) {
           <label class="f">${esc(t('login.user'))}<input class="in" name="name" type="text" placeholder="z. B. crew2" required pattern="[a-z0-9_.-]{2,32}"></label>
           <label class="f">${esc(t('admin.fullName'))}<input class="in" name="fullName" type="text" placeholder="${esc(t('admin.fullNamePh'))}"></label>
           <label class="f">${esc(t('login.password'))}<input class="in" name="password" type="text" placeholder="${esc(t('admin.pwShown'))}" required minlength="4"></label>
-          <label class="chk" style="align-self:center"><input type="checkbox" name="master"> ${esc(t('role.master'))}</label>
+          <label class="chk"><input type="checkbox" name="master"> ${esc(t('role.master'))}</label>
           <button class="btn primary" type="submit">${esc(t('admin.addUser'))}</button>
         </form>
         <p class="muted small" style="margin:0">${esc(t('admin.usersNote'))}</p></section>
