@@ -315,6 +315,12 @@ Lokal ausprobieren: irgendein statischer Webserver im Hauptverzeichnis (z. B. `n
 * **WhatsApp Stufe 2** (automatischer Versand) wartet auf Meta-Business-Konto und genehmigte Vorlage (Abschnitt 6c).
 * **s2stueve Follow-Modus** muss auf Code + Klarname umgestellt werden (eigenes Repo).
 
+## 11a. Dropsonde S2H3-D (geplant)
+
+Konzept und offene Fragen in `docs/KONZEPT-Dropsonde.md` (Entwurf v0.1, 22.11.2026): Betriebsart «Dropsonde» mit drei
+Schritten (Vorbereiten · Abwurf & Aufzeichnung · Bergen), Abwurf-Erkennung statt Startlogik, Dateien mit `role =
+dropsonde`, Anpassung in s2stueve (Profil von oben nach unten). Umsetzung nach Freigabe des Konzepts.
+
 ## 12. Versionen
 
 Die Versionsnummer steht oben rechts unter den Knöpfen (`src/version.js`) und in den Aufstiegsdateien.
